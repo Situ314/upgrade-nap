@@ -1,0 +1,50 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,body, #grid {
+    height: 100%;
+}
+
+#grid {
+    background: #fff;
+    display: grid;
+    grid-gap: 10px;
+    grid-template-areas: 
+        "nav nav"
+        "main-container main-container";
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 50px 1fr;
+}
+#grid.grid-menu {
+    grid-template-areas: 
+        "nav nav"
+        "links main-container";
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: 50px 1fr;
+}
+
+.navbar {
+    background: #fff;
+    grid-area: nav;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    
+}
+
+.navbar, .card {
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.links {
+    grid-area: links;
+    overflow-y: auto;
+}
+.main-container{
+    grid-area: main-container;
+    overflow-y: auto;
+}

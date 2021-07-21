@@ -1,0 +1,2 @@
+@extends('docs.layouts.app')
+
