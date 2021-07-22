@@ -14,3 +14,4 @@ public/error_log
 public/error_log_old
 .ftpquota
 error_log
+.vscode/ftp-kr.json
