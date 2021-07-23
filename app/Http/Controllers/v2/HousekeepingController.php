@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\HousekeepingCleanings;
 use App\Models\HousekeepingEvents;
 use App\Models\Event;
+use App\Models\HotelRoom;
 use App\User;
 use Validator;
 use DB;
@@ -22,37 +23,69 @@ class HousekeepingController extends Controller
 
         if($this->validateHotelId($hotel_id, $staff_id)) #endregion
         {
-            $hsk = HousekeepingCleanings::select([
-                'cleaning_id',
-                'count_by_hotel_id',
-                'room_id',
-                'hk_status',
-                'front_desk_status',
-                'created_on',
-                'assigned_date'
-            ])
-            ->where('hotel_id',$hotel_id)
-            ->where('is_active', 1);
-
-            if(isset($request->room_id) && is_numeric($request->room_id)) {
-                $hsk = $hsk->where('room_id', $request->room_id);
+            $hsk = null;
+            
+            if(isset($request->all) && ($request->all == 'true' || $request->all == true)) {
+            
+                $hsk = HotelRoom::leftJoin('housekeeping_cleanings as hsk', function ($join) {
+                    $join->on('hotel_rooms.room_id', '=', 'hsk.room_id')
+                    ->where('hotel_rooms.hotel_id', '=', 'hsk.hotel_id')
+                    ->where('is_active', 1);
+                })
+                ->where('hotel_rooms.hotel_id', $hotel_id)
+                ->where('hotel_rooms.active', true)
+                ->select('hotel_rooms.location',
+                        'hotel_rooms.room_id',
+                        'hsk.cleaning_id',
+                        'hsk.count_by_hotel_id',
+                        'hsk.hk_status',
+                        'hsk.front_desk_status',
+                        'hsk.created_on',
+                        'hsk.assigned_date')
+                ->paginate($paginate);
+                foreach ($hsk as $shk_room) {
+                        $room = [
+                                "localtion" => $shk_room->location, "room_id"=> $shk_room->room_id
+                            ];
+                        $shk_room->room =  $room;
+                        unset($shk_room->location);
+                        unset($shk_room->room_id);
+                }
+               
+            }else {
+                $hsk = HousekeepingCleanings::select([
+                    'cleaning_id',
+                    'count_by_hotel_id',
+                    'room_id',
+                    'hk_status',
+                    'front_desk_status',
+                    'created_on',
+                    'assigned_date'
+                ])
+                ->where('hotel_id',$hotel_id)
+                ->where('is_active', 1);
+    
+                if(isset($request->room_id) && is_numeric($request->room_id)) {
+                    $hsk = $hsk->where('room_id', $request->room_id);
+                }
+    
+                if(isset($request->assigned_date) && is_numeric($request->assigned_date)) {
+                    $hsk = $hsk->where('assigned_date', $request->assigned_date);
+                }
+    
+                if(isset($request->hk_status) && is_numeric($request->hk_status)) {
+                    $hsk = $hsk->where('hk_status', $request->hk_status);
+                }
+    
+                if(isset($request->front_desk_status) && is_numeric($request->front_desk_status)) {
+                    $hsk = $hsk->where('front_desk_status', $request->front_desk_status);
+                }
+    
+                $hsk = $hsk->with(['Room' => function( $q ) { $q->select('location','room_id'); }])->orderBy('cleaning_id','DESC')->paginate($paginate);
+                    
+    
             }
-
-            if(isset($request->assigned_date) && is_numeric($request->assigned_date)) {
-                $hsk = $hsk->where('assigned_date', $request->assigned_date);
-            }
-
-            if(isset($request->hk_status) && is_numeric($request->hk_status)) {
-                $hsk = $hsk->where('hk_status', $request->hk_status);
-            }
-
-            if(isset($request->front_desk_status) && is_numeric($request->front_desk_status)) {
-                $hsk = $hsk->where('front_desk_status', $request->front_desk_status);
-            }
-
-            $hsk = $hsk->with(['Room' => function( $q ) { $q->select('location','room_id'); }])->orderBy('cleaning_id','DESC')->paginate($paginate);
-                
-
+           
             return response()->json( $hsk, 200 );
         }
 
@@ -206,16 +239,16 @@ class HousekeepingController extends Controller
             // Crear evento
             // Capturar count by hotel id
             $__last_event = Event::where('hotel_id', $hotel_id)->orderBy('event_id', 'DESC')->first();
-            $__count_by_hotel_id = 0;
+            $count_by_hotel_id = 0;
             if($__last_event){
-                $__count_by_hotel_id = $__last_event->count_by_hotel_id + 1;
+                $count_by_hotel_id = $__last_event->count_by_hotel_id + 1;
             }
 
             // Establecer la habitación
             if(array_key_exists("room_id", $pickup_event)) {
                 $__room_id = $pickup_event["room_id"];
             } else {
-                $__room = $this->findRoomId($hotel_id, $staff_id, $pickup_event["room"]);
+                $room = $this->findRoomId($hotel_id, $staff_id, $pickup_event["room"]);
                 $__room_id = (int)$room["room_id"];
             }
 
