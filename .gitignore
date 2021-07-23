@@ -15,3 +15,4 @@ public/error_log_old
 .ftpquota
 error_log
 .vscode/ftp-kr.json
+.vscode/ftp-kr.sync.cache.json
