@@ -1185,7 +1185,7 @@ class GuestController extends Controller
                     'guest.lastname'        => 'required|string',
                     'guest.email_address'   => ['string', 'required_without:phone_no', 'required_if:phone_no,', 'nullable', 'regex:/([-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+.[a-zA-Z]{2,4}|)/'],
                     'guest.phone_no'        => ['string', 'required_without:email_address', 'required_if:email_address,', 'regex:/(\+[0-9]{1,4}[0-9]{6,10}|)/', 'nullable'],
-                    'guest.angel_status'    => 'numeric|required|in:0,1', 
+                    'guest.angel_status'    => 'numeric|required|in:0,1',
                     'guest.category'        => 'numeric|in:0,1,2,3,4,5',
                     'guest.language'        => 'string|in:en,es',
                     'guest.guest_number'    => 'string',
@@ -1272,11 +1272,12 @@ class GuestController extends Controller
                     });
             }
 
-
+            $_guest;
             if ($searchGuest) {
                 $guest_id = $searchGuest->guest_id;
                 $searchGuest->fill($guestData);
                 $searchGuest->save();
+                $_guest = $searchGuest;
             } else {
                 $guestData = array_merge($guestData, [
                     'created_on'    => date('Y-m-d H:i:s'),
@@ -1289,6 +1290,7 @@ class GuestController extends Controller
 
                 $guestCreated = \App\Models\GuestRegistration::create($guestData);
                 $guest_id = $guestCreated->guest_id;
+                $_guest = $guestCreated;
 
                 if (!empty($guest_number)) {
                     \App\Models\IntegrationsGuestInformation::create([
@@ -1297,9 +1299,6 @@ class GuestController extends Controller
                         'guest_number'  => $guest_number
                     ]);
                 }
-
-                $totalProcessed = 0;
-                $unprocessedReservations = [];
 
                 $this->saveLogTracker([
                     'module_id' => 8,
@@ -1311,70 +1310,73 @@ class GuestController extends Controller
                     'hotel_id'  => $hotel_id,
                     'type'      => 'API-v2'
                 ]);
-
-                foreach ($reservations as $reservation) {
-                    $reservation_number = $reservation['reservation_number'];
-                    $chekingDetail = \App\Models\GuestCheckinDetails::where('reservation_number', $reservation_number)->first();
-                    if ($chekingDetail) {
-                        if ($chekingDetail->is_active == 0) {
-                            $chekingDetail->reservation_number = "";
-                            $chekingDetail->save();
-                        }
-                    }
-
-                    $room_id = $reservation["room_no"] ?? "";
-                    if (empty($room_id)) {
-                        $location = $reservation["room"];
-                        $room = $this->findRoomId($hotel_id, $staff_id, $location);
-                        $room_id = $room["room_id"];
-                    }
-
-                    $check_in = $reservation['check_in'];
-                    $check_out = $reservation['check_out'];
-
-                    $reservationData = [
-                        'guest_id'              => $guest_id,
-                        'hotel_id'              => $hotel_id,
-                        'room_no'               => $room_id,
-                        'comment'               => $reservation["comment"] ?? "",
-                        'check_in'              => $check_in,
-                        'check_out'             => $check_out,
-                        'reservation_number'    => $reservation['reservation_number' ?? '']
-                    ];
-
-                    $guestReservationRegistred = \App\Models\GuestCheckinDetails::where('hotel_id', $hotel_id)
-                        ->where('active', 1)
-                        ->where('room_no', $room_id)
-                        ->where('guest_id', $guest_id)
-                        ->where(function ($q) use ($check_in, $check_out) {
-                            $q->whereRaw("'$check_in' BETWEEN check_in and check_out")
-                                ->orWhereRaw("'$check_out' BETWEEN check_in and check_out");
-                        });
-
-                    if ($guestReservationRegistred) {
-                        $unprocessedReservations[] = $reservation;
-                    } else {
-                        $resrvationCreated = \App\Models\GuestCheckinDetails::create($reservationData);
-                        $totalProcessed++;
-                        $this->saveLogTracker([
-                            'module_id' => 8,
-                            'action'    => 'add',
-                            'prim_id'   => $resrvationCreated->sno,
-                            'staff_id'  => $staff_id,
-                            'date_time' => date("Y-m-d H:i:s"),
-                            'comments'  => 'create reservation',
-                            'hotel_id'  => $hotel_id,
-                            'type'      => 'API-v2'
-                        ]);
+            }
+            $totalProcessed = 0;
+            $unprocessedReservations = [];
+            $processedReservations = [];
+            foreach ($reservations as $reservation) {
+                $reservation_number = $reservation['reservation_number'];
+                $chekingDetail = \App\Models\GuestCheckinDetails::where('reservation_number', $reservation_number)->first();
+                if ($chekingDetail) {
+                    if ($chekingDetail->is_active == 0) {
+                        $chekingDetail->reservation_number = "";
+                        $chekingDetail->save();
                     }
                 }
 
-                return response()->json([
-                    'create'                        => true,
-                    'total_reservations_created'    => $totalProcessed,
-                    'unprocessed_reservations'  => $unprocessedReservations
-                ], 200);
+                $room_id = $reservation["room_no"] ?? "";
+                if (empty($room_id)) {
+                    $location = $reservation["room"];
+                    $room = $this->findRoomId($hotel_id, $staff_id, $location);
+                    $room_id = $room["room_id"];
+                }
+
+                $check_in = $reservation['check_in'];
+                $check_out = $reservation['check_out'];
+
+                $reservationData = [
+                    'guest_id'              => $guest_id,
+                    'hotel_id'              => $hotel_id,
+                    'room_no'               => $room_id,
+                    'comment'               => $reservation["comment"] ?? "",
+                    'check_in'              => $check_in,
+                    'check_out'             => $check_out,
+                    'reservation_number'    => $reservation['reservation_number' ?? '']
+                ];
+
+                $guestReservationRegistred = \App\Models\GuestCheckinDetails::where('hotel_id', $hotel_id)
+                    ->where('active', 1)
+                    ->where('room_no', $room_id)
+                    ->where('guest_id', $guest_id)
+                    ->where(function ($q) use ($check_in, $check_out) {
+                        $q->whereRaw("'$check_in' BETWEEN check_in and check_out")
+                            ->orWhereRaw("'$check_out' BETWEEN check_in and check_out");
+                    });
+
+                if ($guestReservationRegistred) {
+                    $unprocessedReservations[] = $reservation;
+                } else {
+                    $resrvationCreated = \App\Models\GuestCheckinDetails::create($reservationData);
+                    $processedReservations[] = $resrvationCreated;
+                    $totalProcessed++;
+                    $this->saveLogTracker([
+                        'module_id' => 8,
+                        'action'    => 'add',
+                        'prim_id'   => $resrvationCreated->sno,
+                        'staff_id'  => $staff_id,
+                        'date_time' => date("Y-m-d H:i:s"),
+                        'comments'  => 'create reservation',
+                        'hotel_id'  => $hotel_id,
+                        'type'      => 'API-v2'
+                    ]);
+                }
             }
+            return response()->json([
+                'create' => true,
+                'message' => "",
+                'success' => array_merge([$_guest],$processedReservations),
+                'error' => $unprocessedReservations
+            ], 200);
         } catch (\Exception $e) {
             \Log::error("Error en storeMultipe");
             \Log::error($e);
