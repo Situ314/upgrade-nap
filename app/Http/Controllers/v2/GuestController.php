@@ -1174,7 +1174,7 @@ class GuestController extends Controller
     {
         try {
             // Capturar hotel id, por default el valor es null, en caso de no enviarlo
-            $hotel_id = $request->hotel_id ?? null;
+            $hotel_id = isset($request->hotel_id) ? $request->hotel_id : null;
             // Generar validaciones
             $validator = Validator::make(
                 $request->all(), //Pasarle al metodo toda la informacion que se recibe por $request
@@ -1239,9 +1239,9 @@ class GuestController extends Controller
             $guest = $request->guest;
             $reservations = $request->reservations;
 
-            $email = $guest['email_address'] ?? "";
-            $phone = $guest['phone'] ?? "";
-            $guest_number = $guest['guest_number'] ?? "";
+            $email = array_key_exists('email_address', $guest) ? $guest['email_address'] : '';
+            $phone = array_key_exists('phone_no', $guest) ? $guest['phone_no'] : '';
+            $guest_number = array_key_exists('guest_number', $guest) ? $guest['guest_number'] : '';
 
             $guestData = [
                 'hotel_id'      => $hotel_id,
@@ -1249,10 +1249,10 @@ class GuestController extends Controller
                 'lastname'      => $guest["lastname"],
                 'email_address' => $email,
                 'phone_no'      => $phone,
-                'angel_status'  => $guest["lastname"] ?? 0,
-                'language'      => $guest["language"] ?? 'en',
-                'comment'       => $guest['comment'] ?? '',
-                'category'      => $guest['category'] ?? '',
+                'angel_status'  => isset($guest['angel_status']) ? $guest['angel_status'] : $this->validateAngelStatus($hotel_id),
+                'language'      => array_key_exists('language', $guest) ? $guest['language'] : '',
+                'comment'       => array_key_exists('comment', $guest) ? $guest['comment'] : '',
+                'category'      => array_key_exists('category', $guest) ? $guest['category'] : 0,
             ];
 
             $searchGuest = null;
@@ -1272,7 +1272,7 @@ class GuestController extends Controller
                     });
             }
 
-            $_guest;
+            $_guest = null;
             if ($searchGuest) {
                 $guest_id = $searchGuest->guest_id;
                 $searchGuest->fill($guestData);
@@ -1324,7 +1324,7 @@ class GuestController extends Controller
                     }
                 }
 
-                $room_id = $reservation["room_no"] ?? "";
+                $room_id = array_key_exists('room_no', $reservation) && !empty($reservation["room_no"]) ? $reservation["room_no"] : "";
                 if (empty($room_id)) {
                     $location = $reservation["room"];
                     $room = $this->findRoomId($hotel_id, $staff_id, $location);
@@ -1338,10 +1338,10 @@ class GuestController extends Controller
                     'guest_id'              => $guest_id,
                     'hotel_id'              => $hotel_id,
                     'room_no'               => $room_id,
-                    'comment'               => $reservation["comment"] ?? "",
+                    'comment'               => array_key_exists('comment', $reservation) ? $reservation['comment'] : "",
                     'check_in'              => $check_in,
                     'check_out'             => $check_out,
-                    'reservation_number'    => $reservation['reservation_number' ?? '']
+                    'reservation_number'    => array_key_exists('reservation_number', $reservation) ? $reservation['reservation_number'] : ''
                 ];
 
                 $guestReservationRegistred = \App\Models\GuestCheckinDetails::where('hotel_id', $hotel_id)
@@ -1374,7 +1374,7 @@ class GuestController extends Controller
             return response()->json([
                 'create' => true,
                 'message' => "",
-                'success' => array_merge([$_guest],$processedReservations),
+                'success' => array_merge([$_guest], $processedReservations),
                 'error' => $unprocessedReservations
             ], 200);
         } catch (\Exception $e) {
