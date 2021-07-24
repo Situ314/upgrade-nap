@@ -96,6 +96,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v2'], function () {
     });
     //GUEST
     Route::resource('guest', 'v2\GuestController');
+    Route::post('guets/multiple-reservations', 'v2\GuestController@storeMultipe');
     Route::get('close-guest-checkin',                               'v2\GuestController@closeGuestCheckinDetails');
     Route::get('guest/validate/email/{hotel_id}/{email}',           'v2\GuestController@validateEmail');
     Route::get('guest/validate/phone/{hotel_id}/{phone_number}',    'v2\GuestController@validatePhoneNumber');
