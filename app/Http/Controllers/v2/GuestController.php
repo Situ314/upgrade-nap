@@ -1183,23 +1183,37 @@ class GuestController extends Controller
                     'guest'                 => 'required',
                     'guest.firstname'       => 'required|string',
                     'guest.lastname'        => 'required|string',
-                    'guest.email_address'   => ['string', 'required_without:phone_no', 'required_if:phone_no,', 'nullable', 'regex:/([-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+.[a-zA-Z]{2,4}|)/'],
-                    'guest.phone_no'        => ['string', 'required_without:email_address', 'required_if:email_address,', 'regex:/(\+[0-9]{1,4}[0-9]{6,10}|)/', 'nullable'],
+                    'guest.email_address'   => [
+                        'string',
+                        'required_without:phone_no',
+                        'required_if:phone_no,',
+                        'nullable',
+                        'regex:/([-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+.[a-zA-Z]{2,4}|)/'
+                    ],
+                    'guest.phone_no'        => [
+                        'string',
+                        'required_without:email_address',
+                        'required_if:email_address,',
+                        'regex:/(\+[0-9]{1,4}[0-9]{6,10}|)/',
+                        'nullable'
+                    ],
                     'guest.angel_status'    => 'numeric|required|in:0,1',
                     'guest.category'        => 'numeric|in:0,1,2,3,4,5',
                     'guest.language'        => 'string|in:en,es',
                     'guest.guest_number'    => 'string',
                     'guest.comment'         => 'string',
-                    'reservations'              => 'required|array', //array con toda la info de las reservas
-                    'reservations.*.room_no'    => [
-                        'required_without:room',
-                        Rule::exists('hotel_rooms', 'room_id')->where(function ($q) use ($hotel_id) {
+                    'reservations'          => 'required|array', //array con toda la info de las reservas
+                    'reservations.*.room'       => [
+                        'string',
+                        'required_without:reservations.*.room_no',
+                        Rule::exists('hotel_rooms', 'location')->where(function ($q) use ($hotel_id) {
                             $q->where('hotel_id', $hotel_id)->where('active', 1);
                         })
                     ],
-                    'reservations.*.room'       => [
-                        'required_without:room_no',
-                        Rule::exists('hotel_rooms', 'location')->where(function ($q) use ($hotel_id) {
+                    'reservations.*.room_no'    => [
+                        'string',
+                        'required_without:reservations.*.room',
+                        Rule::exists('hotel_rooms', 'room_id')->where(function ($q) use ($hotel_id) {
                             $q->where('hotel_id', $hotel_id)->where('active', 1);
                         })
                     ],
@@ -1262,14 +1276,18 @@ class GuestController extends Controller
                     $searchGuest = \App\Models\GuestRegistration::find($intGuestInfo->guest_id);
                 }
             }
-            if (!is_null($searchGuest)) {
+            if (is_null($searchGuest)) {
                 $searchGuest = \App\Models\GuestRegistration::where('hotel_id', $hotel_id)
                     ->where('is_active', 1)
                     ->where(function ($q) use ($email, $phone) {
-                        if (!empty($email) && !empty($phone)) $q->where('email_address', $email)->orWhere('phone_no', $phone);
-                        else if (!empty($email)) $q->where('email_address', $email);
-                        else $q->where('phone_no', $phone);
-                    });
+                        if (!empty($email) && !empty($phone)) {
+                            $q->where('email_address', $email)->orWhere('phone_no', $phone);
+                        } else if (!empty($email)) {
+                            $q->where('email_address', $email);
+                        } else {
+                            $q->where('phone_no', $phone);
+                        }
+                    })->first();
             }
 
             $_guest = null;
@@ -1286,6 +1304,7 @@ class GuestController extends Controller
                     'state'         => '',
                     'zipcode'       => '',
                     'city'          => '',
+                    'is_active'     => 1
                 ]);
 
                 $guestCreated = \App\Models\GuestRegistration::create($guestData);
@@ -1314,13 +1333,15 @@ class GuestController extends Controller
             $totalProcessed = 0;
             $unprocessedReservations = [];
             $processedReservations = [];
-            foreach ($reservations as $reservation) {
-                $reservation_number = $reservation['reservation_number'];
-                $chekingDetail = \App\Models\GuestCheckinDetails::where('reservation_number', $reservation_number)->first();
-                if ($chekingDetail) {
-                    if ($chekingDetail->is_active == 0) {
-                        $chekingDetail->reservation_number = "";
-                        $chekingDetail->save();
+            foreach ($reservations as $key => $reservation) {
+                $reservation_number = array_key_exists('reservation_number', $reservation) && !empty($reservation['reservation_number']) ? $reservation['reservation_number'] : null;
+                if (!is_null($reservation_number)) {
+                    $chekingDetail = \App\Models\GuestCheckinDetails::where('reservation_number', $reservation_number)->first();
+                    if ($chekingDetail) {
+                        if ($chekingDetail->is_active == 0) {
+                            $chekingDetail->reservation_number = "";
+                            $chekingDetail->save();
+                        }
                     }
                 }
 
@@ -1331,8 +1352,8 @@ class GuestController extends Controller
                     $room_id = $room["room_id"];
                 }
 
-                $check_in = $reservation['check_in'];
-                $check_out = $reservation['check_out'];
+                $check_in   = $reservation['check_in'];
+                $check_out  = $reservation['check_out'];
 
                 $reservationData = [
                     'guest_id'              => $guest_id,
@@ -1345,19 +1366,20 @@ class GuestController extends Controller
                 ];
 
                 $guestReservationRegistred = \App\Models\GuestCheckinDetails::where('hotel_id', $hotel_id)
-                    ->where('active', 1)
+                    ->where('status', 1)
                     ->where('room_no', $room_id)
                     ->where('guest_id', $guest_id)
                     ->where(function ($q) use ($check_in, $check_out) {
-                        $q->whereRaw("'$check_in' BETWEEN check_in and check_out")
+                        $q
+                            ->whereRaw("'$check_in' BETWEEN check_in and check_out")
                             ->orWhereRaw("'$check_out' BETWEEN check_in and check_out");
-                    });
+                    })->first();
 
                 if ($guestReservationRegistred) {
-                    $unprocessedReservations[] = $reservation;
+                    $unprocessedReservations["reservation_$key"] = $reservation;
                 } else {
                     $resrvationCreated = \App\Models\GuestCheckinDetails::create($reservationData);
-                    $processedReservations[] = $resrvationCreated;
+                    $processedReservations["reservation_$key"] = ["sno" => $resrvationCreated->sno];
                     $totalProcessed++;
                     $this->saveLogTracker([
                         'module_id' => 8,
@@ -1374,8 +1396,11 @@ class GuestController extends Controller
             return response()->json([
                 'create' => true,
                 'message' => "",
-                'success' => array_merge([$_guest], $processedReservations),
-                'error' => $unprocessedReservations
+                'success' => [
+                    "guest_id" => $_guest->guest_id,
+                    "reservations" => !empty($processedReservations) ? $processedReservations : null,
+                ],
+                'error' => !empty($unprocessedReservations) ? $unprocessedReservations : null
             ], 200);
         } catch (\Exception $e) {
             \Log::error("Error en storeMultipe");
