@@ -36,13 +36,14 @@
             <li>
                 <a class="guest" href="{{ url("/doc/$version/guest") }}#guest">{{$i}}. Guest</a>
                 <ul>
-                    <li><a class="guest_list"              href="{{ url("/doc/$version/guest") }}#guest_list">      {{$i}}.1 Get Guest List</a></li>
-                    <li><a class="guest_new"               href="{{ url("/doc/$version/guest") }}#guest_new">       {{$i}}.2 New Guest</a></li>
-                    <li><a class="guest_update"            href="{{ url("/doc/$version/guest") }}#guest_update">    {{$i}}.3 Update Guest</a></li>
-                    <li><a class="guest_delete"            href="{{ url("/doc/$version/guest") }}#guest_delete">    {{$i}}.4 Delete Guest</a></li>
-                    <li><a class="validate_email"          href="{{ url("/doc/$version/guest") }}#validate_email">  {{$i}}.5 Validate Email</a></li>
-                    <li><a class="validate_phone"          href="{{ url("/doc/$version/guest") }}#validate_phone">  {{$i}}.6 Validate Phone</a></li>
-                    <li><a class="close_checkin"           href="{{ url("/doc/$version/guest") }}#close_checkin">   {{$i++}}.7 Finish a stay <b>Checked Out</b></a></li>
+                    <li><a class="guest_list"              href="{{ url("/doc/$version/guest") }}#guest_list">                  {{$i}}.1 Get Guest List</a></li>
+                    <li><a class="guest_new"               href="{{ url("/doc/$version/guest") }}#guest_new">                   {{$i}}.2 New Guest</a></li>
+                    <li><a class="guest_new"               href="{{ url("/doc/$version/guest") }}#guest_new_multiple">          {{$i}}.3 New Guest with multiple reservations </a></li>
+                    <li><a class="guest_update"            href="{{ url("/doc/$version/guest") }}#guest_update">                {{$i}}.4 Update Guest</a></li>
+                    <li><a class="guest_delete"            href="{{ url("/doc/$version/guest") }}#guest_delete">                {{$i}}.5 Delete Guest</a></li>
+                    <li><a class="validate_email"          href="{{ url("/doc/$version/guest") }}#validate_email">              {{$i}}.6 Validate Email</a></li>
+                    <li><a class="validate_phone"          href="{{ url("/doc/$version/guest") }}#validate_phone">              {{$i}}.7 Validate Phone</a></li>
+                    <li><a class="close_checkin"           href="{{ url("/doc/$version/guest") }}#close_checkin">               {{$i++}}.8 Finish a stay <b>Checked Out</b></a></li>
                 </ul>
             </li>
 
@@ -138,11 +139,12 @@
                 <ul>
                     <li><a class="guest_list"      href="{{ url("/doc/$version/guest") }}#guest_list">{{$i}}.1 Guest list</a></li>
                     <li><a class="guest_new"       href="{{ url("/doc/$version/guest") }}#guest_new">{{$i}}.2 New guest</a></li>
-                    <li><a class="guest_update"    href="{{ url("/doc/$version/guest") }}#guest_update">{{$i}}.3 Update guest</a></li>
-                    <li><a class="guest_delete"    href="{{ url("/doc/$version/guest") }}#guest_delete">{{$i}}.4 Delete guest</a></li>
-                    <li><a class="validate_email"  href="{{ url("/doc/$version/guest") }}#validate_email">{{$i}}.5 Validate email</a></li>
-                    <li><a class="validate_phone"  href="{{ url("/doc/$version/guest") }}#validate_phone">{{$i}}.6 Validate phone</a></li>
-                    <li><a class="close_checkin"   href="{{ url("/doc/$version/guest") }}#close_checkin">{{$i++}}.7 Finish a stay <b>Checked Out</b></a></li>
+                    <li><a class="guest_new_multiple"       href="{{ url("/doc/$version/guest") }}#guest_new_multiple">{{$i}}.3 New Guest with multiple reservations</a></li>
+                    <li><a class="guest_update"    href="{{ url("/doc/$version/guest") }}#guest_update">{{$i}}.4 Update guest</a></li>
+                    <li><a class="guest_delete"    href="{{ url("/doc/$version/guest") }}#guest_delete">{{$i}}.5 Delete guest</a></li>
+                    <li><a class="validate_email"  href="{{ url("/doc/$version/guest") }}#validate_email">{{$i}}.6 Validate email</a></li>
+                    <li><a class="validate_phone"  href="{{ url("/doc/$version/guest") }}#validate_phone">{{$i}}.7 Validate phone</a></li>
+                    <li><a class="close_checkin"   href="{{ url("/doc/$version/guest") }}#close_checkin">{{$i++}}.8 Finish a stay <b>Checked Out</b></a></li>
                 </ul>
             </li>
             <li>

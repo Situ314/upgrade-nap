@@ -186,6 +186,54 @@
             </tr>
         </tbody>
     </table>
+    @if($version == 'v2')
+        <h2 id="guest_new_multiple">New Guest with multiple reservations</h2>
+        <table class="table table-striped">
+            <tbody>
+                <tr>
+                    <td class="bold" width="20%">URL</td>
+                    <td colspan="2">{{$url}}/guest/multiple-reservations</td>
+                </tr>
+                <tr>
+                    <td class="bold">Method</td>
+                    <td colspan="2">POST</td>
+                </tr>
+                <tr>
+                    <td class="bold" rowspan="2">Headers</td>
+                    <td>Autorization</td>
+                    <td><code>{ token_type }</code> + " " + <code>{ access_token }</code></td>
+                </tr>
+                <tr>
+                    <td>Content-type</td>
+                    <td>"application/json"</td>
+                </tr>
+                <tr>
+                    <td class="bold">Data</td>
+                    <td colspan="2"> <per id="new_guest_multiple_data"></per> </td>
+                </tr>     
+                <tr>
+                    <td class="bold">Response</td>
+                    <td colspan="2"> <per id="new_guest_multiple_response"></per> </td>     
+                </tr>   
+                <tr class="note">
+                    <td class="bold"><i class="material-icons"> info </i></td>
+                    <td colspan="2">
+                        <ul>
+                            <li><b>hotel_id:</b> this parameter refers to the hotel identifier where the operation will be performed <a href="#get_hotels">GET HOTELS</a>.</li>
+                            <li>
+                                <b>email_address</b> and <b>phone_no:</b> this field is unique in the hotel system.
+                                <ul>
+                                    <li><a href="#validate_guest_s_email" style="color: #fff;">Validate email</a> </li>
+                                    <li><a href="#validate_guest_s_phone" style="color: #fff;">Validate phone</a></li>
+                                </ul>
+                            </li>
+                            <li><b>room_no / room:</b> this field refers to the room_id / location parameter obtained from the end point <a href="#rooms_get_list">GET ROOMS LIST</a>.</li>
+                        </ul>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    @endif
 
     {{------------------------------------------------------------------------------------------------------------------------------------------------}}
     <h2 id="guest_update">Update Guest</h2>
@@ -540,6 +588,39 @@
         }
     },config);
 
+    $('#new_guest_multiple_data').jsonViewer({
+        hotel_id: "numeric | required",
+        guest: {
+            firstname: "string | required",
+            lastname: "string | required",
+            email_address: "string | email | required_without:phone_no",
+            phone_no: "string | phone number format | required_without:email_address",
+            angel_status: "numeric | required | in:0,1",
+            category: "numeric | in:0,1,2,3,4,5",
+            language: "string | in:en,es",
+            guest_number: "string",
+            comment: "string",
+        },
+        reservations: [
+            {
+                room: "string | required_without: room_no",
+                room_no: "string | required_without:room",
+                check_in: "required | date_format:'YYYY-mm-dd H:i:s'",
+                check_out: "required | date_format:'YYYY-mm-dd H:i:s' | after:check_in",
+                comment: "string",
+                reservation_number: "string | required | unique"
+            },
+            {
+                room: "string | required_without: room_no",
+                room_no: "string | required_without:room",
+                check_in: "required | date_format:'YYYY-mm-dd H:i:s'",
+                check_out: "required | date_format:'YYYY-mm-dd H:i:s' | after:check_in",
+                comment: "string",
+                reservation_number: "string | required | unique"
+            }
+        ]
+    },config);
+
     $('#new_guest_data_one').jsonViewer({
         guest_registration: {
             hotel_id:       "numeric | required",
@@ -611,6 +692,13 @@
         guest_id    : "string",
         message     : "string",
         description : "Array<object>"
+    },config);
+
+    $('#new_guest_multiple_response').jsonViewer({
+        create  :"boolean",
+        message : "string",
+        success : "Array<object>",
+        error   : "Array<object>"
     },config);
 
     $('#new_guest_v1_response').jsonViewer({

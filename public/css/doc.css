@@ -69,7 +69,7 @@ html {
 .mainContainer h3,
 .mainContainer table {
     width: 100%;
-    max-width: 700px;
+    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -136,7 +136,7 @@ html {
 }
 
 .max-700 {
-    max-width: 700px;
+    max-width: 900px;
     margin-left: auto;
     margin-right: auto;
 }
