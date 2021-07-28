@@ -426,9 +426,9 @@ class Opera implements ShouldQueue
 
                             $guest_reservation['check_in']              = $GuestCheckinDetails->check_out;
                             $guest_reservation['check_out']             = $check_out;
-		            if($guest_reservation['check_out'] == strtotime('0000-00-00 00:00:00')){
-			         $guest_reservation['check_out'] =  date('Y-m-d H:i:s');
-			    }
+                            if ($guest_reservation['check_out'] == strtotime('0000-00-00 00:00:00')) {
+                                $guest_reservation['check_out'] =  date('Y-m-d H:i:s');
+                            }
                             \App\Models\GuestCheckinDetails::create($guest_reservation);
                             $this->RoomMove($GuestCheckinDetails, $guest_reservation);
 
@@ -452,7 +452,7 @@ class Opera implements ShouldQueue
                             if ($GuestCheckinDetails->check_in != $guest_reservation['check_in']) {
                                 $__update .= "check_in: $GuestCheckinDetails->check_in to " . $guest_reservation['check_in'] . ", ";
                                 // fix checkin_date
-                                if($guest_reservation['reservation_status'] <= 2){
+                                if ($guest_reservation['reservation_status'] <= 2) {
                                     $GuestCheckinDetails->check_in = $guest_reservation['check_in'];
                                 }
                                 //$GuestCheckinDetails->check_in = $guest_reservation['check_in'];
@@ -602,12 +602,11 @@ class Opera implements ShouldQueue
                     $addressData = [$addressData];
                 }
                 foreach ($addressData as  $address) {
-                    if(is_string($address)){
-		    	$addressString .= $address != '' ? $address . ';' : '';
-		    }
-		    else {
-			$addressString = '';
-		    }
+                    if (is_string($address)) {
+                        $addressString .= $address != '' ? $address . ';' : '';
+                    } else {
+                        $addressString = '';
+                    }
                 }
                 $dataLog = [
                     'resortId'      => $resort_id,
@@ -703,7 +702,7 @@ class Opera implements ShouldQueue
             if ($sw) {
                 $unique_id = array_get($arrayData, 'UniqueID');
                 $guest_zip_code = '';
-                if(!is_array(array_get($arrayData, 'PostalCode', ''))){
+                if (!is_array(array_get($arrayData, 'PostalCode', ''))) {
                     $guest_zip_code = array_get($arrayData, 'PostalCode', '');
                 }
                 $guest_data = [
@@ -726,13 +725,13 @@ class Opera implements ShouldQueue
                     $addressData = [$addressData];
                 }
                 foreach ($addressData as  $address) {
-                    if(is_string($address)) {
+                    if (is_string($address)) {
                         $addressString .= $address != '' ? $address . ';' : '';
                     }
                 }
                 $unique_id = array_get($arrayData, 'Profile.IDs.UniqueID');
                 $guest_zip_code = '';
-                if(!is_array(array_get($arrayData, 'PostalCode', ''))){
+                if (!is_array(array_get($arrayData, 'PostalCode', ''))) {
                     $guest_zip_code = array_get($arrayData, 'Profile.Addresses.NameAddress.PostalCode', '');
                 }
                 $guest_data = [
@@ -792,7 +791,7 @@ class Opera implements ShouldQueue
                         }
 
                         if ($guest_data['firstname'] != $old_guest->firstname) {
-                            if(!is_array($guest_data['firstname'])){
+                            if (!is_array($guest_data['firstname'])) {
                                 $__update .= "firstname: $old_guest->firstname to " . $guest_data['firstname'] . ", ";
                                 $old_guest->firstname = $guest_data['firstname'];
                             }
@@ -801,12 +800,12 @@ class Opera implements ShouldQueue
                             $__update .= "lastname: $old_guest->lastname to " . $guest_data['lastname'] . ", ";
                             $old_guest->lastname = $guest_data['lastname'];
                         }
-                        
+
                         if ($guest_data['address'] != $old_guest->address) {
                             $__update .= "address: $old_guest->address to " . $guest_data['address'] . ", ";
                             $old_guest->address = $guest_data['address'];
                             // truncate  address before save
-                            if(strlen($old_guest->address) >= 100) {
+                            if (strlen($old_guest->address) >= 100) {
                                 $old_guest->address = substr($old_guest->address, 0, 99);
                             }
                         }
@@ -815,13 +814,13 @@ class Opera implements ShouldQueue
                             $old_guest->city = $guest_data['city'];
                         }
                         if ($guest_data['zipcode'] != $old_guest->zipcode) {
-                            if(!is_array($guest_data['zipcode']) && !is_array($old_guest->zipcode) ){
+                            if (!is_array($guest_data['zipcode']) && !is_array($old_guest->zipcode)) {
                                 $__update .= "zipcode: $old_guest->zipcode to " . $guest_data['zipcode'] . ", ";
                                 $old_guest->zipcode = $guest_data['zipcode'];
                             }
                         }
                         if ($guest_data['state'] != $old_guest->state) {
-                            if(!is_array($guest_data['state']) && !is_array($old_guest->state) ){
+                            if (!is_array($guest_data['state']) && !is_array($old_guest->state)) {
                                 $__update .= "state: $old_guest->state to " . $guest_data['state'] . ", ";
                                 $old_guest->state = $guest_data['state'];
                             }
@@ -883,18 +882,18 @@ class Opera implements ShouldQueue
                     if (is_array($guest_data['zipcode'])) {
                         $guest_data['zipcode'] = '';
                     }
-		    if (is_array($guest_data['firstname'])) {
+                    if (is_array($guest_data['firstname'])) {
                         $guest_data['firstname'] = '';
                     }
                     if (is_array($guest_data['state'])) {
                         $guest_data['state'] = '';
                     }
-		    try {
-                    	// truncate  address before save
-                    	if(strlen($guest_data['address']) >= 100) {
-                        $guest_data['address'] = substr($guest_data['address'], 0, 99);
-                    	}
-		    } catch (\Throwable $th) {
+                    try {
+                        // truncate  address before save
+                        if (is_string($guest_data['address']) && strlen($guest_data['address']) >= 100) {
+                            $guest_data['address'] = substr($guest_data['address'], 0, 99);
+                        }
+                    } catch (\Throwable $th) {
                         $guest_data['address'] = '';
                     }
                     $new_guest = \App\Models\GuestRegistration::create($guest_data);
@@ -959,9 +958,9 @@ class Opera implements ShouldQueue
             } else {
                 if ($this->hotel_id == 266) {
                     return null;
-                }  
+                }
                 // find if $location  already exists    
-                if(\App\Models\HotelRoom::where('location', substr($location, 1))->where('hotel_id', $this->hotel_id)->count() >= 1) {
+                if (\App\Models\HotelRoom::where('location', substr($location, 1))->where('hotel_id', $this->hotel_id)->count() >= 1) {
                     return null;
                 }
                 $room = \App\Models\HotelRoom::create([
@@ -1057,7 +1056,7 @@ class Opera implements ShouldQueue
         $HousekeepingData["rooms"]    = [];
 
         foreach ($hsk_data as $key => $room_data) {
-	
+
             if (!is_null($room_data['RoomNumber'])) {
                 $room = $this->getRoom($room_data['RoomNumber']);
                 if (!is_null($room)) {
@@ -1072,13 +1071,13 @@ class Opera implements ShouldQueue
                         $this->FrontdeskStatus($room['room_id'], 2, true);
                     }
                     $_d["room_id"] = $room["room_id"];
-		    try {	    
-                    	$hk_status = $this->HotelHousekeepingConfig[$room_data['RoomStatus']]["codes"][0]["hk_status"];
-	            } catch (\Throwable $th) {
-			echo ($th->getMessage());
-			echo ($room["room_id"]);
-			break;
-		    }
+                    try {
+                        $hk_status = $this->HotelHousekeepingConfig[$room_data['RoomStatus']]["codes"][0]["hk_status"];
+                    } catch (\Throwable $th) {
+                        echo ($th->getMessage());
+                        echo ($room["room_id"]);
+                        break;
+                    }
                     if ($hk_status == 4) {
 
                         if (array_has($room_data, 'reservation_data')) {
@@ -1480,8 +1479,8 @@ class Opera implements ShouldQueue
                 } catch (\Exception $e) {
                     $fetch_room = [$fetch_room];
                 }
-		$this->customWriteLog("sync_opera", $this->hotel_id, "FETCH ROOM DATA:");
-		$this->customWriteLog("sync_opera", $this->hotel_id, json_encode($fetch_room));
+                $this->customWriteLog("sync_opera", $this->hotel_id, "FETCH ROOM DATA:");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($fetch_room));
                 foreach ($fetch_room as $room) {
                     $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($room));
                     $room_no = array_get($room, 'RoomNumber');
@@ -1504,7 +1503,7 @@ class Opera implements ShouldQueue
                         $add = false;
                     }
                     if ($add) {
-                        $this->customWriteLog("sync_opera",$this->hotel_id, $room_no);
+                        $this->customWriteLog("sync_opera", $this->hotel_id, $room_no);
                         $room_status = array_get($room, 'RoomStatus');
                         $reservation_data = [];
 
@@ -1629,8 +1628,7 @@ class Opera implements ShouldQueue
         ));
         try {
             $response = curl_exec($curl);
-        } 
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             throw $e;
         }
         $err = curl_error($curl);
@@ -1961,27 +1959,26 @@ class Opera implements ShouldQueue
         }
     }
 
-    public function customWriteLog( $folder_name, $hotel_id, $text ) {
+    public function customWriteLog($folder_name, $hotel_id, $text)
+    {
 
-        $path = "/logs/$folder_name";       
-        
-        if(!\Storage::has($path)) 
-        {
+        $path = "/logs/$folder_name";
+
+        if (!\Storage::has($path)) {
             \Storage::makeDirectory($path, 0775, true);
         }
 
-        if(!\Storage::has($path."/".$hotel_id)) 
-        {
-            \Storage::makeDirectory($path."/".$hotel_id, 0775, true);
+        if (!\Storage::has($path . "/" . $hotel_id)) {
+            \Storage::makeDirectory($path . "/" . $hotel_id, 0775, true);
         }
-        
+
         $day = date('Y_m_d');
         $file = "$path/$hotel_id/$day.log";
         $hour = date('H:i:s');
-        $text = "[$hour]: $text";        
+        $text = "[$hour]: $text";
 
-        \Storage::append($file,$text);
-        
+        \Storage::append($file, $text);
+
         return true;
     }
 }
