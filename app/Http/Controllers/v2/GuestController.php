@@ -1263,7 +1263,7 @@ class GuestController extends Controller
                 'lastname'      => $guest["lastname"],
                 'email_address' => $email,
                 'phone_no'      => $phone,
-                'angel_status'  => isset($guest['angel_status']) ? $guest['angel_status'] : $this->validateAngelStatus($hotel_id),
+                'angel_status'  => isset($guest['angel_status']) ? (intval($guest['angel_status']) == 1 ? ($this->validateAngelStatus($hotel_id)) : 0) : 0,
                 'language'      => array_key_exists('language', $guest) ? $guest['language'] : '',
                 'comment'       => array_key_exists('comment', $guest) ? $guest['comment'] : '',
                 'category'      => array_key_exists('category', $guest) ? $guest['category'] : 0,
