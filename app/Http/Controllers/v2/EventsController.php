@@ -278,12 +278,14 @@ class EventsController extends Controller
             $event["pending_by"]        = $staff_id;
 
             if (!isset($event["date"])) {
-                $event["date"]  = date('Y-m-d');
-                $event["time"]  = date('H:i:s');
-                $event["pending_on"] = date('Y-m-d');
+                $date = date('Y-m-d');
+                $time = date('H:i:s');
+                $event["date"]  = $date;
+                $event["time"]  = $time;
+                $event["pending_on"] = "$date $time";
             } else {
                 $event["status"] = 5;
-                $event["pending_on"] = $event["date"];
+                $event["pending_on"] = $event["date"]." ".$event["time"];
             }
 
             $event_id = Event::create($event)->event_id;
