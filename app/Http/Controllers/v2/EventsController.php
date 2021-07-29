@@ -282,7 +282,7 @@ class EventsController extends Controller
                 $time = date('H:i:s');
                 $event["date"]  = $date;
                 $event["time"]  = $time;
-                $event["pending_on"] = "$date $time";
+                $event["pending_on"] = $now;
             } else {
                 $event["status"] = 5;
                 $event["pending_on"] = $event["date"]." ".$event["time"];
