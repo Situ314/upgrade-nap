@@ -275,12 +275,15 @@ class EventsController extends Controller
             $event["count_by_hotel_id"] = $count_by_hotel_id;
             $event["created_by"]        = $staff_id;
             $event["created_on"]        = $now;
+            $event["pending_by"]        = $staff_id;
 
             if (!isset($event["date"])) {
                 $event["date"]  = date('Y-m-d');
                 $event["time"]  = date('H:i:s');
+                $event["pending_on"] = date('Y-m-d');
             } else {
                 $event["status"] = 5;
+                $event["pending_on"] = $event["date"];
             }
 
             $event_id = Event::create($event)->event_id;

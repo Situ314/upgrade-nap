@@ -499,7 +499,7 @@
             </tr>
             <tr>
                 <td class="bold">Data</td>
-                <td colspan="2"><code>?hotel_id={ numeric | required }&guest_id={ numeric | required }</code></td>
+                <td colspan="2"><code>?hotel_id={ numeric | required }&guest_id={ numeric | required }&sno={ numeric | required }</code></td>
             </tr>
             <tr>
                 <td class="bold">Response</td>

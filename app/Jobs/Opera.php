@@ -726,7 +726,7 @@ class Opera implements ShouldQueue
                 }
                 foreach ($addressData as  $address) {
                     if (is_string($address)) {
-                        $addressString .= $address != '' ? $address . ';' : '';
+                        $addressString .= $address != '' ? ($address . ';') : '';
                     }
                 }
                 $unique_id = array_get($arrayData, 'Profile.IDs.UniqueID');
@@ -737,7 +737,7 @@ class Opera implements ShouldQueue
                 $guest_data = [
                     'firstname'     => array_get($arrayData, 'Profile.Customer.PersonName.FirstName', ''),
                     'lastname'      => array_get($arrayData, 'Profile.Customer.PersonName.LastName', ''),
-                    'address'       => $addressString,
+                    'address'       => is_string($addressString) ? $addressString : '',
                     'city'          => array_get($arrayData, 'Profile.Addresses.NameAddress.CityName', ''),
                     'state'         => array_get($arrayData, 'Profile.Addresses.NameAddress.StateProv', ''),
                     'zipcode'       => $guest_zip_code,
