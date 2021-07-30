@@ -809,7 +809,7 @@ class Opera implements ShouldQueue
                                 $old_guest->address = substr($old_guest->address, 0, 99);
                             }
                         }
-                        if ($guest_data['city'] != $old_guest->city) {
+                        if (is_string($guest_data['city']) && $guest_data['city'] != $old_guest->city) {
                             $__update .= "city: $old_guest->city to " . $guest_data['city'] . ", ";
                             $old_guest->city = $guest_data['city'];
                         }
