@@ -896,6 +896,9 @@ class Opera implements ShouldQueue
                     } catch (\Throwable $th) {
                         $guest_data['address'] = '';
                     }
+
+                    $guest_data['city'] = is_string($guest_data['city']) ? $guest_data['city'] : '';
+
                     $new_guest = \App\Models\GuestRegistration::create($guest_data);
                     \App\Models\IntegrationsGuestInformation::create([
                         'hotel_id'      => $this->hotel_id,
