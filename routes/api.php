@@ -146,7 +146,6 @@ Route::group(['middleware' => ['oracle'], 'prefix' => 'v2'], function () {
     Route::post('opera/RoomStatus', 'v3\OperaController@index');
     Route::post('opera/Profile',    'v3\OperaController@index');
     Route::post('opera/Message',    'v3\OperaController@index');
-
 });
 
 // integration with queues
@@ -193,8 +192,6 @@ Route::group(['prefix' => 'api'], function () {
         Route::get('alexa/update_hsk', 'v1\AlexaController@changeHskStatus')->name('alexa_hsk');
         Route::get('alexa/get_guest_data', 'v1\AlexaController@getGuestData');
         Route::post('alexa/saveAlexaDevice', 'v1\AlexaController@saveDevice');
-
-
     });
 });
 
@@ -249,7 +246,7 @@ Route::post('/syncProfileData/{hotel_id}',    'v2\OperaController@syncProfileDat
 // verify rooms
 Route::post('/operaverify/{hotel_id}/',    'v2\OperaController@verify');
 
-Route::group(['middleware' => ['auth:api'], ], function () {
+Route::group(['middleware' => ['auth:api'],], function () {
     Route::get('/getIntegrations',    'IntegrationMonitoringController@getHotel');
     Route::get('/getStats',    'IntegrationMonitoringController@getStats');
     Route::get('/getTotal/{hotel_id}/{date?}',    'IntegrationMonitoringController@getTotal');
@@ -273,4 +270,16 @@ Route::post('v2/miller/allCodesInquiry/{hotel_id}', 'v2\SMSMillerController@allC
 
 Route::get('phpinfo', function () {
     phpinfo();
+});
+
+// V3
+Route::group(['middleware' => ['auth:api'], 'prefix' => 'v3'], function () {
+    Route::group(['prefix' => 'pms'], function () {
+        // 
+        Route::post("guest", "v3\GuestController@store");
+        Route::put("guest", "v3\GuestController@update");
+        // 
+        Route::post("reservation", "v3\ReservationController@store");
+        Route::put("reservation", "v3\ReservationController@update");
+    });
 });
