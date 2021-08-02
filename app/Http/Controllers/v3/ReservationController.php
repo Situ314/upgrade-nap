@@ -192,7 +192,7 @@ class ReservationController extends Controller
                 $room_id = $hotel_room["room_id"];
             }
 
-            if ($findReservation->room_id > 0 && $findReservation->room_id != $room_id) {
+            if ($findReservation->room_id > 0 && $findReservation->room_id != $room_id && intval($findReservation->reservation_status) == 1) {
                 \App\Models\RoomMove::create([
                     'guest_id'          => $findReservation->guest_id,
                     'current_room_no'   => $findReservation->room_no,
