@@ -59,6 +59,13 @@ class HousekeepingController extends Controller
 
                     // Se agrega room al objeto actual
                     $shk_room->room =  $room;
+                    // se parsea null a string
+                    $shk_room->cleaning_id =  $shk_room->cleaning_id? $shk_room->cleaning_id : "";
+                    $shk_room->count_by_hotel_id =  $shk_room->count_by_hotel_id? $shk_room->count_by_hotel_id : "";
+                    $shk_room->hk_status =  $shk_room->hk_status? $shk_room->hk_status : "";
+                    $shk_room->front_desk_status =  $shk_room->front_desk_status? $shk_room->front_desk_status : "";
+                    $shk_room->created_on =  $shk_room->created_on? $shk_room->created_on : "";
+                    $shk_room->assigned_date =  $shk_room->assigned_date? $shk_room->assigned_date : "";
 
                     //Se eliminan los campos del objeto principal para evitar datos repetidos
                     unset($shk_room->location);
