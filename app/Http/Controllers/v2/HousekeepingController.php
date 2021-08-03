@@ -54,7 +54,7 @@ class HousekeepingController extends Controller
                     
                     //Se crea el formato room
                     $room = [
-                        "localtion" => $shk_room->location, "room_id" => $shk_room->room_id
+                        "location" => $shk_room->location, "room_id" => $shk_room->room_id
                     ];
 
                     // Se agrega room al objeto actual
