@@ -76,6 +76,18 @@ return [
             'deduplicator' => 'unique',
             'allow_delay' => env('SQS_ALLOW_DELAY'),
 	    ],
+        'sqs-fifo_maestro' => [
+            'driver' => 'sqs-fifo',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'prefix' => env('SQS_PREFIX'),
+            'suffix' => env('SQS_SUFFIX'),
+            'queue' => env('SQS_QUEUE_MAESTRO'),    // ex: queuename.fifo
+            'region' => env('AWS_REGION'), // ex: us-east-2
+            'group' => 'default',
+            'deduplicator' => 'unique',
+            'allow_delay' => env('SQS_ALLOW_DELAY'),
+	    ],
 
     ],
 

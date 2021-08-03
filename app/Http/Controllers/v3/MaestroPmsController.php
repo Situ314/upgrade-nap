@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\v1;
+namespace App\Http\Controllers\v3;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -9,13 +9,11 @@ use \App\Models\IntegrationsActive;
 use \App\Models\MaestroPmsSalt;
 use \App\Jobs\MaestroPms;
 use App\Jobs\MaestroPmsLog;
-
 class MaestroPmsController extends Controller
 {
-
+   
     public function index(Request $request)
     {
-       
         try {            
             // if(strpos($request->getContent(), 'Offmarket')  !== false) {
             //     \Log::info('------------------ Offmarket ----------------------');
@@ -26,20 +24,22 @@ class MaestroPmsController extends Controller
             $xml        = simplexml_load_string($request->getContent());
             $str_json   = json_encode($xml);            
             $json       = json_decode($str_json);
-          
-           
+
             // if( $json->HotelId == '1803' || $json->HotelId == '2305' || $json->HotelId == '1802' || $json->HotelId == '1777') {
             //     \Log::info('------------------ Mensajes XML MAESTRO ----------------------');
             //     \Log::info($json->HotelId);
             //     \Log::info($request->getContent());
             //     \Log::info('----------------------------------------');
             // }
-      
+
             $maestroIntegration = IntegrationsActive::where('pms_hotel_id', $json->HotelId)
-            ->whereHas('integration', function ($q) {
+                ->whereHas('integration', function ($q) {
                     $q->where('name', 'maestro_pms');
-                })->first(); 
-                         
+                })->first();
+
+
+
+            
             if ($maestroIntegration) {
                 $hotel_id           = $maestroIntegration->hotel_id;
                 $user_id            = $maestroIntegration->created_by;
@@ -66,8 +66,8 @@ class MaestroPmsController extends Controller
 
                 $validatePasswordHash = $this->validatePasswordHash($hotel_id, $json->PasswordHash, $agreed_upon_key);
                 if ($validatePasswordHash) {
-
-                    $this->dispatch((new MaestroPms($maestroIntegration, $json)));
+                    \App\Jobs\MaestroPms::dispatch($maestroIntegration, $json)->onConnection('sqs-fifo_maestro');
+                   // $this->dispatch((new MaestroPms($maestroIntegration, $json)));
 
                     $xml_response = ArrayToXml::convert([
                         'HotelId'       => $json->HotelId,
@@ -104,9 +104,9 @@ class MaestroPmsController extends Controller
 
     public function getSalt($hotel_id)
     {
+       
         $this->configTimeZone($hotel_id);
         $salt = $this->generateRandomString();
-        //consultar si exitessa 
         $maestroPmsSalt =  MaestroPmsSalt::where('hotel_id', $hotel_id)->first();
         if (!$maestroPmsSalt) {
             $maestroPmsSalt = new MaestroPmsSalt([ 'hotel_id' => $hotel_id]);
@@ -114,7 +114,6 @@ class MaestroPmsController extends Controller
         $maestroPmsSalt->salt = $salt;
         $maestroPmsSalt->created_on = date('Y-m-d H:i:s');
         $maestroPmsSalt->save();
-       
         return $salt;
     }
 
@@ -211,7 +210,8 @@ class MaestroPmsController extends Controller
             ->first();
 
         if ($integration) {
-            $this->dispatch((new MaestroPms($integration, null, true, $room_id)));
+            \App\Jobs\MaestroPms::dispatch($integration, null, true, $room_id)->onConnection('sqs-fifo_maestro');
+           // $this->dispatch((new MaestroPms($integration, null, true, $room_id)));
             return response()->json(['sync' => true], 200);
         }
         
