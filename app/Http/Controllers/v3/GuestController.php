@@ -118,7 +118,7 @@ class GuestController extends Controller
             'status'    => 'success',
             'message'   => "Successfully created",
             'data'      => $data
-        ], 400);
+        ], 200);
     }
 
     /**
@@ -216,6 +216,6 @@ class GuestController extends Controller
         return response()->json([
             'status'    => 'success',
             'message'   => "Successfully updated",
-        ], 400);
+        ], 200);
     }
 }
