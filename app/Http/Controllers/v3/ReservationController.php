@@ -120,7 +120,7 @@ class ReservationController extends Controller
             'status'    => 'success',
             'message'   => "Successfully created",
             'data'      => $data
-        ], 400);
+        ], 200);
     }
 
 
