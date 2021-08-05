@@ -224,7 +224,7 @@ class ReservationController extends Controller
         return response()->json([
             'status'    => 'success',
             'message'   => "Successfully updated",
-        ], 400);
+        ], 200);
     }
 
     public function findRoomId($hotel_id, $location)
