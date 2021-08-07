@@ -885,6 +885,9 @@ class Opera implements ShouldQueue
                     if (is_array($guest_data['firstname'])) {
                         $guest_data['firstname'] = '';
                     }
+                    if (is_array($guest_data['lastname'])) {
+                        $guest_data['lastname'] = '';
+                    }
                     if (is_array($guest_data['state'])) {
                         $guest_data['state'] = '';
                     }
