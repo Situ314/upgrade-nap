@@ -675,7 +675,6 @@ class Opera implements ShouldQueue
         } catch (Exception $e) {
             \Log::error('Error Create Log Profile');
             \Log::error($e);
-            // DB::rollback();
             return false;
         }
     }
@@ -770,10 +769,8 @@ class Opera implements ShouldQueue
                 if ($IntegrationsGuestInformation) {
                     $old_guest = \App\Models\GuestRegistration::find($IntegrationsGuestInformation->guest_id);
                     if ($old_guest) {
-
-
                         $__update = '';
-                        if ($old_guest->email_address != $guest_data['email_address']) {
+                        if (is_string($guest_data['email_address']) && $guest_data['email_address'] != $old_guest->email_address) {
                             $__update .= "email_address: $old_guest->email_address to " . $guest_data['email_address'] . ", ";
                             $old_guest->email_address = $guest_data['email_address'];
                         }
@@ -785,26 +782,25 @@ class Opera implements ShouldQueue
                         }
                         $guest_data['phone_no'] = $phone_no;
 
-                        if ($old_guest->phone_no !== $guest_data['phone_no'] && $guest_data['phone_no'] != '') {
+                        if ($old_guest->phone_no != $guest_data['phone_no'] && $guest_data['phone_no'] != '') {
                             $__update .= "phone_no: $old_guest->phone_no to " . $guest_data['phone_no'] . ", ";
                             $old_guest->phone_no = $guest_data['phone_no'];
                         }
 
-                        if ($guest_data['firstname'] != $old_guest->firstname) {
+                        if (is_string($guest_data['firstname']) && $guest_data['firstname'] != $old_guest->firstname) {
                             if (!is_array($guest_data['firstname'])) {
                                 $__update .= "firstname: $old_guest->firstname to " . $guest_data['firstname'] . ", ";
                                 $old_guest->firstname = $guest_data['firstname'];
                             }
                         }
-                        if ($guest_data['lastname'] != $old_guest->lastname) {
+                        if (is_string($guest_data['lastname']) && $guest_data['lastname'] != $old_guest->lastname) {
                             $__update .= "lastname: $old_guest->lastname to " . $guest_data['lastname'] . ", ";
                             $old_guest->lastname = $guest_data['lastname'];
                         }
 
-                        if ($guest_data['address'] != $old_guest->address) {
+                        if (is_string($guest_data['address']) && $guest_data['address'] != $old_guest->address) {
                             $__update .= "address: $old_guest->address to " . $guest_data['address'] . ", ";
                             $old_guest->address = $guest_data['address'];
-                            // truncate  address before save
                             if (strlen($old_guest->address) >= 100) {
                                 $old_guest->address = substr($old_guest->address, 0, 99);
                             }
@@ -828,9 +824,7 @@ class Opera implements ShouldQueue
                         if ($__update != '') {
                             $old_guest->updated_on = date('Y-m-d H:i:s');
                             $old_guest->updated_by = $this->staff_id;
-                            // \Log::info($old_guest);
                             $old_guest->save();
-
                             $this->saveLogTracker([
                                 'hotel_id'  => $this->hotel_id,
                                 'module_id' => 8,
