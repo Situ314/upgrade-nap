@@ -143,7 +143,7 @@ class EventsController extends Controller
                     'numeric',
                     Rule::in([1, 2, 3])
                 ],
-                'date' => 'date_format:Y-m-d|after:' . $now,
+                'date' => 'date_format:Y-m-d|after:' . date("Y-m-d", strtotime($now . " -1 day")),
                 'time' => 'required_with:date|date_format:H:i:s'
             ];
 
@@ -285,7 +285,7 @@ class EventsController extends Controller
                 $event["pending_on"] = $now;
             } else {
                 $event["status"] = 5;
-                $event["pending_on"] = $event["date"]." ".$event["time"];
+                $event["pending_on"] = $event["date"] . " " . $event["time"];
             }
 
             $event_id = Event::create($event)->event_id;
