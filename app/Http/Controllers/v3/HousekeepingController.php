@@ -86,7 +86,7 @@ class HousekeepingController extends Controller
 
                 $curl = curl_init();
                 curl_setopt_array($curl, array(
-                    CURLOPT_URL             => "https://integrations.mynuvola.com/index.php/housekeeping/pmsHKChange",
+                    CURLOPT_URL             => "https://hotel.mynuvola.com/index.php/housekeeping/pmsHKChange",
                     CURLOPT_RETURNTRANSFER  => true,
                     CURLOPT_ENCODING        => "",
                     CURLOPT_MAXREDIRS       => 10,
