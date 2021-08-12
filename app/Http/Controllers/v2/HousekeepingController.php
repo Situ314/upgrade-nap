@@ -24,34 +24,44 @@ class HousekeepingController extends Controller
         if ($this->validateHotelId($hotel_id, $staff_id)) #endregion
         {
             $hsk = null;
-            
+
             /*Se agrega valiacion para parametro all, 
             con el objetivo de mostrar todas las habitaciones cuando este llegue en true*/
             if (isset($request->all) && ($request->all == 'true' || $request->all == true)) {
 
                 //Se consultan todas las habitaciones con estado en caso de que lo tenga en formato lineal(habitacion-status)
-                $hsk = HotelRoom::leftJoin('housekeeping_cleanings as hsk', function ($join) {
-                    $join->on('hotel_rooms.room_id', '=', 'hsk.room_id')
-                        ->where('hotel_rooms.hotel_id', '=', 'hsk.hotel_id')
-                        ->where('is_active', 1);
-                })
-                    ->where('hotel_rooms.hotel_id', $hotel_id)
-                    ->where('hotel_rooms.active', true)
-                    ->select(
-                        'hotel_rooms.location',
-                        'hotel_rooms.room_id',
-                        'hsk.cleaning_id',
-                        'hsk.count_by_hotel_id',
-                        'hsk.hk_status',
-                        'hsk.front_desk_status',
-                        'hsk.created_on',
-                        'hsk.assigned_date'
-                    )
+                $hsk = HotelRoom::select("cleaning_id","count_by_hotel_id","hk_status","front_desk_status","assigned_date","hotel_rooms.location", "hotel_rooms.room_id")
+                    ->leftJoin("housekeeping_cleanings", "housekeeping_cleanings.room_id", "=", "hotel_rooms.room_id")
+                    ->where("hotel_rooms.hotel_id", $hotel_id)
+                    ->where("hotel_rooms.active", 1)
+                    ->where("housekeeping_cleanings.is_active", 1)
+                    ->orderBy("housekeeping_cleanings.cleaning_id","DESC")
                     ->paginate($paginate);
+
+                // $hsk = HotelRoom::leftJoin('housekeeping_cleanings as hsk', function ($join) {
+                //     $join->on('hotel_rooms.room_id', '=', 'hsk.room_id')
+                //         ->where('hotel_rooms.hotel_id', '=', 'hsk.hotel_id')
+                //         ->where('hsk.is_active', 1);
+                // })
+                //     ->where('hotel_rooms.hotel_id', $hotel_id)
+                //     ->where('hotel_rooms.active', 1)
+                //     ->select(
+                //         'hotel_rooms.location',
+                //         'hotel_rooms.room_id',
+                //         'hsk.cleaning_id',
+                //         'hsk.count_by_hotel_id',
+                //         'hsk.hk_status',
+                //         'hsk.front_desk_status',
+                //         'hsk.created_on',
+                //         'hsk.assigned_date'
+                //     )
+                //     ->paginate($paginate);
+
+                // dd(json_encode($hsk));
 
                 //Se recorre el resultado y se parsea al formato  de la consulta convencional (HousekeepingCleanings.room)
                 foreach ($hsk as $shk_room) {
-                    
+
                     //Se crea el formato room
                     $room = [
                         "location" => $shk_room->location, "room_id" => $shk_room->room_id
@@ -60,12 +70,12 @@ class HousekeepingController extends Controller
                     // Se agrega room al objeto actual
                     $shk_room->room =  $room;
                     // se parsea null a string
-                    $shk_room->cleaning_id =  $shk_room->cleaning_id? $shk_room->cleaning_id : "";
-                    $shk_room->count_by_hotel_id =  $shk_room->count_by_hotel_id? $shk_room->count_by_hotel_id : "";
-                    $shk_room->hk_status =  $shk_room->hk_status? $shk_room->hk_status : "";
-                    $shk_room->front_desk_status =  $shk_room->front_desk_status? $shk_room->front_desk_status : "";
-                    $shk_room->created_on =  $shk_room->created_on? $shk_room->created_on : "";
-                    $shk_room->assigned_date =  $shk_room->assigned_date? $shk_room->assigned_date : "";
+                    $shk_room->cleaning_id          = $shk_room->cleaning_id        ? $shk_room->cleaning_id : "";
+                    $shk_room->count_by_hotel_id    = $shk_room->count_by_hotel_id  ? $shk_room->count_by_hotel_id : "";
+                    $shk_room->hk_status            = $shk_room->hk_status          ? $shk_room->hk_status : "";
+                    $shk_room->front_desk_status    = $shk_room->front_desk_status  ? $shk_room->front_desk_status : "";
+                    $shk_room->created_on           = $shk_room->created_on         ? $shk_room->created_on : "";
+                    $shk_room->assigned_date        = $shk_room->assigned_date      ? $shk_room->assigned_date : "";
 
                     //Se eliminan los campos del objeto principal para evitar datos repetidos
                     unset($shk_room->location);

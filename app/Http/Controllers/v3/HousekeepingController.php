@@ -90,7 +90,7 @@ class HousekeepingController extends Controller
                     CURLOPT_RETURNTRANSFER  => true,
                     CURLOPT_ENCODING        => "",
                     CURLOPT_MAXREDIRS       => 10,
-                    CURLOPT_TIMEOUT         => 2,
+                    CURLOPT_TIMEOUT         => 10,
                     CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
                     CURLOPT_CUSTOMREQUEST   => "POST",
                     CURLOPT_POSTFIELDS      => json_encode($HousekeepingData)
@@ -104,6 +104,8 @@ class HousekeepingController extends Controller
         return response()->json([
             'status'    => 'success',
             'message'   => "Successfully updated",
+            "response" => $response, 
+            "err" => $err
         ], 200);
 
     }

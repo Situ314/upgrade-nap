@@ -282,6 +282,6 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v3'], function () {
         Route::post("reservation", "v3\ReservationController@store");
         Route::put("reservation", "v3\ReservationController@update");
         // 
-        Route::put("room-status", "'v3\HousekeepingController@updateHsk'");
+        Route::put("room-status", "v3\HousekeepingController@updateHsk");
     });
 });
