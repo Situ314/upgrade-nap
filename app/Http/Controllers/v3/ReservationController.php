@@ -131,7 +131,7 @@ class ReservationController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         // Capturar hotel id, por default el valor es null, en caso de no enviarlo
         $hotel_id = isset($request->hotel_id) ? $request->hotel_id : null;
