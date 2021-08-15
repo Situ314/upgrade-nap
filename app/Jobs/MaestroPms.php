@@ -1761,8 +1761,8 @@ class MaestroPms implements ShouldQueue
                         $value->phone_no = '';
                         $value->comment = 'GuestChat dummy';
                         $value->save();
-                        \Log::info('cambio ' . $phone);
-                        \Log::info(json_encode($value));
+                        // \Log::info('cambio ' . $phone);
+                        // \Log::info(json_encode($value));
                     }
                 }
             }

@@ -640,7 +640,8 @@ class Opera implements ShouldQueue
                 try {
                     $profile_log_data->save();
                 } catch (\Exception $th) {
-                    \Log::info('No guardó');
+                    \Log::error("Error en ProfileRegistration 1");
+                    \Log::error($th);
                 }
 
                 $dataLog['idLog'] = $profile_log_data->id;
@@ -654,7 +655,8 @@ class Opera implements ShouldQueue
                 try {
                     $profile_log_data->save();
                 } catch (\Exception $th) {
-                    \Log::info('No guardó');
+                    \Log::error("Error en ProfileRegistration 2");
+                    \Log::error($th);
                 }
             }
 
@@ -926,8 +928,11 @@ class Opera implements ShouldQueue
 
     public function getRoom($location)
     {
+        $location = intval($location);
+        $location *= 1;
         $add = true;
-        if ((($this->hotel_id == '275' || $this->hotel_id == '281') && is_numeric($location) && $location >= 9000 && $location <= 9600) ||
+        if (
+            (($this->hotel_id == '275' || $this->hotel_id == '281') && is_numeric($location) && $location >= 9000 && $location <= 9600) ||
             ($this->hotel_id == '207' && (!($location <= 202)  || !is_numeric($location)))
             || ($this->hotel_id == '289' && ((is_numeric($location) && ($location >= 4000)) || !is_numeric($location))) ||
             ($this->hotel_id == '239' && ((is_numeric($location) && ($location >= 3000)) || !is_numeric($location))) ||
@@ -935,20 +940,21 @@ class Opera implements ShouldQueue
         ) {
             $add = false;
         }
-        // $add = $this->hotel_id == 266 ? false : true;
         if ($add) {
             $this->configTimeZone($this->hotel_id);
-            if (substr($location, 0, 1) == '0' && ($this->hotel_id == 189 || $this->hotel_id == 296)) {
-                $location = substr($location, 1);
-            }
-            $room = \App\Models\HotelRoom::where('hotel_id', $this->hotel_id)
-                ->where(function ($query) use ($location) {
-                    return $query
-                        ->where('location', $location)
-                        ->orWhere('room_id', $location);
-                })->where('active', 1)
-                ->first();
+            // if (substr($location, 0, 1) == '0' && ($this->hotel_id == 189 || $this->hotel_id == 296)) {
+            //     $location = substr($location, 1);
+            // }
+            // $room = \App\Models\HotelRoom::where('hotel_id', $this->hotel_id)
+            //     ->where(function ($query) use ($location) {
+            //         return $query
+            //             ->where('location', $location);
+            //         // ->orWhere('room_id', $location);
+            //     })->where('active', 1)
+            //     ->first();
 
+            $room = \App\Models\HotelRoom::where('hotel_id', $this->hotel_id)->where("active", 1)->whereRaw("(location * 1) = '$location'")->first();
+ 
             if ($room) {
                 date_default_timezone_set('UTC');
                 return [
@@ -959,7 +965,6 @@ class Opera implements ShouldQueue
                 if ($this->hotel_id == 266) {
                     return null;
                 }
-                // find if $location  already exists    
                 if (\App\Models\HotelRoom::where('location', substr($location, 1))->where('hotel_id', $this->hotel_id)->count() >= 1) {
                     return null;
                 }

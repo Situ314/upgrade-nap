@@ -20,8 +20,8 @@ class Miller
         $response   = $request->getContent();
         $xmlString  = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
         $xml        = simplexml_load_string($xmlString);
-        \Log::info('MILLER XML');
-        \Log::info($xmlString);
+        // \Log::info('MILLER XML');
+        // \Log::info($xmlString);
         $str_json   = json_encode($xml);
         // \Log::info($str_json);
         $json       = json_decode($str_json, true);
@@ -43,8 +43,8 @@ class Miller
             $__password = $config['password'];
             if ($__username == $Username && $__password == $Password) {
                 if ($IntegrationsActive->hotel_id == 362) {
-                    \Log::info('SMS_MILLER INNISBROOK');
-                    \Log::info($response);
+                    // \Log::info('SMS_MILLER INNISBROOK');
+                    // \Log::info($response);
                 }
                 $request->merge([
                     "staff_id"  => $IntegrationsActive->created_by,

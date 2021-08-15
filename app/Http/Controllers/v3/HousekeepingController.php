@@ -78,10 +78,7 @@ class HousekeepingController extends Controller
                 $HousekeepingData = [
                     "hotel_id" => $hotel_id,
                     "staff_id" => $request->user()->staff_id,
-                    "rooms" => [
-                        "room_id"   => $room->room_id,
-                        "hk_status" => $hk_status,
-                    ]
+                    "rooms" => [ [ "room_id"   => $room->room_id, "hk_status" => $hk_status, ] ]
                 ];
 
                 $curl = curl_init();
