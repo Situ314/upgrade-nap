@@ -136,7 +136,7 @@ class SmsMiller implements ShouldQueue
                                 if ($__reservation->reservation_status == 1  &&  date('Y-m-d', strtotime($value["check_in"])) == date('Y-m-d')) {
                                     $send_message_miller = true;
                                 }
-                                \Log::alert(json_encode($__reservation));
+                                // \Log::alert(json_encode($__reservation));
                                 $this->saveLogTracker([
                                     'hotel_id'  => $this->hotel_id,
                                     'module_id' => 8,

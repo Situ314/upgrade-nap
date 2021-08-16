@@ -22,8 +22,9 @@ class MaestroPmsController extends Controller
             //     \Log::info($request->getContent());
             //     \Log::info('----------------------------------------');
             // }
-            
-            $xml        = simplexml_load_string($request->getContent());
+            $text = $request->getContent();
+            $text = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $text);
+            $xml        = simplexml_load_string($text);
             $str_json   = json_encode($xml);            
             $json       = json_decode($str_json);
           
@@ -96,8 +97,10 @@ class MaestroPmsController extends Controller
 
             return response($xml_response, 200)->header('Content-Type', 'text/xml');
         } catch (\Exception $e) {
-            \Log::info('------------------ Error try XML MAESTRO ----------------------');
+            \Log::error('Error try XML MAESTRO');
             \Log::error($e);
+            \Log::error('MAESTRO index');
+            \Log::error($request->getContent());
             echo $e;
         }
     }
