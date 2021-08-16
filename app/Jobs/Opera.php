@@ -948,8 +948,13 @@ class Opera implements ShouldQueue
 
     public function getRoom($location)
     {
-        $location = intval($location);
-        $location *= 1;
+        $is_numeric = false;
+        if(is_numeric($location)) {
+            $location = intval($location);
+            $location *= 1;
+            $is_numeric = true;
+        }
+        
         $add = true;
         if (
             (($this->hotel_id == '275' || $this->hotel_id == '281') && is_numeric($location) && $location >= 9000 && $location <= 9600) ||
@@ -973,7 +978,12 @@ class Opera implements ShouldQueue
             //     })->where('active', 1)
             //     ->first();
 
-            $room = \App\Models\HotelRoom::where('hotel_id', $this->hotel_id)->where("active", 1)->whereRaw("(location * 1) = '$location'")->first();
+            $query = "location = '$location'";
+            if($is_numeric) {
+                $query = "(location * 1) = '$location'";
+            }
+
+            $room = \App\Models\HotelRoom::where('hotel_id', $this->hotel_id)->where("active", 1)->whereRaw($query,[])->first();
 
             if ($room) {
                 date_default_timezone_set('UTC');
