@@ -598,12 +598,6 @@ class MaestroPms implements ShouldQueue
     {
         $success = false;
         try {
-            // if(  $hotel_id == '276' || $hotel_id == '277' || $hotel_id == '278' || $hotel_id == '279') {
-            //     \Log::info('------------------Maestro entro al CheckIn ----------------------');
-            //     \Log::info('data');
-            //     \Log::info(json_encode($data));
-            //     \Log::info('----------------------------------------');
-            // }
             $Check_in_data = [];
             $is_array = is_array($data->CheckInData->GuestInfo);
             if ($is_array) {
@@ -612,121 +606,97 @@ class MaestroPms implements ShouldQueue
                 $Check_in_data[] = $data->CheckInData->GuestInfo;
             }
             foreach ($Check_in_data as $value) {
-                // if(  $hotel_id == '276' || $hotel_id == '277' || $hotel_id == '278' || $hotel_id == '279') {
-                //     \Log::info('------------------entro en el forEach ----------------------');
-                // }
                 $GuestRegistration = null;
                 $status = null;
                 $reservation_status = null;
                 $phone_no = null;
                 DB::beginTransaction();
-
-           
                 $ReservationNumber = $value->ReservationNumber;
-                $GuestCheckinDetails = GuestCheckinDetails::where('hotel_id', $hotel_id)->where('reservation_number', $ReservationNumber)->first();
-                // if(  $hotel_id == '276' || $hotel_id == '277' || $hotel_id == '278' || $hotel_id == '279') {
-                //     \Log::info('------------------GuestCheckinDetails ----------------------');
-                //     \Log::info('data');
-                //     \Log::info(json_encode($GuestCheckinDetails));
-                //     \Log::info('----------------------------------------');
-                // }
-                if ($GuestCheckinDetails) {
+                if(is_string($ReservationNumber)) {
 
-                    $status = $GuestCheckinDetails->status;
-                    $reservation_status = $GuestCheckinDetails->reservation_status;
-                    $room_no = 0;
-                    if (isset($value->RoomCode) && is_string($value->RoomCode) && !empty($value->RoomCode)) {
-                        $room_code  = $value->RoomCode;
-                        $room       = $this->findRoomId($hotel_id, $staff_id, $room_code);
-                        $room_no    = (int) $room["room_id"];
-                        $GuestCheckinDetails->room_no               = $room_no;
-                    }
-
-                    $GuestCheckinDetails->status                = 1;
-                    $GuestCheckinDetails->reservation_status    = 1;
-                    $GuestCheckinDetails->check_in              = (new DateTime($value->ArrivalDate))->format('Y-m-d H:i:s');
-                    $GuestCheckinDetails->check_out             = (new DateTime($value->DepartureDate))->format('Y-m-d H:i:s');
-
-                    $GuestCheckinDetails->save();
-
-                    $GuestRegistration = GuestRegistration::find($GuestCheckinDetails->guest_id);
-                    // if(  $hotel_id == '276' || $hotel_id == '277' || $hotel_id == '278' || $hotel_id == '279') {
-                    //     \Log::info('------------------GuestCheckinDetails luego del save ----------------------');
-                    //     \Log::info('data');
-                    //     \Log::info(json_encode($GuestRegistration));
-                    //     \Log::info('----------------------------------------');
-                    // }
-                    $__GuestCheckinDetails = GuestCheckinDetails::where('hotel_id', $hotel_id)->where('guest_id', $GuestCheckinDetails->guest_id)->get();
-                    $back = false;
-
-                    if (count($__GuestCheckinDetails) > 1) {
-                        $back = true;
-                    }
-                    $phone_no = str_replace(["-", ".", " ", "(", ")", "*", "/", "na", "+"], "", is_string($value->Cell) ? $value->Cell : '');
-                    $phone_no = preg_replace('/[^0-9]/', '', $phone_no);
-
-                    if (!empty($phone_no) && is_numeric($phone_no)) {
-                        $phone_no = "+$phone_no";
-                    }
-                    $GuestRegistration->email_address =  is_string($value->EmailAddress) ? $value->EmailAddress : '';
-                    $GuestRegistration->phone_no = !empty($phone_no) ? $phone_no : '';
-                    $GuestRegistration->save();
-                    // if(  $hotel_id == '276' || $hotel_id == '277' || $hotel_id == '278' || $hotel_id == '279') {
-                    //     \Log::info('------------------GuestRegistration luego del save ----------------------');
-                    //     \Log::info('data');
-                    //     \Log::info(json_encode($GuestRegistration));
-                    //     \Log::info('----------------------------------------');
-                    // }
-                    $this->guestChatDummy($GuestCheckinDetails->guest_id, $phone_no, $hotel_id);
-                }
-                DB::commit();
-
-                // \Log::info('datas validate '. json_encode($GuestRegistration) );
-                // \Log::info('datas validate '. json_encode($GuestCheckinDetails) );
-                if ($GuestCheckinDetails) {
-
-
-                    if ($GuestCheckinDetails->status == 1 && $GuestCheckinDetails->reservation_status != $reservation_status) {
-                        $rs = null;
-                        try {
-                            $date = date('Y-m-d H:i:s');
-                            if ($GuestCheckinDetails->check_in == $date ) {
-                                $rs = $this->sendMessages(
-                                    $hotel_id,
-                                    $GuestCheckinDetails->guest_id,
-                                    $staff_id,
-                                    is_string($value->EmailAddress) ? $value->EmailAddress : '',
-                                    $phone_no,
-                                    $back,
-                                    $GuestCheckinDetails->check_in,
-                                    $GuestCheckinDetails->check_out
-                                );
-                            }
-                        } catch (\Throwable $th) {
-                            \Log::error("Validation SMS ERROR:\n".$th);
+                    $GuestCheckinDetails = GuestCheckinDetails::where('hotel_id', $hotel_id)->where('reservation_number', $ReservationNumber)->first();
+                
+                    if ($GuestCheckinDetails) {
+                        $status = $GuestCheckinDetails->status;
+                        $reservation_status = $GuestCheckinDetails->reservation_status;
+                        $room_no = 0;
+                        if (isset($value->RoomCode) && is_string($value->RoomCode) && !empty($value->RoomCode)) {
+                            $room_code  = $value->RoomCode;
+                            $room       = $this->findRoomId($hotel_id, $staff_id, $room_code);
+                            $room_no    = (int) $room["room_id"];
+                            $GuestCheckinDetails->room_no               = $room_no;
                         }
-                        
 
-                        $this->saveLogTracker([
-                            'module_id' => 0,
-                            'action'    => 'send_mail',
-                            'prim_id'   => $GuestCheckinDetails->guest_id,
-                            'staff_id'  => $staff_id,
-                            'date_time' => date('Y-m-d H:i:s'),
-                            'comments'  => json_encode([
-                                "data" => [
-                                    "hotel_id"      => $hotel_id,
-                                    "guest_id"      => $GuestCheckinDetails->guest_id,
-                                    "staff_id"      => $staff_id,
-                                    "EmailAddress"  => is_string($value->EmailAddress) ? $value->EmailAddress : '',
-                                    "Cell"          => is_string($value->Cell) ? $value->Cell : '',
-                                    "back"          => $back
-                                ],
-                                "rs" => $rs ? $rs : null
-                            ]),
-                            'hotel_id'  => $hotel_id,
-                            'type'      => 'API-maestro_pms'
-                        ]);
+                        $GuestCheckinDetails->status                = 1;
+                        $GuestCheckinDetails->reservation_status    = 1;
+                        $GuestCheckinDetails->check_in              = (new DateTime($value->ArrivalDate))->format('Y-m-d H:i:s');
+                        $GuestCheckinDetails->check_out             = (new DateTime($value->DepartureDate))->format('Y-m-d H:i:s');
+
+                        $GuestCheckinDetails->save();
+
+                        $GuestRegistration = GuestRegistration::find($GuestCheckinDetails->guest_id);
+                        $__GuestCheckinDetails = GuestCheckinDetails::where('hotel_id', $hotel_id)->where('guest_id', $GuestCheckinDetails->guest_id)->get();
+                        $back = false;
+
+                        if (count($__GuestCheckinDetails) > 1) {
+                            $back = true;
+                        }
+                        $phone_no = str_replace(["-", ".", " ", "(", ")", "*", "/", "na", "+"], "", is_string($value->Cell) ? $value->Cell : '');
+                        $phone_no = preg_replace('/[^0-9]/', '', $phone_no);
+
+                        if (!empty($phone_no) && is_numeric($phone_no)) {
+                            $phone_no = "+$phone_no";
+                        }
+                        $GuestRegistration->email_address =  is_string($value->EmailAddress) ? $value->EmailAddress : '';
+                        $GuestRegistration->phone_no = !empty($phone_no) ? $phone_no : '';
+                        $GuestRegistration->save();
+                        $this->guestChatDummy($GuestCheckinDetails->guest_id, $phone_no, $hotel_id);
+                    }
+                    DB::commit();
+
+                    if ($GuestCheckinDetails) {
+                        if ($GuestCheckinDetails->status == 1 && $GuestCheckinDetails->reservation_status != $reservation_status) {
+                            $rs = null;
+                            try {
+                                $date = date('Y-m-d H:i:s');
+                                if ($GuestCheckinDetails->check_in == $date ) {
+                                    $rs = $this->sendMessages(
+                                        $hotel_id,
+                                        $GuestCheckinDetails->guest_id,
+                                        $staff_id,
+                                        is_string($value->EmailAddress) ? $value->EmailAddress : '',
+                                        $phone_no,
+                                        $back,
+                                        $GuestCheckinDetails->check_in,
+                                        $GuestCheckinDetails->check_out
+                                    );
+                                }
+                            } catch (\Throwable $th) {
+                                \Log::error("Validation SMS ERROR:\n".$th);
+                            }
+                            
+
+                            $this->saveLogTracker([
+                                'module_id' => 0,
+                                'action'    => 'send_mail',
+                                'prim_id'   => $GuestCheckinDetails->guest_id,
+                                'staff_id'  => $staff_id,
+                                'date_time' => date('Y-m-d H:i:s'),
+                                'comments'  => json_encode([
+                                    "data" => [
+                                        "hotel_id"      => $hotel_id,
+                                        "guest_id"      => $GuestCheckinDetails->guest_id,
+                                        "staff_id"      => $staff_id,
+                                        "EmailAddress"  => is_string($value->EmailAddress) ? $value->EmailAddress : '',
+                                        "Cell"          => is_string($value->Cell) ? $value->Cell : '',
+                                        "back"          => $back
+                                    ],
+                                    "rs" => $rs ? $rs : null
+                                ]),
+                                'hotel_id'  => $hotel_id,
+                                'type'      => 'API-maestro_pms'
+                            ]);
+                        }
                     }
                 }
             }

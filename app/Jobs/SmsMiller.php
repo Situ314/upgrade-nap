@@ -753,9 +753,10 @@ class SmsMiller implements ShouldQueue
             $response = curl_exec($curl);
             $err = curl_error($curl);
             if ($err) {
-                \Log::info($err);
+                \Log::error("Error en SmsMiller SendHSK");
+                \Log::error($err);
             } else {
-                \Log::info($response);
+                // \Log::info($response);
             }
             curl_close($curl);
         }

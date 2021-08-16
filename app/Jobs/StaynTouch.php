@@ -117,9 +117,10 @@ class StaynTouch implements ShouldQueue
             $err = curl_error($curl);
             
             if ($err) {
-                \Log::info($err);
+                \Log::error("Error en StaynTouch SendHSK");
+                \Log::error($err);
             } else {
-                \Log::info($response);
+                // \Log::info($response);
             }
             curl_close($curl);
         }

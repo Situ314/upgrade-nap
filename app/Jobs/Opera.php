@@ -1,7 +1,5 @@
 <?php
 
-// FALTA VALIDAR EL ROOM MOvE DE SUITES 
-
 namespace App\Jobs;
 
 use App\Models\GuestCheckinDetails;
@@ -608,18 +606,38 @@ class Opera implements ShouldQueue
                         $addressString = '';
                     }
                 }
+
+                $firstName = array_get($this->data, 'Profile.Customer.PersonName.FirstName', '');
+                $firstName = is_array($firstName) ? "" : $firstName;
+
+                $lastName = array_get($this->data, 'Profile.Customer.PersonName.LastName', '');
+                $lastName = is_array($lastName) ? "" : $lastName;
+
+                $cityName = array_get($this->data, 'Profile.Addresses.NameAddress.CityName', '');
+                $cityName = is_array($cityName) ? "" : $cityName;
+
+                $postalCode = array_get($this->data, 'Profile.Addresses.NameAddress.PostalCode', '');
+                $postalCode = is_array($postalCode) ? "" : $postalCode;
+
+                $countryCode = array_get($this->data, 'Profile.Addresses.NameAddress.CountryCode', '');
+                $countryCode = is_array($countryCode) ? "" : $countryCode;
+
+                $birthDate = array_get($this->data, 'Profile.Customer.@attributes.birthDate', '');
+                $birthDate = is_array($birthDate) ? "" : $birthDate;
+
+
                 $dataLog = [
                     'resortId'      => $resort_id,
                     'UniqueID'      => $unique_id,
-                    'FirstName'     => array_get($this->data, 'Profile.Customer.PersonName.FirstName', ''),
-                    'LastName'      => array_get($this->data, 'Profile.Customer.PersonName.LastName', ''),
+                    'FirstName'     => $firstName,
+                    'LastName'      => $lastName,
                     'EMAIL'         => '',
                     'MOBILE'        => '',
                     'AddressLine'   => $addressString,
-                    'CityName'      => array_get($this->data, 'Profile.Addresses.NameAddress.CityName', ''),
-                    'PostalCode'    => array_get($this->data, 'Profile.Addresses.NameAddress.PostalCode', ''),
-                    'CountryCode'   => array_get($this->data, 'Profile.Addresses.NameAddress.CountryCode', ''),
-                    'birthDate'     => array_get($this->data, 'Profile.Customer.@attributes.birthDate', ''),
+                    'CityName'      => $cityName,
+                    'PostalCode'    => $postalCode,
+                    'CountryCode'   => $countryCode,
+                    'birthDate'     => $birthDate,
                     'created_at'    => date('Y-m-d H:i:s')
                 ];
                 $phonesData = array_get($this->data, 'Profile.Phones.NamePhone', []);
@@ -630,9 +648,11 @@ class Opera implements ShouldQueue
                 foreach ($phonesData as $value) {
                     if (array_get($value, '@attributes.phoneRole') == 'PHONE' && $dataLog['MOBILE'] == '') {
                         $dataLog['MOBILE'] = array_get($value, 'PhoneNumber', '');
+                        $dataLog['MOBILE'] = is_array($dataLog['MOBILE']) ? "" : $dataLog['MOBILE'];
                     }
                     if (array_get($value, '@attributes.phoneRole') == 'EMAIL' && $dataLog['EMAIL'] == '') {
                         $dataLog['EMAIL'] = array_get($value, 'PhoneNumber', '');
+                        $dataLog['EMAIL'] = is_array($dataLog['EMAIL']) ? "" : $dataLog['EMAIL'];
                     }
                 }
                 $profile_log_data = new \App\Models\Log\OracleProfile($dataLog);
@@ -954,7 +974,7 @@ class Opera implements ShouldQueue
             //     ->first();
 
             $room = \App\Models\HotelRoom::where('hotel_id', $this->hotel_id)->where("active", 1)->whereRaw("(location * 1) = '$location'")->first();
- 
+
             if ($room) {
                 date_default_timezone_set('UTC');
                 return [
@@ -1129,9 +1149,10 @@ class Opera implements ShouldQueue
             $response = curl_exec($curl);
             $err = curl_error($curl);
             if ($err) {
-                \Log::info($err);
+                \Log::error("Error en Job Opera SendHSK");
+                \Log::error($err);
             } else {
-                \Log::info($response);
+                // \Log::info($response);
             }
             curl_close($curl);
         }
@@ -1442,12 +1463,13 @@ class Opera implements ShouldQueue
         curl_close($curl);
         date_default_timezone_set('UTC');
         if ($err) {
-            \Log::alert($err);
+            \Log::error("Error en getReservationRoom curl");
+            \Log::error($err);
 
             return null;
         } else {
             $xmlString  = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
-            \Log::alert($response);
+            // \Log::alert($response);
             $xml        = simplexml_load_string($xmlString);
             $str_json   = json_encode($xml);
             $json       = json_decode($str_json, true);
