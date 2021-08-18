@@ -18,8 +18,8 @@ class MaestroPmsController extends Controller
        
         try {            
             // if(strpos($request->getContent(), 'Offmarket')  !== false) {
-            //     \Log::info('------------------ Offmarket ----------------------');
-            //     \Log::info($request->getContent());
+                \Log::info('XML MAESTRO PMS');
+                \Log::info($request->getContent());
             //     \Log::info('----------------------------------------');
             // }
             $text = $request->getContent();

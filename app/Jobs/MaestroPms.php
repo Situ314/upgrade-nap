@@ -121,19 +121,21 @@ class MaestroPms implements ShouldQueue
             $reservation_data = $this->unique_inArray($reservation_data);
 
             foreach ($reservation_data as $data) {
-                switch ($data->Status) {
-                    case 'reserved':
-                        $this->CheckInReservationList($hotel_id, $staff_id, $data, 0);
-                        break;
-                    case 'checked_in':
-                        $this->CheckInReservationList($hotel_id, $staff_id, $data, 1);
-                        break;
-                    case 'cancelled':
-                        $this->CheckOutReservationList($hotel_id, $staff_id, $data, 2);
-                        break;
-                    case 'checked_out':
-                        $this->CheckOutReservationList($hotel_id, $staff_id, $data, 3);
-                        break;
+                if(isset($data->Status)) {
+                    switch ($data->Status) {
+                        case 'reserved':
+                            $this->CheckInReservationList($hotel_id, $staff_id, $data, 0);
+                            break;
+                        case 'checked_in':
+                            $this->CheckInReservationList($hotel_id, $staff_id, $data, 1);
+                            break;
+                        case 'cancelled':
+                            $this->CheckOutReservationList($hotel_id, $staff_id, $data, 2);
+                            break;
+                        case 'checked_out':
+                            $this->CheckOutReservationList($hotel_id, $staff_id, $data, 3);
+                            break;
+                    }
                 }
             }
             $success = true;
