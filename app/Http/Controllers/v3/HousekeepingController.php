@@ -30,7 +30,7 @@ class HousekeepingController extends Controller
                     $q->where('hotel_id', $hotel_id)->where('active', 1);
                 })
             ],
-            "room_status.*.status" => "string|required|in:DIRTY,CLEANING,CLEAN,INSPECTED"
+            "room_status.*.status" => "numeric|required|in:1,2,3,4"
         ]);
 
         if ($validator->fails()) {
@@ -58,22 +58,22 @@ class HousekeepingController extends Controller
         foreach ($room_status as $key => $status) {
             $room = \App\Models\HotelRoom::where('location', $status['room'])->where('hotel_id', $hotel_id)->where('active', 1)->first();
             if ($room) {
-                $hk_status = 0;
+                $hk_status = $status["status"];
 
-                switch ($status["status"]) {
-                    case 'DIRTY':
-                        $hk_status = 1;
-                        break;
-                    case 'CLEANING':
-                        $hk_status = 2;
-                        break;
-                    case 'CLEAN':
-                        $hk_status = 3;
-                        break;
-                    case 'INSPECTED':
-                        $hk_status = 4;
-                        break;
-                }
+                // switch ($status["status"]) {
+                //     case 'DIRTY':
+                //         $hk_status = 1;
+                //         break;
+                //     case 'CLEANING':
+                //         $hk_status = 2;
+                //         break;
+                //     case 'CLEAN':
+                //         $hk_status = 3;
+                //         break;
+                //     case 'INSPECTED':
+                //         $hk_status = 4;
+                //         break;
+                // }
 
                 $HousekeepingData = [
                     "hotel_id" => $hotel_id,
