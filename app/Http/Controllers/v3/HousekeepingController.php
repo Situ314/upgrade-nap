@@ -15,6 +15,16 @@ use DB;
 
 class HousekeepingController extends Controller
 {
+    private $DIRTY = 1;
+    private $CLEANING = 2;
+    private $CLEAN = 3;
+    private $INSPECTED = 4;
+    private $QUEUE = 5;
+    private $RUSH = 6;
+    private $OUT_OF_ORDER = 7;
+    private $OUT_OF_SERVICE = 8;
+
+
     public function updateHsk(Request $request)
     {
         // Capturar hotel id, por default el valor es null, en caso de no enviarlo
@@ -30,7 +40,8 @@ class HousekeepingController extends Controller
                     $q->where('hotel_id', $hotel_id)->where('active', 1);
                 })
             ],
-            "room_status.*.status" => "numeric|required|in:1,2,3,4"
+            "room_status.*.status" => "numeric|required|in:1,2,3,4,5,6,7",
+            "room_status.*.flag" => "boolean"
         ]);
 
         if ($validator->fails()) {
@@ -54,56 +65,217 @@ class HousekeepingController extends Controller
         $this->configTimeZone($hotel_id);
 
         $room_status = $request->room_status;
+        $now = date("Y-m-d H:i:s");
 
         foreach ($room_status as $key => $status) {
             $room = \App\Models\HotelRoom::where('location', $status['room'])->where('hotel_id', $hotel_id)->where('active', 1)->first();
             if ($room) {
                 $hk_status = $status["status"];
+                $flag = isset($status["flag"]) ? $status["flag"] : false;
 
-                // switch ($status["status"]) {
-                //     case 'DIRTY':
-                //         $hk_status = 1;
-                //         break;
-                //     case 'CLEANING':
-                //         $hk_status = 2;
-                //         break;
-                //     case 'CLEAN':
-                //         $hk_status = 3;
-                //         break;
-                //     case 'INSPECTED':
-                //         $hk_status = 4;
-                //         break;
-                // }
+                $room_id = $room->room_id;
 
-                $HousekeepingData = [
-                    "hotel_id" => $hotel_id,
-                    "staff_id" => $request->user()->staff_id,
-                    "rooms" => [ [ "room_id"   => $room->room_id, "hk_status" => $hk_status, ] ]
-                ];
+                switch ($hk_status) {
+                    case $this->QUEUE:
+                        $this->queue($hotel_id, $staff_id, $room_id, $flag);
+                        break;
+                    case $this->RUSH:
+                        $this->rush($hotel_id, $staff_id, $room_id, $flag);
+                        break;
+                    case $this->OUT_OF_ORDER:
+                        $this->outOfOrder_outOfService($hotel_id, $staff_id, $room_id, $flag, 1);
+                        break;
+                    case $this->OUT_OF_SERVICE:
+                        $this->outOfOrder_outOfService($hotel_id, $staff_id, $room_id, $flag, 2);
+                        break;
+                }
 
-                $curl = curl_init();
-                curl_setopt_array($curl, array(
-                    CURLOPT_URL             => "https://hotel.mynuvola.com/index.php/housekeeping/pmsHKChange",
-                    CURLOPT_RETURNTRANSFER  => true,
-                    CURLOPT_ENCODING        => "",
-                    CURLOPT_MAXREDIRS       => 10,
-                    CURLOPT_TIMEOUT         => 10,
-                    CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
-                    CURLOPT_CUSTOMREQUEST   => "POST",
-                    CURLOPT_POSTFIELDS      => json_encode($HousekeepingData)
-                ));
-                $response = curl_exec($curl);
-                $err = curl_error($curl);
-                curl_close($curl);
+                if (in_array($hk_status, [$this->DIRTY, $this->CLEANING, $this->CLEAN, $this->INSPECTED])) {
+                    $HousekeepingData = [
+                        "hotel_id" => $hotel_id,
+                        "staff_id" => $request->user()->staff_id,
+                        "rooms" => [
+                            [
+                                "room_id"   => $room->room_id,
+                                "hk_status" => $hk_status,
+                            ]
+                        ]
+                    ];
+
+                    $curl = curl_init();
+                    curl_setopt_array($curl, array(
+                        CURLOPT_URL             => "https://hotel.mynuvola.com/index.php/housekeeping/pmsHKChange",
+                        CURLOPT_RETURNTRANSFER  => true,
+                        CURLOPT_ENCODING        => "",
+                        CURLOPT_MAXREDIRS       => 10,
+                        CURLOPT_TIMEOUT         => 10,
+                        CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST   => "POST",
+                        CURLOPT_POSTFIELDS      => json_encode($HousekeepingData)
+                    ));
+                    $response = curl_exec($curl);
+                    $err = curl_error($curl);
+                    curl_close($curl);
+                }
             }
         }
 
         return response()->json([
             'status'    => 'success',
             'message'   => "Successfully updated",
-            "response" => $response, 
+            "response" => $response,
             "err" => $err
         ], 200);
+    }
 
+    private function queue($hotel_id, $staff_id,  $room_id, $flag)
+    {
+        $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $this->hotel_id)
+            ->where('room_id', $room_id)
+            ->orderBy('assigned_date', 'DESC')
+            ->orderBy('cleaning_id', 'DESC')
+            ->limit(2)
+            ->get();
+
+        if (count($cleanings) > 0) {
+            $currentCleanig = $cleanings[0]->in_queue;
+            $currentCleanig->in_queue = $flag ? 1 : 0;
+            $currentCleanig->save();
+        } else {
+            $now = date("Y-m-d H:i:s");
+            $yesterday = date("Y-m-d H:i:s", strtotime($now . " - 1 days"));
+
+            $currentCleanig = \App\Models\HousekeepingCleanings::create([
+                "hotel_id"      => $hotel_id,
+                "room_id"       => $room_id,
+                "in_queue"      => $flag ? 1 : 0,
+                "is_active"     => 1,
+                "created_by"    => $yesterday,
+                "changed_by"    => $staff_id,
+            ]);
+        }
+
+        \App\Models\HousekeepingTimeline::create([
+            'item_id'       => $currentCleanig->cleaning_id,
+            'hotel_id'      => $hotel_id,
+            'action'        => $flag ? 'CLEANING_CREATED' : 'CLEANING_DELETED',
+            'is_active'     => 1,
+            'changed_by'    => $staff_id,
+            'changed_on'    => date('Y-m-d H:i:s'),
+            'platform'      => 'HSK API V3'
+        ]);
+    }
+
+    private function rush($hotel_id, $staff_id,  $room_id, $flag)
+    {
+        $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $this->hotel_id)
+            ->where('room_id', $room_id)
+            ->orderBy('assigned_date', 'DESC')
+            ->orderBy('cleaning_id', 'DESC')
+            ->limit(2)
+            ->get();
+
+        if (count($cleanings) > 0) {
+            $currentCleanig = $cleanings[0]->in_queue;
+            $currentCleanig->in_queue = $flag ? 2 : 0;
+            $currentCleanig->save();
+        } else {
+            $now = date("Y-m-d H:i:s");
+            $yesterday = date("Y-m-d H:i:s", strtotime($now . " - 1 days"));
+
+            $currentCleanig = \App\Models\HousekeepingCleanings::create([
+                "hotel_id"      => $hotel_id,
+                "room_id"       => $room_id,
+                "in_queue"      => $flag ? 2 : 0,
+                "is_active"     => 1,
+                "created_by"    => $yesterday,
+                "changed_by"    => $staff_id,
+            ]);
+        }
+
+        \App\Models\HousekeepingTimeline::create([
+            'item_id'       => $currentCleanig->cleaning_id,
+            'hotel_id'      => $hotel_id,
+            'action'        => $flag ? 'CLEANING_CREATED' : 'CLEANING_DELETED',
+            'is_active'     => 1,
+            'changed_by'    => $staff_id,
+            'changed_on'    => date('Y-m-d H:i:s'),
+            'platform'      => 'HSK API V3'
+        ]);
+    }
+
+    /**
+     * $ooo_oos == 1 "Out of order"
+     * $ooo_oos == 2 "Out of service"
+     */
+    private function outOfOrder_outOfService($hotel_id, $staff_id, $room_id, $flag, $ooo_oos)
+    {
+        $reason_id = 0;
+        $date = date('Y-m-d H:i:s');
+        $roomOut = \App\Models\HotelRoomsOut::where('hotel_id', $hotel_id)
+            ->where('room_id', $room_id)
+            ->where('is_active', 1)
+            ->whereRaw("'$date' BETWEEN start_date AND end_date")
+            ->orderBy('room_out_id', 'DESC')
+            ->first();
+
+        if ($flag) {
+            if ($roomOut) {
+                $roomOut->end_date = date('Y-m-d H:i:s', strtotime($roomOut->end_date . ' +30 days'));
+                $roomOut->status = $ooo_oos;
+                $roomOut->save();
+                \App\Models\HotelRoomsOut::where('hotel_id', $this->hotel_id)
+                    ->where('room_id', $room_id)
+                    ->where('is_active', 1)
+                    ->whereRaw("'$date' BETWEEN start_date AND end_date")
+                    ->whereNotIn('room_out_id', [$roomOut->room_out_id])
+                    ->update(['is_active' => 0]);
+            } else {
+                \App\Models\HotelRoomsOut::create([
+                    'room_id'       => $room_id,
+                    'hotel_id'      => $hotel_id,
+                    'status'        => $ooo_oos,
+                    'hk_reasons_id' => $reason_id,
+                    'start_date'    => $date,
+                    'end_date'      => date('Y-m-d H:i:s', strtotime($date . ' +90 days')),
+                    'comment'       => 'HSK API V3',
+                    'is_active'     => 1,
+                    'created_by'    => $staff_id,
+                    'created_on'    => $date,
+                ]);
+            }
+        } else {
+            if ($roomOut) {
+                $roomOut->is_active     = 0;
+                $roomOut->updated_by    = $staff_id;
+                $roomOut->updated_on    = $date;
+                $roomOut->save();
+            }
+        }
+    }
+
+    public function synergexSendHskChangeStatus(Request $request)
+    {
+        $synergexUrl = 'https://75.12.128.89/Nuvola/Nuvola.aspx';
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL             => $synergexUrl,
+            CURLOPT_RETURNTRANSFER  => true,
+            CURLOPT_ENCODING        => '',
+            CURLOPT_MAXREDIRS       => 10,
+            CURLOPT_TIMEOUT         => 0,
+            CURLOPT_FOLLOWLOCATION  => true,
+            CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST   => 'POST',
+            CURLOPT_POSTFIELDS      => json_encode([
+                "room_id" => $request->room_id,
+                "room_status" => $request->room_status
+            ]),
+            CURLOPT_HTTPHEADER      => ['Content-Type: application/json'],
+        ));
+        $response = curl_exec($curl);
+        curl_close($curl);
+        echo $response;
     }
 }

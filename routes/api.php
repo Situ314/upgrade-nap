@@ -283,5 +283,10 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v3'], function () {
         Route::put("reservation", "v3\ReservationController@update");
         // 
         Route::put("room-status", "v3\HousekeepingController@updateHsk");
+        // 
+        Route::group(['prefix' => 'change-hsk-status'], function () {
+            // SYNERGEX
+            Route::post("synergex", "v3\HousekeepingController@synergexSendHskChangeStatus");
+        }
     });
 });
