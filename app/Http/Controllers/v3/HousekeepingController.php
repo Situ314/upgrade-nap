@@ -40,7 +40,7 @@ class HousekeepingController extends Controller
                     $q->where('hotel_id', $hotel_id)->where('active', 1);
                 })
             ],
-            "room_status.*.status" => "numeric|required|in:1,2,3,4,5,6,7",
+            "room_status.*.status" => "numeric|required|in:1,2,3,4,5,6,7,8",
             "room_status.*.flag" => "boolean"
         ]);
 
@@ -134,8 +134,6 @@ class HousekeepingController extends Controller
         return response()->json([
             'status'    => 'success',
             'message'   => "Successfully updated",
-            "response" => $response,
-            "err" => $err
         ], 200);
     }
 
@@ -234,7 +232,7 @@ class HousekeepingController extends Controller
                 $roomOut->end_date = date('Y-m-d H:i:s', strtotime($roomOut->end_date . ' +30 days'));
                 $roomOut->status = $ooo_oos;
                 $roomOut->save();
-                \App\Models\HotelRoomsOut::where('hotel_id', $this->hotel_id)
+                \App\Models\HotelRoomsOut::where('hotel_id', $hotel_id)
                     ->where('room_id', $room_id)
                     ->where('is_active', 1)
                     ->whereRaw("'$date' BETWEEN start_date AND end_date")
