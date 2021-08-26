@@ -67,6 +67,17 @@ class HousekeepingController extends Controller
         $room_status = $request->room_status;
         $now = date("Y-m-d H:i:s");
 
+        $IntegrationsActive = \App\Models\IntegrationsActive::where('hotel_id', $hotel_id)
+            ->where('int_id', 16)
+            ->where('state', 1)
+            ->first();
+
+        $reason_id = 0;
+        if ($IntegrationsActive) {
+            $reason_id = $IntegrationsActive->config["hk_reasons_id"];
+        }
+
+
         foreach ($room_status as $key => $status) {
             $room = \App\Models\HotelRoom::where('location', $status['room'])->where('hotel_id', $hotel_id)->where('active', 1)->first();
             if ($room) {
@@ -83,10 +94,10 @@ class HousekeepingController extends Controller
                         $this->rush($hotel_id, $staff_id, $room_id, $flag);
                         break;
                     case $this->OUT_OF_ORDER:
-                        $this->outOfOrder_outOfService($hotel_id, $staff_id, $room_id, $flag, 1);
+                        $this->outOfOrder_outOfService($hotel_id, $staff_id, $room_id, $flag, 1, $reason_id);
                         break;
                     case $this->OUT_OF_SERVICE:
-                        $this->outOfOrder_outOfService($hotel_id, $staff_id, $room_id, $flag, 2);
+                        $this->outOfOrder_outOfService($hotel_id, $staff_id, $room_id, $flag, 2, $reason_id);
                         break;
                 }
 
@@ -208,9 +219,8 @@ class HousekeepingController extends Controller
      * $ooo_oos == 1 "Out of order"
      * $ooo_oos == 2 "Out of service"
      */
-    private function outOfOrder_outOfService($hotel_id, $staff_id, $room_id, $flag, $ooo_oos)
+    private function outOfOrder_outOfService($hotel_id, $staff_id, $room_id, $flag, $ooo_oos, $reason_id = 0)
     {
-        $reason_id = 0;
         $date = date('Y-m-d H:i:s');
         $roomOut = \App\Models\HotelRoomsOut::where('hotel_id', $hotel_id)
             ->where('room_id', $room_id)
@@ -256,7 +266,8 @@ class HousekeepingController extends Controller
 
     public function synergexSendHskChangeStatus(Request $request)
     {
-        $synergexUrl = 'https://75.12.128.89/Nuvola/Nuvola.aspx';
+
+        $synergexUrl = 'https://75.112.128.89/Nuvola/Nuvola.aspx';
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
