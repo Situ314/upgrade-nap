@@ -102,6 +102,21 @@ class HousekeepingController extends Controller
                 }
 
                 if (in_array($hk_status, [$this->DIRTY, $this->CLEANING, $this->CLEAN, $this->INSPECTED])) {
+
+                    if ($hk_status == $this->INSPECTED) {
+                        $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $this->hotel_id)
+                            ->where('room_id', $room_id)
+                            ->orderBy('assigned_date', 'DESC')
+                            ->orderBy('cleaning_id', 'DESC')
+                            ->limit(1)
+                            ->fiest();
+                            
+                        if ($cleanings) {
+                            $cleanings->in_queue = 0;
+                            $cleanings->save();
+                        }
+                    }
+
                     $HousekeepingData = [
                         "hotel_id" => $hotel_id,
                         "staff_id" => $request->user()->staff_id,
