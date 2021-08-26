@@ -267,7 +267,7 @@ class HousekeepingController extends Controller
     public function synergexSendHskChangeStatus(Request $request)
     {
 
-        $synergexUrl = 'https://75.112.128.89/Nuvola/Nuvola.aspx';
+        $synergexUrl = 'https://75.112.128.89/Nuvola/Nuvola.aspx?UpdateRoomHKStatus';
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
