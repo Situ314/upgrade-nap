@@ -279,7 +279,7 @@ class HousekeepingController extends Controller
 
     public function synergexSendHskChangeStatus(Request $request)
     {
-
+        \Log::error("synergexSendHskChangeStatus");
         $synergexUrl = 'https://75.112.128.89/Nuvola/Nuvola.aspx?UpdateRoomHKStatus';
 
         $curl = curl_init();
@@ -299,7 +299,12 @@ class HousekeepingController extends Controller
             CURLOPT_HTTPHEADER      => ['Content-Type: application/json'],
         ));
         $response = curl_exec($curl);
+        \Log::error("--> response: ".$response);
         curl_close($curl);
-        echo $response;
+        // echo $response;
+
+        return response()->json([
+            "response" => $response
+        ]);
     }
 }

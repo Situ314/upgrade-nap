@@ -102,6 +102,7 @@ class StayNTouchController extends Controller
                 $this->config = $this->GetToken();
             }
         } catch (\Exception $e) {
+            \Log::error("Error in StayNTouchController CheckToken");
             \Log::error($e);
             return null;
         }
@@ -140,6 +141,7 @@ class StayNTouchController extends Controller
             $this->config = $config->config;
             return $config->config;
         } catch (\Exception $e) {
+            \Log::error("Error in StayNTouchController GetToken");
             \Log::error($e);
             return null;
         }
@@ -191,6 +193,7 @@ class StayNTouchController extends Controller
             // \Log::info($response);
             return json_decode($response, true);
         } catch (\Exception $e) {
+            \Log::error("Error in StayNTouchController GetData");
             \Log::error($e->getMessage());
             return null;
         }
@@ -376,6 +379,7 @@ class StayNTouchController extends Controller
             // \Log::info($response);
             return array_get(json_decode($response, true), 'results', []);
         } catch (\Exception $e) {
+            \Log::error("Error in StayNTouchController getRooms");
             \Log::error($e->getMessage());
             return null;
         }
