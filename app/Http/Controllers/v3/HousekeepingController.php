@@ -104,12 +104,12 @@ class HousekeepingController extends Controller
                 if (in_array($hk_status, [$this->DIRTY, $this->CLEANING, $this->CLEAN, $this->INSPECTED])) {
 
                     if ($hk_status == $this->INSPECTED) {
-                        $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $this->hotel_id)
+                        $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $hotel_id)
                             ->where('room_id', $room_id)
                             ->orderBy('assigned_date', 'DESC')
                             ->orderBy('cleaning_id', 'DESC')
                             ->limit(1)
-                            ->fiest();
+                            ->first();
                             
                         if ($cleanings) {
                             $cleanings->in_queue = 0;
@@ -154,7 +154,7 @@ class HousekeepingController extends Controller
 
     private function queue($hotel_id, $staff_id,  $room_id, $flag)
     {
-        $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $this->hotel_id)
+        $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $hotel_id)
             ->where('room_id', $room_id)
             ->orderBy('assigned_date', 'DESC')
             ->orderBy('cleaning_id', 'DESC')
@@ -162,7 +162,7 @@ class HousekeepingController extends Controller
             ->get();
 
         if (count($cleanings) > 0) {
-            $currentCleanig = $cleanings[0]->in_queue;
+            $currentCleanig = $cleanings[0];
             $currentCleanig->in_queue = $flag ? 1 : 0;
             $currentCleanig->save();
         } else {
@@ -192,7 +192,7 @@ class HousekeepingController extends Controller
 
     private function rush($hotel_id, $staff_id,  $room_id, $flag)
     {
-        $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $this->hotel_id)
+        $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $hotel_id)
             ->where('room_id', $room_id)
             ->orderBy('assigned_date', 'DESC')
             ->orderBy('cleaning_id', 'DESC')
@@ -200,7 +200,7 @@ class HousekeepingController extends Controller
             ->get();
 
         if (count($cleanings) > 0) {
-            $currentCleanig = $cleanings[0]->in_queue;
+            $currentCleanig = $cleanings[0];
             $currentCleanig->in_queue = $flag ? 2 : 0;
             $currentCleanig->save();
         } else {
