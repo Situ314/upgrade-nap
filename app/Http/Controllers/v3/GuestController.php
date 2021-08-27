@@ -108,7 +108,7 @@ class GuestController extends Controller
                 'prim_id'   => $guest_id,
                 'staff_id'  => $staff_id,
                 'date_time' => date("Y-m-d H:i:s"),
-                'comments'  => "GUEST CREATION",
+                'comments'  => "GUEST CREATION | " . json_encode($guestCreated),
                 'hotel_id'  => $hotel_id,
                 'type'      => 'API-V3'
             ]);
@@ -183,7 +183,7 @@ class GuestController extends Controller
                 ->where('guest_number', $guest_number)
                 ->first();
 
-            $findGuest = \App\Models\GuestRegistration::find($guestInfo->guest_id);
+            $findGuest = \App\Models\GuestRegistration::where("hotel_id", $hotel_id)->where("guest_id", $guestInfo->guest_id)->first();
             if ($findGuest) {
                 $validateAngelStatus = isset($guest['angel_status']) ? (intval($guest['angel_status']) == 1 ? ($this->validateAngelStatus($hotel_id)) : 0) : 0;
                 $guestData = [
@@ -206,7 +206,7 @@ class GuestController extends Controller
                     'prim_id'   => $findGuest->guest_id,
                     'staff_id'  => $staff_id,
                     'date_time' => date("Y-m-d H:i:s"),
-                    'comments'  => "GUEST UPDATE",
+                    'comments'  => "GUEST UPDATE | " . json_encode($findGuest),
                     'hotel_id'  => $hotel_id,
                     'type'      => 'API-V3'
                 ]);

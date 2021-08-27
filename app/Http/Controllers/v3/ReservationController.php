@@ -80,7 +80,7 @@ class ReservationController extends Controller
         $guest_number = $request->guest_number;
         $reservations = $request->reservations;
 
-        $guest_id = \App\Models\IntegrationsGuestInformation::where('hotel_id', $hotel_id)->where('guest_number', $guest_number)->first();
+        $guest = \App\Models\IntegrationsGuestInformation::where('hotel_id', $hotel_id)->where('guest_number', $guest_number)->first();
         $data = [];
         foreach ($reservations as $key => $reservation) {
             $room = array_key_exists('room', $reservation) && !empty($reservation["room"]) ? $reservation["room"] : "";
@@ -91,7 +91,7 @@ class ReservationController extends Controller
             }
 
             $reservationData = [
-                'guest_id'              => $guest_id->guest_id,
+                'guest_id'              => $guest->guest_id,
                 'hotel_id'              => $hotel_id,
                 'room_no'               => $room_id,
                 'check_in'              => $reservation["check_in"],
@@ -99,7 +99,7 @@ class ReservationController extends Controller
                 'reservation_number'    => $reservation['reservation_number'],
                 'reservation_status'    => $reservation['reservation_status'],
                 'comment'               => array_key_exists('comment', $reservation) ? $reservation['comment'] : "",
-                'status'                => intval($reservation["reservation_status"]) == 1 ? 1 : 0
+                'status'                => (intval($reservation["reservation_status"]) == 0 || intval($reservation["reservation_status"]) == 1) ? 1 : 0
             ];
 
             $resrvationCreated = \App\Models\GuestCheckinDetails::create($reservationData);
@@ -110,7 +110,7 @@ class ReservationController extends Controller
                 'prim_id'   => $resrvationCreated->sno,
                 'staff_id'  => $staff_id,
                 'date_time' => date("Y-m-d H:i:s"),
-                'comments'  => 'RESERVATION CREATION',
+                'comments'  => 'RESERVATION CREATION | '.json_encode($resrvationCreated),
                 'hotel_id'  => $hotel_id,
                 'type'      => 'API-V3'
             ]);
@@ -214,11 +214,22 @@ class ReservationController extends Controller
                 'reservation_number'    => $reservation['reservation_number'],
                 'reservation_status'    => $reservation['reservation_status'],
                 'comment'               => array_key_exists('comment', $reservation) ? $reservation['comment'] : "",
-                'status'                => intval($reservation["reservation_status"]) == 1 ? 1 : 0
+                'status'                => (intval($reservation["reservation_status"]) == 0 || intval($reservation["reservation_status"]) == 1) ? 1 : 0
             ];
 
             $findReservation->fill($reservationData);
             $findReservation->save();
+
+            $this->saveLogTracker([
+                'module_id' => 8,
+                'action'    => 'add',
+                'prim_id'   => $findReservation->sno,
+                'staff_id'  => $staff_id,
+                'date_time' => date("Y-m-d H:i:s"),
+                'comments'  => 'RESERVATION UPDATE | '.json_encode($findReservation),
+                'hotel_id'  => $hotel_id,
+                'type'      => 'API-V3'
+            ]);
         }
 
         return response()->json([

@@ -273,6 +273,9 @@ Route::get('phpinfo', function () {
 });
 
 // V3
+// https://api.mynuvola.net/v3/pms/reservation
+
+
 Route::group(['middleware' => ['auth:api'], 'prefix' => 'v3'], function () {
     Route::group(['prefix' => 'pms'], function () {
         // 
@@ -287,6 +290,6 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v3'], function () {
         Route::group(['prefix' => 'change-hsk-status'], function () {
             // SYNERGEX
             Route::post("synergex", "v3\HousekeepingController@synergexSendHskChangeStatus");
-        }
+        });
     });
 });
