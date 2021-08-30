@@ -21,7 +21,7 @@ class Oracle
         $xml        = simplexml_load_string($xmlString);
         $str_json   = json_encode($xml);
 
-        
+
         $json       = json_decode($str_json, true);
         $Username   = array_get($json, 'Header.Security.UsernameToken.Username');
         $Password   = array_get($json, 'Header.Security.UsernameToken.Password');
@@ -51,15 +51,17 @@ class Oracle
         if (array_has($json, 'Body.GuestStatusNotificationRequest.GuestStatus.resortId')) {
             $pms_hotel_id = array_get($json, 'Body.GuestStatusNotificationRequest.GuestStatus.resortId');
         }
+
         if (array_has($json, 'Body.QueueRoomBERequest.ResortId')) {
             $pms_hotel_id = array_get($json, 'Body.QueueRoomBERequest.ResortId');
         }
-	try {
+        
+        try {
             $this->customWriteLog("opera", $pms_hotel_id, $response);
-	} catch (\Throwable $th) {
-	    \Log::error('ERROR SAVING LOG...');
-	    \Log::error($th);
-	}
+        } catch (\Throwable $th) {
+            \Log::error('ERROR SAVING LOG...');
+            \Log::error($th);
+        }
 
         $IntegrationsActive = \App\Models\IntegrationsActive::where('pms_hotel_id', $pms_hotel_id)
             ->where('int_id', 5)
@@ -115,27 +117,26 @@ class Oracle
         return $error;
     }
 
-    public function customWriteLog( $folder_name, $hotel_id, $text ) {
+    public function customWriteLog($folder_name, $hotel_id, $text)
+    {
 
-        $path = "/logs/$folder_name";       
-        
-        if(!\Storage::has($path)) 
-        {
+        $path = "/logs/$folder_name";
+
+        if (!\Storage::has($path)) {
             \Storage::makeDirectory($path, 0775, true);
         }
 
-        if(!\Storage::has($path."/".$hotel_id)) 
-        {
-            \Storage::makeDirectory($path."/".$hotel_id, 0775, true);
+        if (!\Storage::has($path . "/" . $hotel_id)) {
+            \Storage::makeDirectory($path . "/" . $hotel_id, 0775, true);
         }
-        
+
         $day = date('Y_m_d');
         $file = "$path/$hotel_id/$day.log";
         $hour = date('H:i:s');
-        $text = "[$hour]: $text";        
+        $text = "[$hour]: $text";
 
-        \Storage::append($file,$text);
-        
+        \Storage::append($file, $text);
+
         return true;
     }
 }

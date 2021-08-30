@@ -35,6 +35,7 @@ class OperaController extends Controller
                 $resp = $this->QueueService($request);
                 break;
         }
+
         return response($resp, 200)->header('Content-Type', 'application/soap+xml; charset=utf-8');
     }
 
@@ -88,6 +89,7 @@ class OperaController extends Controller
                 $created    = array_get($data, 'Header.Security.Timestamp.Created');
                 $expired    = array_get($data, 'Header.Security.Timestamp.Expires');
                 $unique_id  = array_get($data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
+                
                 \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config)->onConnection('sqs-fifo');
 
                 $resp = $this->BuildXMLResponse($action, $unique_id, $created, $expired, $message_id);

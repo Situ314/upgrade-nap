@@ -1676,8 +1676,6 @@ class Opera implements ShouldQueue
             \Log::info($err);
             return null;
         } else {
-            \Log::error("-->-->");
-            \Log::error($response);
             $xmlString  = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
             $xmlString = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $xmlString);
             $xml        = simplexml_load_string($xmlString);

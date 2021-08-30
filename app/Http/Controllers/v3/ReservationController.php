@@ -154,7 +154,7 @@ class ReservationController extends Controller
                 })
             ],
             'reservations.*.check_in'   => 'required|date_format:"Y-m-d H:i:s"',
-            'reservations.*.check_out'  => 'required|date_format:"Y-m-d H:i:s"|after:reservations.*.check_in',
+            'reservations.*.check_out'  => 'required|date_format:"Y-m-d H:i:s"',
             'reservations.*.comment'    => 'string',
         ]);
 
