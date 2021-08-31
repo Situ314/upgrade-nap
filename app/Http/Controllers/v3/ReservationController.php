@@ -14,9 +14,35 @@ class ReservationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $hotel_id           = isset($request->hotel_id) ? $request->hotel_id : null;
+        $reservation_status = isset($request->reservation_status) ? $request->reservation_status : null;
+
+        $staff_id = $request->user()->staff_id;
+        
+        if (!$this->validateHotelId($hotel_id, $staff_id)) {
+            return response()->json([
+                'status'    => "error",
+                "message"   => "User does not have access to the hotel",
+                'errors'    => null
+            ], 400);
+        }
+        
+        $this->configTimeZone($hotel_id);
+
+        $reservations = \App\Models\GuestCheckinDetails::with("GuestPms")->where('hotel_id', $request->hotel_id);
+
+        if(!is_null($reservation_status)) $reservations->where('reservation_status', $reservation_status);
+
+        $_data = $reservations->get();
+        $data = [];
+
+        return response()->json([
+            'status'    => 'success',
+            'message'   => "Successfully updated",
+            "data"      => $data
+        ], 200);
     }
 
     /**

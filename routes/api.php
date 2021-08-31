@@ -282,6 +282,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v3'], function () {
         Route::post("guest", "v3\GuestController@store");
         Route::put("guest", "v3\GuestController@update");
         // 
+        Route::get("reservation", "v3\ReservationController@index");
         Route::post("reservation", "v3\ReservationController@store");
         Route::put("reservation", "v3\ReservationController@update");
         // 
