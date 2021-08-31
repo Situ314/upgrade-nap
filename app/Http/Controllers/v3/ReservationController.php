@@ -40,12 +40,13 @@ class ReservationController extends Controller
         $data = [];
 
         foreach ($_data as $key => $value) {
-            $guest_number = $value->GuestPms()->guest_number;
+            // dd($value);
+            $guest_number = $value->GuestPms->guest_number;
 
-            if(!isset($data[$guest_number])) $data[$guest_number]["guest_number"] = $value->GuestPms()->guest_number;
-            if(!isset($data[$guest_number])) $data[$guest_number]["reservation"] = [];
+            if (!isset($data[$guest_number])) $data[$guest_number]["guest_number"] = $guest_number;
+            if (!isset($data[$guest_number])) $data[$guest_number]["reservation"] = [];
 
-            $data[$value->GuestPms()->guest_number]["reservation"][] = [
+            $data[$guest_number]["reservation"][] = [
                 "reservation_number"    => $value->reservation_number,
                 "reservation_status"    => $value->reservation_status,
                 "check_in"              => $value->check_in,
@@ -62,7 +63,7 @@ class ReservationController extends Controller
         return response()->json([
             'status'    => 'success',
             'message'   => "Successfully updated",
-            "data"      => $data
+            "data"      => $reservatons
         ], 200);
     }
 
