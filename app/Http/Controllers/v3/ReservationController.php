@@ -18,9 +18,10 @@ class ReservationController extends Controller
     {
         $hotel_id           = isset($request->hotel_id) ? $request->hotel_id : null;
         $reservation_status = isset($request->reservation_status) ? $request->reservation_status : null;
+        $reservation_status = 1;
 
         $staff_id = $request->user()->staff_id;
-        
+
         if (!$this->validateHotelId($hotel_id, $staff_id)) {
             return response()->json([
                 'status'    => "error",
@@ -28,15 +29,35 @@ class ReservationController extends Controller
                 'errors'    => null
             ], 400);
         }
-        
+
         $this->configTimeZone($hotel_id);
 
         $reservations = \App\Models\GuestCheckinDetails::with("GuestPms")->where('hotel_id', $request->hotel_id);
 
-        if(!is_null($reservation_status)) $reservations->where('reservation_status', $reservation_status);
+        if (!is_null($reservation_status)) $reservations->where('reservation_status', $reservation_status);
 
         $_data = $reservations->get();
         $data = [];
+
+        foreach ($_data as $key => $value) {
+            $guest_number = $value->GuestPms()->guest_number;
+
+            if(!isset($data[$guest_number])) $data[$guest_number]["guest_number"] = $value->GuestPms()->guest_number;
+            if(!isset($data[$guest_number])) $data[$guest_number]["reservation"] = [];
+
+            $data[$value->GuestPms()->guest_number]["reservation"][] = [
+                "reservation_number"    => $value->reservation_number,
+                "reservation_status"    => $value->reservation_status,
+                "check_in"              => $value->check_in,
+                "check_out"             => $value->check_out,
+                "comment"               => $value->comment,
+            ];
+        }
+
+        $reservatons = [];
+        foreach ($data as $key => $value) {
+            $reservatons[] = $value;
+        }
 
         return response()->json([
             'status'    => 'success',
@@ -136,7 +157,7 @@ class ReservationController extends Controller
                 'prim_id'   => $resrvationCreated->sno,
                 'staff_id'  => $staff_id,
                 'date_time' => date("Y-m-d H:i:s"),
-                'comments'  => 'RESERVATION CREATION | '.json_encode($resrvationCreated),
+                'comments'  => 'RESERVATION CREATION | ' . json_encode($resrvationCreated),
                 'hotel_id'  => $hotel_id,
                 'type'      => 'API-V3'
             ]);
@@ -252,7 +273,7 @@ class ReservationController extends Controller
                 'prim_id'   => $findReservation->sno,
                 'staff_id'  => $staff_id,
                 'date_time' => date("Y-m-d H:i:s"),
-                'comments'  => 'RESERVATION UPDATE | '.json_encode($findReservation),
+                'comments'  => 'RESERVATION UPDATE | ' . json_encode($findReservation),
                 'hotel_id'  => $hotel_id,
                 'type'      => 'API-V3'
             ]);
@@ -266,7 +287,7 @@ class ReservationController extends Controller
 
     public function findRoomId($hotel_id, $location)
     {
-        $room = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('location',$location)->first();
+        $room = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('location', $location)->first();
         return [
             "room_id" => $room->room_id,
             "room" => $room->location
