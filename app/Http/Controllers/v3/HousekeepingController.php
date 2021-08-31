@@ -280,7 +280,7 @@ class HousekeepingController extends Controller
     public function synergexSendHskChangeStatus(Request $request)
     {
         \Log::error("synergexSendHskChangeStatus");
-        $synergexUrl = 'https://75.112.128.89/Nuvola/Nuvola.aspx?UpdateRoomHKStatus';
+        $synergexUrl = 'http://75.112.128.89/Nuvola/Nuvola.aspx?UpdateRoomHKStatus';
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
@@ -293,7 +293,7 @@ class HousekeepingController extends Controller
             CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST   => 'POST',
             CURLOPT_POSTFIELDS      => json_encode([
-                "room_id" => $request->room_id,
+                "hotel_id" => $request->hotel_id,
                 "room_status" => $request->room_status
             ]),
             CURLOPT_HTTPHEADER      => ['Content-Type: application/json'],

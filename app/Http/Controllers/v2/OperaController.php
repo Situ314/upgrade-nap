@@ -30,16 +30,18 @@ class OperaController extends Controller
         $reps = null;
 
         switch ($keys[0]) {
+            // ROOM STATUS
             case 'GuestStatusNotificationRequest':
             case 'GuestStatusNotificationExtRequest':
             case 'RoomStatusUpdateBERequest':
                 $resp = $this->reservationService($request);
                 break;
+                // PRFILE
             case 'NewProfileRequest':
             case 'UpdateProfileRequest':
                 $resp = $this->nameService($request);
                 break;
-
+                // MESSAGE
             case 'QueueRoomBERequest':
                 $resp = $this->QueueService($request);
                 break;
@@ -107,6 +109,7 @@ class OperaController extends Controller
                 $created    = array_get($data, 'Header.Security.Timestamp.Created');
                 $expired    = array_get($data, 'Header.Security.Timestamp.Expires');
                 $unique_id  = array_get($data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
+                
                 $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, $data, $config));
 
                 $resp = $this->BuildXMLResponse($action, $unique_id, $created, $expired, $message_id);
