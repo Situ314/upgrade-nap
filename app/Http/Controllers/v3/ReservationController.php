@@ -32,18 +32,22 @@ class ReservationController extends Controller
         }
 
         if (!is_null($rooms)) {
-            $rooms = explode('-', $rooms);
+            $rooms = explode(',', $rooms);
             if (count($rooms) > 0) {
                 $hotelRooms = \App\Models\HotelRoom::select(["location", "room_id"])->where("hotel_id", $hotel_id)->whereIn("location", $rooms)->get();
-                if(count($hotelRooms) > 0) {
-
+                if (count($hotelRooms) > 0) {
+                    foreach ($hotelRooms as $key => $value) {
+                        $roomIdsList[] = $value->room_id;
+                    }
                 }
             }
         }
 
         $this->configTimeZone($hotel_id);
 
-        $reservations = \App\Models\GuestCheckinDetails::with("GuestPms")->where('hotel_id', $request->hotel_id);
+        $reservations = \App\Models\GuestCheckinDetails::with(["GuestPms","Room"])->where('hotel_id', $request->hotel_id);
+
+        if (count($roomIdsList) > 0) $reservations->whereIn("room_no", $roomIdsList);
 
         if (!is_null($reservation_status)) $reservations->where('reservation_status', $reservation_status);
 
@@ -64,6 +68,7 @@ class ReservationController extends Controller
                 "check_in"              => $value->check_in,
                 "check_out"             => $value->check_out,
                 "comment"               => $value->comment,
+                "room"                  => $value->Room->location      
             ];
         }
 
@@ -74,7 +79,7 @@ class ReservationController extends Controller
 
         return response()->json([
             'status'    => 'success',
-            'message'   => "Successfully updated",
+            'message'   => "",
             "data"      => $reservatons
         ], 200);
     }
