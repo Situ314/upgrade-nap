@@ -116,11 +116,8 @@ class Opera implements ShouldQueue
             $_rs = $reservation['ReservationID'];
             $this->removeReservation($_rs);
             $resp = $this->isAnotherSuite($_rs, $reservation['roomNumber']);
-            if ($resp) {
-                $this->removeSuitesReservation($_rs);
-            }
-            //123-409
-            //123-410
+            if ($resp)  $this->removeSuitesReservation($_rs);
+
             foreach ($suites as  $suite) {
                 $reservation['roomNumber'] = $suite['location'];
                 $reservation['ReservationID'] = $_rs . '_' . $suite['location'];
@@ -138,12 +135,9 @@ class Opera implements ShouldQueue
                     \Log::error($th);
                 }
             }
-            // 123
-            // 123-1
-            // 123-2
             GuestCheckinDetails::where('hotel_id', $this->hotel_id)->where('reservation_number', 'like', "%$_rs%")
-            ->whereNotIn('reservation_number', $this->reservations_numbers)
-            ->update(['status' => 0, 'reservation_status' => 5]);
+                ->whereNotIn('reservation_number', $this->reservations_numbers)
+                ->update(['status' => 0, 'reservation_status' => 5]);
         } else {
             $this->removeSuitesReservation($reservation['ReservationID']);
 
@@ -172,16 +166,10 @@ class Opera implements ShouldQueue
 
         $Profile = null;
         $Profile = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $UniqueID)->first();
-
-        // \App\Models\Log\OracleProfile::where('resortId', $resortId)
-        //     ->where('UniqueID', $UniqueID)
-        //     ->where('resortId', $resortId)
-        //     ->orderBy('id', 'DESC')
-        //     ->first();
-
         $state = 0;
-        if ($Profile && $this->hotel_id != 289) {
 
+        // if ($Profile && $this->hotel_id != 289) {
+        if ($Profile) {
             $state = 1;
         } else {
             $result = $this->getProfileData($UniqueID, $resortId);
@@ -190,9 +178,7 @@ class Opera implements ShouldQueue
             $this->data = $result;
             $resp = $this->ProfileRegistration();
             $this->data = $data;
-            if ($resp) {
-                $state = 1;
-            }
+            if ($resp) $state = 1;
         }
         $reservation = [
             'resortId'          => $resortId,
@@ -213,9 +199,8 @@ class Opera implements ShouldQueue
             $_rs = $reservation['ReservationID'];
             $this->removeReservation($_rs);
             $resp = $this->isAnotherSuite($_rs, $reservation['roomNumber']);
-            if ($resp) {
-                $this->removeSuitesReservation($_rs);
-            }
+            if ($resp)  $this->removeSuitesReservation($_rs);
+
             foreach ($suites as  $suite) {
                 $reservation['roomNumber'] = $suite['location'];
                 $reservation['ReservationID'] = $_rs . '_' . $suite['location'];
@@ -781,7 +766,7 @@ class Opera implements ShouldQueue
             }
 
             if (!$unique_id == '') {
-                
+
                 $IntegrationsGuestInformation = \App\Models\IntegrationsGuestInformation::where('guest_number', $unique_id)
                     ->where('hotel_id', $this->hotel_id)
                     ->first();
@@ -948,12 +933,12 @@ class Opera implements ShouldQueue
     public function getRoom($location)
     {
         $is_numeric = false;
-        if(is_numeric($location)) {
+        if (is_numeric($location)) {
             $location = intval($location);
             $location *= 1;
             $is_numeric = true;
         }
-        
+
         $add = true;
         if (
             (($this->hotel_id == '275' || $this->hotel_id == '281') && is_numeric($location) && $location >= 9000 && $location <= 9600) ||
@@ -978,11 +963,11 @@ class Opera implements ShouldQueue
             //     ->first();
 
             $query = "location = '$location'";
-            if($is_numeric) {
+            if ($is_numeric) {
                 $query = "(location * 1) = '$location'";
             }
 
-            $room = \App\Models\HotelRoom::where('hotel_id', $this->hotel_id)->where("active", 1)->whereRaw($query,[])->first();
+            $room = \App\Models\HotelRoom::where('hotel_id', $this->hotel_id)->where("active", 1)->whereRaw($query, [])->first();
 
             if ($room) {
                 date_default_timezone_set('UTC');
@@ -1053,7 +1038,6 @@ class Opera implements ShouldQueue
 
     public function RoomStatusUpdateBERequest()
     {
-
         $data_elements = array_get($this->data, 'DataElements.DataElement', null);
         if (!is_null($data_elements)) {
             $hskLog = [
@@ -1090,12 +1074,12 @@ class Opera implements ShouldQueue
         $HousekeepingData["rooms"]    = [];
 
         foreach ($hsk_data as $key => $room_data) {
-
             if (!is_null($room_data['RoomNumber'])) {
                 $room = $this->getRoom($room_data['RoomNumber']);
                 if (!is_null($room)) {
-                    $ooo = $room_data['RoomStatus'] == "Out of Order"  || $room_data['RoomStatus'] == "OutOfOrder" ? true : false;
-                    $oos = $room_data['RoomStatus'] == "Out of Service" || $room_data['RoomStatus'] == "OutOfService" ? true : false;
+                    $ooo = ($room_data['RoomStatus'] == "Out of Order"  || $room_data['RoomStatus'] == "OutOfOrder") ? true : false;
+                    $oos = ($room_data['RoomStatus'] == "Out of Service" || $room_data['RoomStatus'] == "OutOfService") ? true : false;
+
                     if ($ooo) {
                         $this->FrontdeskStatus($room['room_id'], 1, false);
                     } elseif ($oos) {
@@ -1112,22 +1096,22 @@ class Opera implements ShouldQueue
                         echo ($room["room_id"]);
                         break;
                     }
-                    if ($hk_status == 4) {
 
+                    if ($hk_status == 4) {
+                        // Esta información se proporciona cuando se realiza un sync
                         if (array_has($room_data, 'reservation_data')) {
                             $GuestCheckinDetails = $room_data['reservation_data'];
-
-                            if (!empty($GuestCheckinDetails) && $this->hotel_id != 238) {
-                                $hk_status = 3;
-                            }
+                            if (!empty($GuestCheckinDetails) && $this->hotel_id != 238) $hk_status = 3;
                         }
                     }
                     $hsk_cleanning = HousekeepingCleanings::where('hotel_id', $this->hotel_id)
                         ->where('room_id', $room['room_id'])
-                        ->orderBy('assigned_date', 'desc')->orderBy('cleaning_id', 'DESC')->first();
-                    if ($hsk_cleanning && $hsk_cleanning->hk_status == 2) {
-                        $hk_status = 2;
-                    }
+                        ->orderBy('assigned_date', 'desc')
+                        ->orderBy('cleaning_id', 'DESC')
+                        ->first();
+
+                    if ($hsk_cleanning && $hsk_cleanning->hk_status == 2) $hk_status = 2;
+
                     $_d["hk_status"] = $hk_status;
                     $HousekeepingData["rooms"][] = $_d;
                 }
