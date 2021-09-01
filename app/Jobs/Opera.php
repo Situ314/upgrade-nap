@@ -79,7 +79,6 @@ class Opera implements ShouldQueue
         $resortId       = array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.resortId', '');
         $ReservationID  = array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.ReservationID', '');
         $UniqueID       = array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
-
         $Profile        = null;
         $Profile        = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $UniqueID)->first();
         $state          = 0;
@@ -135,7 +134,8 @@ class Opera implements ShouldQueue
                     \Log::error($th);
                 }
             }
-            GuestCheckinDetails::where('hotel_id', $this->hotel_id)->where('reservation_number', 'like', "%$_rs%")
+            GuestCheckinDetails::where('hotel_id', $this->hotel_id)
+                ->where('reservation_number', 'like', "%$_rs%")
                 ->whereNotIn('reservation_number', $this->reservations_numbers)
                 ->update(['status' => 0, 'reservation_status' => 5]);
         } else {
@@ -766,11 +766,9 @@ class Opera implements ShouldQueue
             }
 
             if (!$unique_id == '') {
-
                 $IntegrationsGuestInformation = \App\Models\IntegrationsGuestInformation::where('guest_number', $unique_id)
                     ->where('hotel_id', $this->hotel_id)
                     ->first();
-
                 if ($IntegrationsGuestInformation) {
                     $old_guest = \App\Models\GuestRegistration::find($IntegrationsGuestInformation->guest_id);
                     if ($old_guest) {
@@ -1096,7 +1094,6 @@ class Opera implements ShouldQueue
                         echo ($room["room_id"]);
                         break;
                     }
-
                     if ($hk_status == 4) {
                         // Esta información se proporciona cuando se realiza un sync
                         if (array_has($room_data, 'reservation_data')) {
