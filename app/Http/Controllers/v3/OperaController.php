@@ -89,11 +89,8 @@ class OperaController extends Controller
                 $created    = array_get($data, 'Header.Security.Timestamp.Created');
                 $expired    = array_get($data, 'Header.Security.Timestamp.Expires');
                 $unique_id  = array_get($data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
-                
                 \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config)->onConnection('sqs-fifo');
-
                 $resp = $this->BuildXMLResponse($action, $unique_id, $created, $expired, $message_id);
-
                 break;
             case 'GuestStatusNotificationExtRequest':
                 $type       = 'GuestStatusNotificationExtRequest';
@@ -102,21 +99,15 @@ class OperaController extends Controller
                 $created    = array_get($data, 'Header.Security.Timestamp.Created');
                 $expired    = array_get($data, 'Header.Security.Timestamp.Expires');
                 $unique_id  = array_get($data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.ProfileIDs.UniqueID', '');
-
                 \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config)->onConnection('sqs-fifo');
-
                 $resp = $this->BuildXMLResponse($action, $unique_id, $created, $expired, $message_id);
-
                 break;
-
             case 'RoomStatusUpdateBERequest':
                 $type       = 'RoomStatusUpdateBERequest';
                 $action     = str_replace('Request', 'Response', $keys[0]);
                 $data       = array_get($data, 'Body.RoomStatusUpdateBERequest');
                 $resp       = $this->BuildXMLRoomResponse($action);
-
                 \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config)->onConnection('sqs-fifo');
-
                 break;
         }
 
