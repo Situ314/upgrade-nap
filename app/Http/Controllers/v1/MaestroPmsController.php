@@ -78,6 +78,7 @@ class MaestroPmsController extends Controller
                     ], 'Response');
                     
                     $this->dispatch((new MaestroPmsLog($json, $request->getContent())));
+                    \Log::info("RESPUESTA MAESTRO".json_encode(["xml_response" => $xml_response]));
                     return response($xml_response, 200)->header('Content-Type', 'text/xml');
                 }
             }
