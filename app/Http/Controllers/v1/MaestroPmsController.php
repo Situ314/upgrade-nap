@@ -15,7 +15,19 @@ class MaestroPmsController extends Controller
 
     public function index(Request $request)
     {
-       
+        try {  
+            $text = $request->getContent();
+            $client = new Client();
+            $promise = $client->postAsync('https://c9ge7dpq3b.execute-api.us-east-1.amazonaws.com/', [
+                'body' => $text,
+                'headers'        => ['Content-Type' => 'application/xml']
+            ])->then(function ($response) {
+            });
+            $promise->wait();
+        } catch (\Exception $e) {
+            \Log::error('Error Sending Async Promise');
+        }
+        
         try {            
             // if(strpos($request->getContent(), 'Offmarket')  !== false) {
                 \Log::info('XML MAESTRO PMS');
