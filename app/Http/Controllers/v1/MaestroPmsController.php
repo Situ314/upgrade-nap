@@ -54,6 +54,7 @@ class MaestroPmsController extends Controller
                 })->first(); 
                          
             if ($maestroIntegration) {
+                \Log::info("-> maestroIntegration");
                 $hotel_id           = $maestroIntegration->hotel_id;
                 $user_id            = $maestroIntegration->created_by;
                 $agreed_upon_key    = $maestroIntegration->config["agreed_upon_key"];
