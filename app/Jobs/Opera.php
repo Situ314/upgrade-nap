@@ -142,9 +142,8 @@ class Opera implements ShouldQueue
             $this->removeSuitesReservation($reservation['ReservationID']);
 
             $OracleReservation = new \App\Models\Log\OracleReservation($reservation);
-            if ($state === 1) {
-                $this->GuestRegistration($OracleReservation);
-            }
+            if ($state === 1) $this->GuestRegistration($OracleReservation);
+            
             try {
                 $OracleReservation->save();
                 $reservation['idLog'] = $OracleReservation->id;
@@ -463,6 +462,7 @@ class Opera implements ShouldQueue
                                 $__update .= "reservation_status: $GuestCheckinDetails->reservation_status to " . $guest_reservation['reservation_status'] . ", ";
                                 $GuestCheckinDetails->reservation_status = $guest_reservation['reservation_status'];
                             }
+
                             if ($GuestCheckinDetails->room_no != $guest_reservation['room_no']) {
                                 $__update .= "room_no: $GuestCheckinDetails->room_no to " . $guest_reservation['room_no'] . ", ";
                                 $hsk_cleanning = HousekeepingCleanings::where('hotel_id', $this->hotel_id)
@@ -482,6 +482,11 @@ class Opera implements ShouldQueue
                                         $hsk_cleanning2->save();
                                     }
                                 }
+                            }
+                            // Se agrego en la actualización de la reserva, que verifique si el huesped asociado a la reserva fue o no modificado
+                            if($GuestCheckinDetails->guest_id != $guest_reservation["guest_id"]) {
+                                $__update .= "guest_id: $GuestCheckinDetails->guest_id to " . $guest_reservation['guest_id'] . ", ";
+                                $GuestCheckinDetails->guest_id = $guest_reservation['guest_id'];
                             }
                         }
 
