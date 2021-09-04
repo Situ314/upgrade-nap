@@ -9,13 +9,15 @@ use \App\Models\IntegrationsActive;
 use \App\Models\MaestroPmsSalt;
 use \App\Jobs\MaestroPms;
 use App\Jobs\MaestroPmsLog;
+use GuzzleHttp\Client;
+
 
 class MaestroPmsController extends Controller
 {
 
     public function index(Request $request)
     {
-        try {  
+        try {
             $text = $request->getContent();
             $client = new Client();
             $promise = $client->postAsync('https://c9ge7dpq3b.execute-api.us-east-1.amazonaws.com/', [
@@ -27,34 +29,32 @@ class MaestroPmsController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error Sending Async Promise');
         }
-        
-        try {            
+
+        try {
             // if(strpos($request->getContent(), 'Offmarket')  !== false) {
-                \Log::info('XML MAESTRO PMS');
-                \Log::info($request->getContent());
+            \Log::info("XML MAESTRO" . json_encode(["xml_request" => $request->getContent()]));
             //     \Log::info('----------------------------------------');
             // }
             $text = $request->getContent();
             $text = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $text);
             $xml        = simplexml_load_string($text);
-            $str_json   = json_encode($xml);            
+            $str_json   = json_encode($xml);
             $json       = json_decode($str_json);
-          
-           
+
+
             // if( $json->HotelId == '1803' || $json->HotelId == '2305' || $json->HotelId == '1802' || $json->HotelId == '1777') {
             //     \Log::info('------------------ Mensajes XML MAESTRO ----------------------');
             //     \Log::info($json->HotelId);
             //     \Log::info($request->getContent());
             //     \Log::info('----------------------------------------');
             // }
-      
+
             $maestroIntegration = IntegrationsActive::where('pms_hotel_id', $json->HotelId)
-            ->whereHas('integration', function ($q) {
+                ->whereHas('integration', function ($q) {
                     $q->where('name', 'maestro_pms');
-                })->first(); 
-                         
+                })->first();
+
             if ($maestroIntegration) {
-                \Log::info("-> maestroIntegration");
                 $hotel_id           = $maestroIntegration->hotel_id;
                 $user_id            = $maestroIntegration->created_by;
                 $agreed_upon_key    = $maestroIntegration->config["agreed_upon_key"];
@@ -67,7 +67,7 @@ class MaestroPmsController extends Controller
                         'HotelId'   => $json->HotelId,
                         'Salt'      => $salt
                     ], 'Response');
-                   
+
 
                     return response($xml_response, 200)->header('Content-Type', 'text/xml');
                 }
@@ -89,9 +89,9 @@ class MaestroPmsController extends Controller
                         'Status'        => 'success',
                         'Message'       => ''
                     ], 'Response');
-                    
+
                     $this->dispatch((new MaestroPmsLog($json, $request->getContent())));
-                    \Log::info("RESPUESTA MAESTRO".json_encode(["xml_response" => $xml_response]));
+                    \Log::info("RESPUESTA MAESTRO" . json_encode(["xml_response" => $xml_response]));
                     return response($xml_response, 200)->header('Content-Type', 'text/xml');
                 }
             }
@@ -103,7 +103,7 @@ class MaestroPmsController extends Controller
                 'Message'       => 'Inactive integration'
             ], 'Response');
 
-            if( $json->HotelId == '1803' || $json->HotelId == '2305' || $json->HotelId == '1802' || $json->HotelId == '1777') {
+            if ($json->HotelId == '1803' || $json->HotelId == '2305' || $json->HotelId == '1802' || $json->HotelId == '1777') {
                 \Log::info('------------------ Mensajes XML Respnse error inactive int ----------------------');
                 \Log::info($xml_response);
                 \Log::info('----------------------------------------');
@@ -126,12 +126,12 @@ class MaestroPmsController extends Controller
         //consultar si exitessa 
         $maestroPmsSalt =  MaestroPmsSalt::where('hotel_id', $hotel_id)->first();
         if (!$maestroPmsSalt) {
-            $maestroPmsSalt = new MaestroPmsSalt([ 'hotel_id' => $hotel_id]);
+            $maestroPmsSalt = new MaestroPmsSalt(['hotel_id' => $hotel_id]);
         }
         $maestroPmsSalt->salt = $salt;
         $maestroPmsSalt->created_on = date('Y-m-d H:i:s');
         $maestroPmsSalt->save();
-       
+
         return $salt;
     }
 
@@ -156,7 +156,7 @@ class MaestroPmsController extends Controller
             $current_date   = date('Y-m-d H:i:s');
             $created_on     = $MaestroPmsSalt->created_on;
             $diferencia     = strtotime($current_date) - strtotime($created_on);
-            if ($diferencia > 112233445566778899){
+            if ($diferencia > 112233445566778899) {
                 return false;
             }
             if (strcmp(hash('sha256', $agreed_upon_key . $MaestroPmsSalt->salt), $pass_hash) == 0) {
@@ -231,7 +231,7 @@ class MaestroPmsController extends Controller
             $this->dispatch((new MaestroPms($integration, null, true, $room_id)));
             return response()->json(['sync' => true], 200);
         }
-        
+
         return response()->json(['sync' => false], 200);
     }
 }
