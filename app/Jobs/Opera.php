@@ -44,7 +44,7 @@ class Opera implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($hotel_id, $staff_id, $type, $data, $config, $room_id = null, $is_suite = false)
+    public function __construct($hotel_id, $staff_id, $type, $data, $config, $room_id = null, $is_suite = false, $MessageID = null)
     {
         $this->hotel_id                 = $hotel_id;
         $this->staff_id                 = $staff_id;
@@ -55,6 +55,7 @@ class Opera implements ShouldQueue
         $this->room_id                  = $room_id;
         $this->is_suite                 = $is_suite;
         $this->messages_guest           = 0;
+        $this->MessageID                = $MessageID;
         date_default_timezone_set('UTC');
     }
 
@@ -1044,11 +1045,12 @@ class Opera implements ShouldQueue
         $data_elements = array_get($this->data, 'DataElements.DataElement', null);
         if (!is_null($data_elements)) {
             $hskLog = [
-                'RoomNumber' => '',
-                'RoomStatus' => '',
-                'RoomType'   => '',
-                'resortId'   => array_get($this->data, 'ResortId', ''),
-                'created_at' => date('Y-m-d H:i:s')
+                'RoomNumber'    => '',
+                'RoomStatus'    => '',
+                'RoomType'      => '',
+                'resortId'      => array_get($this->data, 'ResortId', ''),
+                'created_at'    => date('Y-m-d H:i:s'),
+                'MessageID'     => $this->MessageID,
             ];
             if (!is_array($data_elements)) {
                 $data_elements = [$data_elements];

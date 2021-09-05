@@ -25,6 +25,10 @@ class Oracle
         $json       = json_decode($str_json, true);
         $Username   = array_get($json, 'Header.Security.UsernameToken.Username');
         $Password   = array_get($json, 'Header.Security.UsernameToken.Password');
+        // JESUS SANCHE - 2021-09-05
+        // El attr MEssageID se agrega para darle seguimiento a los mensajes de HSK, 
+        // se agrega un nuevo campo den la tabla Oracle_housekeeping
+        $MessageID  = array_get($json, 'Header.MessageID');
 
         $pms_hotel_id  = "";
         if (array_has($json, 'Body.NewProfileRequest.ResortId')) {
@@ -55,7 +59,9 @@ class Oracle
         if (array_has($json, 'Body.QueueRoomBERequest.ResortId')) {
             $pms_hotel_id = array_get($json, 'Body.QueueRoomBERequest.ResortId');
         }
+
         
+
         try {
             $this->customWriteLog("opera", $pms_hotel_id, $response);
         } catch (\Throwable $th) {
@@ -67,32 +73,32 @@ class Oracle
             ->where('int_id', 5)
             ->where('state', 1)
             ->first();
+
         if ($IntegrationsActive) {
             $config     = $IntegrationsActive->config;
             $__username = $config['username'];
             $__password = $config['password'];
+            
             if ($config['url_send'] == '' && $config['url_sync'] == '') {
                 $xml_response = ArrayToXml::convert($this->BuildXML(), 'soap:envelope');
                 return response($xml_response, 200)->header('Content-Type', 'text/xml');
             }
+            
             if ($__username == $Username && $__password == $Password) {
                 $request->merge([
                     "staff_id"  => $IntegrationsActive->created_by,
                     "hotel_id"  => $IntegrationsActive->hotel_id,
                     "data"      => $json,
-                    "config"    => $config
+                    "config"    => $config,
+                    "MessageID" => $MessageID
                 ]);
 
                 return $next($request);
-            } else {
-                $xml_response = ArrayToXml::convert($this->BuildXML(), 'soap:envelope');
-                return response($xml_response, 200)->header('Content-Type', 'text/xml');
             }
+
+            $xml_response = ArrayToXml::convert($this->BuildXML(), 'soap:envelope');
+            return response($xml_response, 200)->header('Content-Type', 'text/xml');
         } else {
-            // \Log::info('no encontrado');
-
-            // \Log::info($xmlString);
-
             $xml_response = ArrayToXml::convert($this->BuildXML(), 'soap:envelope');
             return response($xml_response, 200)->header('Content-Type', 'text/xml');
         }

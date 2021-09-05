@@ -75,6 +75,7 @@ class OperaController extends Controller
         $hotel_id   = $request->hotel_id;
         $staff_id   = $request->staff_id;
         $data       = $request->data;
+        $MessageID = $request->MessageID;
 
         $config     = $request->config;
         $unique_id  = '';
@@ -107,7 +108,7 @@ class OperaController extends Controller
                 $action     = str_replace('Request', 'Response', $keys[0]);
                 $data       = array_get($data, 'Body.RoomStatusUpdateBERequest');
                 $resp       = $this->BuildXMLRoomResponse($action);
-                \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config)->onConnection('sqs-fifo');
+                \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config, null, false, $MessageID)->onConnection('sqs-fifo');
                 break;
         }
 

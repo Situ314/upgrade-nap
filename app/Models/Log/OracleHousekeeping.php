@@ -13,6 +13,7 @@ class OracleHousekeeping extends Model{
         'RoomNumber',
         'RoomStatus',    
         'RoomType',
-        'created_at'
+        'created_at',
+        'MessageID'
     ];
 }
