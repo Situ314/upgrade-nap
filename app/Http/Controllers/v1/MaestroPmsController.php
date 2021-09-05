@@ -32,7 +32,7 @@ class MaestroPmsController extends Controller
 
         try {
             // if(strpos($request->getContent(), 'Offmarket')  !== false) {
-            \Log::info("XML MAESTRO" . json_encode(["xml_request" => $request->getContent()]));
+            // \Log::info("XML MAESTRO" . json_encode(["xml_request" => $request->getContent()]));
             //     \Log::info('----------------------------------------');
             // }
             $text = $request->getContent();
@@ -91,7 +91,7 @@ class MaestroPmsController extends Controller
                     ], 'Response');
 
                     $this->dispatch((new MaestroPmsLog($json, $request->getContent())));
-                    \Log::info("RESPUESTA MAESTRO" . json_encode(["xml_response" => $xml_response]));
+                    // \Log::info("RESPUESTA MAESTRO" . json_encode(["xml_response" => $xml_response]));
                     return response($xml_response, 200)->header('Content-Type', 'text/xml');
                 }
             }
