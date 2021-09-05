@@ -14,6 +14,7 @@ class OracleHousekeeping extends Model{
         'RoomStatus',    
         'RoomType',
         'created_at',
+        'xml',
         'MessageID'
     ];
 }

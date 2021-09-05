@@ -21,6 +21,9 @@ class Oracle
         $xml        = simplexml_load_string($xmlString);
         $str_json   = json_encode($xml);
 
+        // \Log::info("OPERA XML");
+        // \Log::info($str_json);
+
 
         $json       = json_decode($str_json, true);
         $Username   = array_get($json, 'Header.Security.UsernameToken.Username');
@@ -90,7 +93,8 @@ class Oracle
                     "hotel_id"  => $IntegrationsActive->hotel_id,
                     "data"      => $json,
                     "config"    => $config,
-                    "MessageID" => $MessageID
+                    "MessageID" => $MessageID,
+                    'xml'       => $xmlString,
                 ]);
 
                 return $next($request);

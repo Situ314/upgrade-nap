@@ -75,7 +75,8 @@ class OperaController extends Controller
         $hotel_id   = $request->hotel_id;
         $staff_id   = $request->staff_id;
         $data       = $request->data;
-        $MessageID = $request->MessageID;
+        $MessageID  = $request->MessageID;
+        $xml        = $request->xml;
 
         $config     = $request->config;
         $unique_id  = '';
@@ -108,7 +109,8 @@ class OperaController extends Controller
                 $action     = str_replace('Request', 'Response', $keys[0]);
                 $data       = array_get($data, 'Body.RoomStatusUpdateBERequest');
                 $resp       = $this->BuildXMLRoomResponse($action);
-                \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config, null, false, $MessageID)->onConnection('sqs-fifo');
+                \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config, null, false, $MessageID, $xml)->onConnection('sqs-fifo');
+                // $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, $data, $config, null, false, $MessageID, $xml));
                 break;
         }
 
@@ -466,23 +468,23 @@ class OperaController extends Controller
             ->first();
 
         $location = null;
-        
+
         if ($room_id) {
             $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('room_id', $room_id)->first();
             $location = (strlen($HotelRoom->location) > 3 && $hotel_id == 296) ? $HotelRoom->location : "0$HotelRoom->location";
             $location = $HotelRoom->location;
-            
+
             \App\Jobs\Opera::dispatch($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)->onConnection('sqs-fifo');
             $this->check_out_reserve($hotel_id);
         } else {
             $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('is_common_area', 0)->where('active', 1)->orderBy('location', 'ASC')->get();
             foreach ($HotelRoom as  $room) {
                 $location = (strlen($room->location) > 3 && ($hotel_id == 296 || $hotel_id == 238 || $hotel_id == 289  || $hotel_id == 314)) ? $room->location : "0$room->location";
-                $location = $hotel_id== 314 ? $room->location : $location;
+                $location = $hotel_id == 314 ? $room->location : $location;
                 \App\Jobs\Opera::dispatch($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)->onConnection('sqs-fifo');
-                if($location > 8000 and $hotel_id == 238){
+                if ($location > 8000 and $hotel_id == 238) {
                     break;
-                }else{
+                } else {
                     if ($location > 4000 && $hotel_id != 238) {
                         break;
                     }
@@ -522,26 +524,26 @@ class OperaController extends Controller
             $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('room_id', $room_id)->first();
             $location = (strlen($HotelRoom->location) > 3 && $hotel_id == 296) ? $HotelRoom->location : "0$HotelRoom->location";
             $location = $HotelRoom->location;
-        
+
             \App\Jobs\Opera::dispatch($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)->onConnection('sqs-fifo');
         } else {
-            
+
             $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('is_common_area', 0)->where('active', 1)->orderBy('location', 'ASC')->get();
             $rooms_fetch = $this->formatFetchRoomStatus($hotel_id);
             // return response()->json($rooms_fetch);
             foreach ($HotelRoom as  $room) {
                 $location = (strlen($room->location) > 3 && ($hotel_id == 296 || $hotel_id == 238 || $hotel_id == 289 || $hotel_id == 314)) ? $room->location : "0$room->location";
-                if (!$this->validateHskCleanning($hotel_id,array_get($rooms_fetch,$location,0),$room->room_id)) {
+                if (!$this->validateHskCleanning($hotel_id, array_get($rooms_fetch, $location, 0), $room->room_id)) {
                     // dd($hotel_id,array_get($rooms_fetch,$location,0),$room->room_id, $location);
                     \App\Jobs\Opera::dispatch($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)->onConnection('sqs-fifo');
                 }
-            if($location > 8000 and $hotel_id == 238){
-                break;
-            }else{
-                if ($location > 4000 && $hotel_id != 238) {
+                if ($location > 8000 and $hotel_id == 238) {
                     break;
+                } else {
+                    if ($location > 4000 && $hotel_id != 238) {
+                        break;
+                    }
                 }
-            }
             }
         }
 
@@ -634,9 +636,9 @@ class OperaController extends Controller
 
     public function check_out_reserve($hotel_id)
     {
-        $reservation = GuestCheckinDetails::where('hotel_id', $hotel_id)->where('status',1)->where('reservation_status',0)
-            ->whereDate('check_out', '<' , date('Y-m-d'))->get();
-        foreach ($reservation as $r){
+        $reservation = GuestCheckinDetails::where('hotel_id', $hotel_id)->where('status', 1)->where('reservation_status', 0)
+            ->whereDate('check_out', '<', date('Y-m-d'))->get();
+        foreach ($reservation as $r) {
             $r->reservation_status =  3;
             $r->status = 0;
             $r->save();
@@ -650,7 +652,7 @@ class OperaController extends Controller
             ->where('state', 1)
             ->first();
 
-            $timestamp = date('Y-m-d\TH:i:s\Z');
+        $timestamp = date('Y-m-d\TH:i:s\Z');
         $username   = $IntegrationsActive->config['username_send'];
         $password   = $IntegrationsActive->config['password_send'];
         $url        = $IntegrationsActive->config['url_sync'];
@@ -734,36 +736,36 @@ class OperaController extends Controller
         $data = array_get($data, 'FetchRoomStatus', []);
         $rooms = [];
         foreach ($data as $key => $value) {
-            if((array_get($value, 'RoomNumber') >= 4000 && $hotel_id != 238) || (array_get($value, 'RoomNumber') >= 8000 && $hotel_id == 238) ){
+            if ((array_get($value, 'RoomNumber') >= 4000 && $hotel_id != 238) || (array_get($value, 'RoomNumber') >= 8000 && $hotel_id == 238)) {
                 break;
-            }else{
-                
-                if(
+            } else {
+
+                if (
                     array_get($value, 'RoomStatus') != 'OutOfOrder' &&
                     array_get($value, 'RoomStatus') != 'Out of Order' &&
                     array_get($value, 'RoomStatus') != 'Out of Service' &&
                     array_get($value, 'RoomStatus') != 'OutOfService'
-                ){
+                ) {
                     $rooms[array_get($value, 'RoomNumber')] = (array_get($value, 'HouseKeepingStatus') == 'OCC' && array_get($value, 'RoomStatus') == 'Inspected') ? 'Clean' : array_get($value, 'RoomStatus');
                     $rooms[array_get($value, 'RoomNumber')] = $this->hsk_config[$rooms[array_get($value, 'RoomNumber')]]["codes"][0]["hk_status"];
                 }
             }
         }
         return $rooms;
-
     }
 
-    public function validateHskCleanning($hotel_id,$hsk_status,$room_id){ 
-        if($hsk_status != 0){
+    public function validateHskCleanning($hotel_id, $hsk_status, $room_id)
+    {
+        if ($hsk_status != 0) {
             $hsk_cleanning = HousekeepingCleanings::where('hotel_id', $hotel_id)
-            ->where('room_id', $room_id)
-            ->orderBy('assigned_date', 'DESC')->orderBy('cleaning_id', 'DESC')->first();
+                ->where('room_id', $room_id)
+                ->orderBy('assigned_date', 'DESC')->orderBy('cleaning_id', 'DESC')->first();
             if ($hsk_cleanning) {
                 return $hsk_cleanning->hk_status == $hsk_status;
-            }else{
+            } else {
                 return true;
             }
-        }else{
+        } else {
             return true;
         }
     }

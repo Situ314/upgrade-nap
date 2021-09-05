@@ -40,12 +40,13 @@ class Opera implements ShouldQueue
     private $send_message_opera = 0;
     private $reservations_numbers = [];
     private $MessageID;
+    private $xml;
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($hotel_id, $staff_id, $type, $data, $config, $room_id = null, $is_suite = false, $MessageID = null)
+    public function __construct($hotel_id, $staff_id, $type, $data, $config, $room_id = null, $is_suite = false, $MessageID = null, $xml = null)
     {
         $this->hotel_id                 = $hotel_id;
         $this->staff_id                 = $staff_id;
@@ -57,6 +58,7 @@ class Opera implements ShouldQueue
         $this->is_suite                 = $is_suite;
         $this->messages_guest           = 0;
         $this->MessageID                = $MessageID;
+        $this->xml                      = $xml;
         date_default_timezone_set('UTC');
     }
 
@@ -1051,6 +1053,7 @@ class Opera implements ShouldQueue
                 'RoomType'      => '',
                 'resortId'      => array_get($this->data, 'ResortId', ''),
                 'created_at'    => date('Y-m-d H:i:s'),
+                'xml'           => $this->xml,
                 'MessageID'     => $this->MessageID,
             ];
             if (!is_array($data_elements)) {
