@@ -39,6 +39,7 @@ class Opera implements ShouldQueue
     private $messages_guest;
     private $send_message_opera = 0;
     private $reservations_numbers = [];
+    private $MessageID;
     /**
      * Create a new job instance.
      *
@@ -144,7 +145,7 @@ class Opera implements ShouldQueue
 
             $OracleReservation = new \App\Models\Log\OracleReservation($reservation);
             if ($state === 1) $this->GuestRegistration($OracleReservation);
-            
+
             try {
                 $OracleReservation->save();
                 $reservation['idLog'] = $OracleReservation->id;
@@ -485,7 +486,7 @@ class Opera implements ShouldQueue
                                 }
                             }
                             // Se agrego en la actualización de la reserva, que verifique si el huesped asociado a la reserva fue o no modificado
-                            if($GuestCheckinDetails->guest_id != $guest_reservation["guest_id"]) {
+                            if ($GuestCheckinDetails->guest_id != $guest_reservation["guest_id"]) {
                                 $__update .= "guest_id: $GuestCheckinDetails->guest_id to " . $guest_reservation['guest_id'] . ", ";
                                 $GuestCheckinDetails->guest_id = $guest_reservation['guest_id'];
                             }
@@ -1118,6 +1119,18 @@ class Opera implements ShouldQueue
 
                     $_d["hk_status"] = $hk_status;
                     $HousekeepingData["rooms"][] = $_d;
+
+                    // Add log tracker
+                    $this->saveLogTracker([
+                        'hotel_id'  => $this->hotel_id,
+                        'module_id' => 36,
+                        'action'    => 'HSK STATUS',
+                        'prim_id'   => $hsk_cleanning ? $hsk_cleanning->cleaning_id : 0,
+                        'staff_id'  => $this->staff_id,
+                        'date_time' => date('Y-m-d H:i:s'),
+                        'comments'  => $this->MessageID,
+                        'type'      => 'API-OPERA'
+                    ]);
                 }
             }
         }
