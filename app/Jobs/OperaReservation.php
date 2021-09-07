@@ -136,7 +136,7 @@ class OperaReservation implements ShouldQueue
                     $this->sendMonitoringApp($reservation, 'LogOpera_Reservation');
                 } catch (\Exception $th) {
                     \Log::info('No guardó 138');
-                \Log::error($th);
+                    \Log::error($th);
                 }
             }
             GuestCheckinDetails::where('hotel_id', $this->hotel_id)->where('reservation_number', 'like', "%$_rs%")->whereNotIn('reservation_number', $this->reservations_numbers)->update(['status' => 0, 'reservation_status' => 5]);
@@ -451,7 +451,7 @@ class OperaReservation implements ShouldQueue
                             if ($GuestCheckinDetails->check_in != $guest_reservation['check_in']) {
                                 $__update .= "check_in: $GuestCheckinDetails->check_in to " . $guest_reservation['check_in'] . ", ";
                                 // fix checkin_date
-                                if($guest_reservation['reservation_status'] <= 2){
+                                if ($guest_reservation['reservation_status'] <= 2) {
                                     $GuestCheckinDetails->check_in = $guest_reservation['check_in'];
                                 }
                                 //$GuestCheckinDetails->check_in = $guest_reservation['check_in'];
@@ -697,7 +697,7 @@ class OperaReservation implements ShouldQueue
             if ($sw) {
                 $unique_id = array_get($arrayData, 'UniqueID');
                 $guest_zip_code = '';
-                if(!is_array(array_get($arrayData, 'PostalCode', ''))){
+                if (!is_array(array_get($arrayData, 'PostalCode', ''))) {
                     $guest_zip_code = array_get($arrayData, 'PostalCode', '');
                 }
                 $guest_data = [
@@ -724,7 +724,7 @@ class OperaReservation implements ShouldQueue
                 }
                 $unique_id = array_get($arrayData, 'Profile.IDs.UniqueID');
                 $guest_zip_code = '';
-                if(!is_array(array_get($arrayData, 'PostalCode', ''))){
+                if (!is_array(array_get($arrayData, 'PostalCode', ''))) {
                     $guest_zip_code = array_get($arrayData, 'Profile.Addresses.NameAddress.PostalCode', '');
                 }
                 $guest_data = [
@@ -800,13 +800,13 @@ class OperaReservation implements ShouldQueue
                             $old_guest->city = $guest_data['city'];
                         }
                         if ($guest_data['zipcode'] != $old_guest->zipcode) {
-                            if(!is_array($guest_data['zipcode']) && !is_array($old_guest->zipcode) ){
+                            if (!is_array($guest_data['zipcode']) && !is_array($old_guest->zipcode)) {
                                 $__update .= "zipcode: $old_guest->zipcode to " . $guest_data['zipcode'] . ", ";
                                 $old_guest->zipcode = $guest_data['zipcode'];
                             }
                         }
                         if ($guest_data['state'] != $old_guest->state) {
-                            if(!is_array($guest_data['state']) && !is_array($old_guest->state) ){
+                            if (!is_array($guest_data['state']) && !is_array($old_guest->state)) {
                                 $__update .= "state: $old_guest->state to " . $guest_data['state'] . ", ";
                                 $old_guest->state = $guest_data['state'];
                             }
@@ -872,7 +872,7 @@ class OperaReservation implements ShouldQueue
                         $guest_data['state'] = '';
                     }
                     // truncate  address before save
-                    if(strlen($guest_data['address']) >= 100) {
+                    if (strlen($guest_data['address']) >= 100) {
                         $guest_data['address'] = substr($guest_data['address'], 0, 99);
                     }
                     $new_guest = \App\Models\GuestRegistration::create($guest_data);
@@ -1031,7 +1031,7 @@ class OperaReservation implements ShouldQueue
         $HousekeepingData["rooms"]    = [];
 
         foreach ($hsk_data as $key => $room_data) {
-	
+
             if (!is_null($room_data['RoomNumber'])) {
                 $room = $this->getRoom($room_data['RoomNumber']);
                 if (!is_null($room)) {
@@ -1046,13 +1046,13 @@ class OperaReservation implements ShouldQueue
                         $this->FrontdeskStatus($room['room_id'], 2, true);
                     }
                     $_d["room_id"] = $room["room_id"];
-		    try {	    
-                    	$hk_status = $this->HotelHousekeepingConfig[$room_data['RoomStatus']]["codes"][0]["hk_status"];
-	            } catch (\Throwable $th) {
-			echo ($th->getMessage());
-			echo ($room["room_id"]);
-			break;
-		    }
+                    try {
+                        $hk_status = $this->HotelHousekeepingConfig[$room_data['RoomStatus']]["codes"][0]["hk_status"];
+                    } catch (\Throwable $th) {
+                        echo ($th->getMessage());
+                        echo ($room["room_id"]);
+                        break;
+                    }
                     if ($hk_status == 4) {
 
                         if (array_has($room_data, 'reservation_data')) {
@@ -1314,8 +1314,8 @@ class OperaReservation implements ShouldQueue
         curl_close($curl);
 
         if ($err) {
-            // \Log::error("GetOracleRoomSync");
-            // \Log::info($err);
+            \Log::error("GetOracleRoomSync");
+            \Log::info($err);
             return $err;
         } else {
             // \Log::error("GetOracleRoomSync");
@@ -1324,7 +1324,8 @@ class OperaReservation implements ShouldQueue
             $xmlString  = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
             $xml        = simplexml_load_string($xmlString);
             $str_json   = json_encode($xml);
-            // \Log::info($str_json);
+            \Log::info("-> OPRRA DATA RESERVATION");
+            \Log::info($str_json);
             $json       = json_decode($str_json, true);
             $fetch_room = array_get($json, 'Body.FetchRoomStatusResponse');
             return $fetch_room;
@@ -1411,8 +1412,9 @@ class OperaReservation implements ShouldQueue
         curl_close($curl);
         date_default_timezone_set('UTC');
         if ($err) {
-            //\Log::alert($err);
-
+            
+            \Log::info("--> error getReservationRoom:");
+            \Log::error($err);
             return null;
         } else {
             $xmlString  = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
@@ -1420,6 +1422,9 @@ class OperaReservation implements ShouldQueue
             $xml        = simplexml_load_string($xmlString);
             $str_json   = json_encode($xml);
             $json       = json_decode($str_json, true);
+
+            \Log::info("--> getReservationRoom: ".$str_json);
+
             $resp = array_get($json, 'Body.ReservationLookupResponse.ReservationLookups.ReservationLookup');
             try {
                 $resp[0];
@@ -1435,84 +1440,84 @@ class OperaReservation implements ShouldQueue
         //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, 'START SYNC');
 
         //) {
-            $this->configTimeZone($this->hotel_id);
-            $data = $this->GetOracleRoomSync($this->config, $this->pms_hotel_id);
-            if ($data) {
-                $hsk_status = [
-                    'hotel_id' => $this->hotel_id,
-                    'staff_id' => $this->staff_id,
-                    'rooms'    => []
-                ];
-                $fetch_room = array_get($data, 'FetchRoomStatus', []);
-                try {
-                    $fetch_room[0];
-                } catch (\Exception $e) {
-                    $fetch_room = [$fetch_room];
-                }
-		        //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, "FETCH ROOM DATA:");
-		        //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($fetch_room));
-                foreach ($fetch_room as $room) {
-                    //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($room));
-                    $room_no = array_get($room, 'RoomNumber');
-
-                    if (!$room_no) {
-                        $room_no  = $this->room_id ? $this->room_id : null;
-                    }
-                    if ($room_no > 4000 && $this->hotel_id == 289) {
-                        $add = false;
-                    }
-                    $add = true;
-                    if (($this->pms_hotel_id == 'MI01' || $this->pms_hotel_id == 'CVS') && is_numeric($room_no) && $room_no >= 9000 && $room_no <= 9600) {
-                        $add = false;
-                    }
-                    if ($this->pms_hotel_id == 'MI01' && substr($room_no, 0, 3) == 'CAB') {
-                        $add = false;
-                    }
-                    if (($this->pms_hotel_id == '04130' || $this->pms_hotel_id == 'MCOGR') && (($room_no >= 9000 && $room_no <= 9600))) {
-                        $add = false;
-                    }
-                    if ($add) {
-                        //$this->customWriteLog("sync_opera_reservation",$this->hotel_id, $room_no);
-                        $room_status = array_get($room, 'RoomStatus');
-                        $reservation_data = [];
-
-                        // && $this->hotel_id != 289
-                        if (array_get($room, 'HouseKeepingStatus') == 'OCC') {
-                            // $room_status = 'Clean';
-
-                            $reservation = $this->getReservationRoom($room_no, $this->config, $this->pms_hotel_id);
-                            //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, $room_no . json_encode($this->config) . $this->pms_hotel_id);
-                            //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, 'reservation sync' . json_encode($reservation));
-                            
-                            $reservation_data = [
-                                'ReservationID'     => array_get($reservation, 'ReservationID', ''),
-                                'ProfileID'         => array_get($reservation, 'ProfileID', ''),
-                                'Start'             => array_get($reservation, 'DateRange.Start', ''),
-                                'End'               => array_get($reservation, 'DateRange.End', ''),
-                                'FirstName'         => array_get($reservation, 'ProfileInfo.FirstName', ''),
-                                'LastName'          => array_get($reservation, 'ProfileInfo.LastName', ''),
-                                'AddressLine'       => array_get($reservation, 'ReservationAddress.AddressLine', ''),
-                                'CityName'          => array_get($reservation, 'ReservationAddress.CityName', ''),
-                                'StateProv'         => array_get($reservation, 'ReservationAddress.StateProv', ''),
-                                'CountryCode'       => array_get($reservation, 'ReservationAddress.CountryCode', ''),
-                                'PostalCode'        => array_get($reservation, 'ReservationAddress.PostalCode', ''),
-                                'ResortId'          => array_get($reservation, 'ResortId', ''),
-                                'reservationStatus' => array_get($reservation, '@attributes.reservationStatus')
-                            ];
-                            //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, 'RESERVATION DATA:');
-                            //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($reservation_data));
-                        }
-                        $hsk_status['rooms'][] = [
-                            'RoomNumber'        => $room_no,
-                            'RoomStatus'        => $room_status,
-                            'reservation_data'  => $reservation_data
-                        ];
-                        //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($hsk_status));
-                    }
-                }
-
-                $this->OracleSync($hsk_status);
+        $this->configTimeZone($this->hotel_id);
+        $data = $this->GetOracleRoomSync($this->config, $this->pms_hotel_id);
+        if ($data) {
+            $hsk_status = [
+                'hotel_id' => $this->hotel_id,
+                'staff_id' => $this->staff_id,
+                'rooms'    => []
+            ];
+            $fetch_room = array_get($data, 'FetchRoomStatus', []);
+            try {
+                $fetch_room[0];
+            } catch (\Exception $e) {
+                $fetch_room = [$fetch_room];
             }
+            //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, "FETCH ROOM DATA:");
+            //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($fetch_room));
+            foreach ($fetch_room as $room) {
+                //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($room));
+                $room_no = array_get($room, 'RoomNumber');
+
+                if (!$room_no) {
+                    $room_no  = $this->room_id ? $this->room_id : null;
+                }
+                if ($room_no > 4000 && $this->hotel_id == 289) {
+                    $add = false;
+                }
+                $add = true;
+                if (($this->pms_hotel_id == 'MI01' || $this->pms_hotel_id == 'CVS') && is_numeric($room_no) && $room_no >= 9000 && $room_no <= 9600) {
+                    $add = false;
+                }
+                if ($this->pms_hotel_id == 'MI01' && substr($room_no, 0, 3) == 'CAB') {
+                    $add = false;
+                }
+                if (($this->pms_hotel_id == '04130' || $this->pms_hotel_id == 'MCOGR') && (($room_no >= 9000 && $room_no <= 9600))) {
+                    $add = false;
+                }
+                if ($add) {
+                    //$this->customWriteLog("sync_opera_reservation",$this->hotel_id, $room_no);
+                    $room_status = array_get($room, 'RoomStatus');
+                    $reservation_data = [];
+
+                    // && $this->hotel_id != 289
+                    if (array_get($room, 'HouseKeepingStatus') == 'OCC') {
+                        // $room_status = 'Clean';
+
+                        $reservation = $this->getReservationRoom($room_no, $this->config, $this->pms_hotel_id);
+                        //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, $room_no . json_encode($this->config) . $this->pms_hotel_id);
+                        //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, 'reservation sync' . json_encode($reservation));
+
+                        $reservation_data = [
+                            'ReservationID'     => array_get($reservation, 'ReservationID', ''),
+                            'ProfileID'         => array_get($reservation, 'ProfileID', ''),
+                            'Start'             => array_get($reservation, 'DateRange.Start', ''),
+                            'End'               => array_get($reservation, 'DateRange.End', ''),
+                            'FirstName'         => array_get($reservation, 'ProfileInfo.FirstName', ''),
+                            'LastName'          => array_get($reservation, 'ProfileInfo.LastName', ''),
+                            'AddressLine'       => array_get($reservation, 'ReservationAddress.AddressLine', ''),
+                            'CityName'          => array_get($reservation, 'ReservationAddress.CityName', ''),
+                            'StateProv'         => array_get($reservation, 'ReservationAddress.StateProv', ''),
+                            'CountryCode'       => array_get($reservation, 'ReservationAddress.CountryCode', ''),
+                            'PostalCode'        => array_get($reservation, 'ReservationAddress.PostalCode', ''),
+                            'ResortId'          => array_get($reservation, 'ResortId', ''),
+                            'reservationStatus' => array_get($reservation, '@attributes.reservationStatus')
+                        ];
+                        //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, 'RESERVATION DATA:');
+                        //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($reservation_data));
+                    }
+                    $hsk_status['rooms'][] = [
+                        'RoomNumber'        => $room_no,
+                        'RoomStatus'        => $room_status,
+                        'reservation_data'  => $reservation_data
+                    ];
+                    //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($hsk_status));
+                }
+            }
+
+            $this->OracleSync($hsk_status);
+        }
         //}
     }
 
@@ -1907,33 +1912,30 @@ class OperaReservation implements ShouldQueue
         }
     }
 
-    public function customWriteLog( $folder_name, $hotel_id, $text ) {
+    public function customWriteLog($folder_name, $hotel_id, $text)
+    {
         try {
-            $path = "/logs/$folder_name";       
-        
-            if(!\Storage::has($path)) 
-            {
+            $path = "/logs/$folder_name";
+
+            if (!\Storage::has($path)) {
                 \Storage::makeDirectory($path, 0775, true);
             }
 
-            if(!\Storage::has($path."/".$hotel_id)) 
-            {
-                \Storage::makeDirectory($path."/".$hotel_id, 0775, true);
+            if (!\Storage::has($path . "/" . $hotel_id)) {
+                \Storage::makeDirectory($path . "/" . $hotel_id, 0775, true);
             }
-            
+
             $day = date('Y_m_d');
             $file = "$path/$hotel_id/$day.log";
             $hour = date('H:i:s');
-            $text = "[$hour]: $text";        
+            $text = "[$hour]: $text";
 
-            \Storage::append($file,$text);
-            
+            \Storage::append($file, $text);
+
             return true;
         } catch (\Throwable $th) {
             \Log::error($th);
             return false;
         }
-        
-        
     }
 }
