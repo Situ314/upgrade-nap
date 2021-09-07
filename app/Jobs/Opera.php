@@ -775,9 +775,7 @@ class Opera implements ShouldQueue
             }
 
             if (!$unique_id == '') {
-                $IntegrationsGuestInformation = \App\Models\IntegrationsGuestInformation::where('guest_number', $unique_id)
-                    ->where('hotel_id', $this->hotel_id)
-                    ->first();
+                $IntegrationsGuestInformation = \App\Models\IntegrationsGuestInformation::where('guest_number', $unique_id)->where('hotel_id', $this->hotel_id)->first();
                 if ($IntegrationsGuestInformation) {
                     $old_guest = \App\Models\GuestRegistration::find($IntegrationsGuestInformation->guest_id);
                     if ($old_guest) {
@@ -1045,6 +1043,7 @@ class Opera implements ShouldQueue
 
     public function RoomStatusUpdateBERequest()
     {
+        date_default_timezone_set('UTC');
         $data_elements = array_get($this->data, 'DataElements.DataElement', null);
         if (!is_null($data_elements)) {
             $hskLog = [
@@ -1056,9 +1055,11 @@ class Opera implements ShouldQueue
                 'xml'           => $this->xml,
                 'MessageID'     => $this->MessageID,
             ];
+            
             if (!is_array($data_elements)) {
                 $data_elements = [$data_elements];
             }
+
             foreach ($data_elements as  $data_element) {
                 if (array_get($data_element, '@attributes.name', '') == 'RoomNumber') {
                     $hskLog['RoomNumber'] = array_get($data_element, '@attributes.newData');
@@ -1124,6 +1125,7 @@ class Opera implements ShouldQueue
                     $HousekeepingData["rooms"][] = $_d;
 
                     // Add log tracker
+                    $this->configTimeZone($this->hotel_id);
                     $this->saveLogTracker([
                         'hotel_id'  => $this->hotel_id,
                         'module_id' => 36,
@@ -1134,6 +1136,7 @@ class Opera implements ShouldQueue
                         'comments'  => $this->MessageID,
                         'type'      => 'API-OPERA'
                     ]);
+                    date_default_timezone_set('UTC');
                 }
             }
         }
