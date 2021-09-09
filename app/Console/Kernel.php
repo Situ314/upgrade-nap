@@ -51,17 +51,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('full:resync 278')->dailyAt('07:00')->timezone('America/New_York');
         $schedule->command('full:resync 279')->dailyAt('07:00')->timezone('America/New_York');
         $schedule->command('full:resync 208')->dailyAt('07:00')->timezone('America/New_York');
-        
         $schedule->command('full:resync 240')->dailyAt('07:00')->timezone('America/New_York');
         $schedule->command('full:resync 241')->dailyAt('07:00')->timezone('America/New_York');
         $schedule->command('full:resync 267')->dailyAt('07:00')->timezone('America/New_York');
         // $schedule->command('full:resync 281')->dailyAt('06:00')->timezone('Asia/Jakarta');
         // $schedule->command('full:resync 289')->dailyAt('05:00')->timezone('America/New_York');
-        
         $schedule->command('full:resync 275')->dailyAt('06:00')->timezone('America/New_York');
         $schedule->command('full:resync 289')->dailyAt('03:00')->timezone('America/New_York');
         $schedule->command('full:resync 207')->dailyAt('07:00')->timezone('America/New_York');
-
         // $schedule->command('full:resync 275')->dailyAt('07:00')->timezone('America/New_York');
         // $schedule->command('full:resync 275')->cron('0 */1 * * *')->timezone('UTC');
         $schedule->command("monitoring:sendmail")->dailyAt('08:00')->timezone('America/New_York');

@@ -57,12 +57,12 @@ class SendReport extends Command
 
         try {
             $emails = [
-                'ysalcedo@mynuvola.co',
                 // 'jsanchez@mynuvola.co',
-                'fidel@mynuvola.com',
-                'asanchez@mynuvola.com',
-                'cdelaossa@mynuvola.com',
-                'customersuccess@mynuvola.com'
+                'support@mynuvola.com',
+                // 'fidel@mynuvola.com',
+                // 'asanchez@mynuvola.com',
+                // 'cdelaossa@mynuvola.com',
+                // 'customersuccess@mynuvola.com'
             ];
             $parameters = [
                 'QuantityLogs'  => $logs,

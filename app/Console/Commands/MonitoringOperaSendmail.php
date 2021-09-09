@@ -226,8 +226,8 @@ class MonitoringOperaSendmail extends Command
     {
         try {
             $emails = [
-                'ysalcedo@mynuvola.co',
                 // 'fidel@mynuvola.com',
+                'support@mynuvola.com',
                 'asanchez@mynuvola.com',
                 //  'cdelaossa@mynuvola.com',
                 // 'customersuccess@mynuvola.com'

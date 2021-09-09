@@ -54,15 +54,15 @@ class MonitoringMaestroSendmail extends Command
             $end_time   = date('H:i:s');
             $start_time  = date('H:i:s', strtotime("-$__time minutes", strtotime($end_time)));
 
-            $Monitoring = Monitoring::where('int_id',1)->whereDate('date', $date)
+            $Monitoring = Monitoring::where('int_id', 1)->whereDate('date', $date)
                 ->whereTime('time', '>=', $start_time)
                 ->whereTime('time', '<=', $end_time)
                 ->get();
-                
-            $Hotels_monitoring = $Monitoring->groupBy('Hotel_id')->map(function ($row) { 
-                return $row->sum('total'); 
+
+            $Hotels_monitoring = $Monitoring->groupBy('Hotel_id')->map(function ($row) {
+                return $row->sum('total');
             });
-            
+
             $hotels = [];
             $is_send = false;
             foreach ($Hotels_monitoring as $key => $value) {
@@ -89,10 +89,10 @@ class MonitoringMaestroSendmail extends Command
     {
         try {
             $emails = [
-                'ysalcedo@mynuvola.co',
                 // 'jsanchez@mynuvola.co',
                 // 'fidel@mynuvola.com',
-                 'asanchez@mynuvola.com',
+                'support@mynuvola.com',
+                'asanchez@mynuvola.com',
                 // 'cdelaossa@mynuvola.com',
                 // 'customersuccess@mynuvola.com'
             ];
