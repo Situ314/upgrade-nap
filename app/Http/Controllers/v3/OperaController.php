@@ -471,8 +471,9 @@ class OperaController extends Controller
 
         if ($room_id) {
             $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('room_id', $room_id)->first();
-            $location = (strlen($HotelRoom->location) > 3 && $hotel_id == 296) ? $HotelRoom->location : "0$HotelRoom->location";
-            $location = $HotelRoom->location;
+            #$location = (strlen($HotelRoom->location) > 3 && $hotel_id == 296) ? $HotelRoom->location : "0$HotelRoom->location";
+            #$location = $HotelRoom->location;
+            $location = str_pad($HotelRoom->location, 4, "0", STR_PAD_LEFT);
 
             \App\Jobs\Opera::dispatch($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)->onConnection('sqs-fifo');
             $this->check_out_reserve($hotel_id);
@@ -522,8 +523,9 @@ class OperaController extends Controller
         $this->hsk_config = $IntegrationsActive->config['housekeeping'];
         if ($room_id) {
             $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('room_id', $room_id)->first();
-            $location = (strlen($HotelRoom->location) > 3 && $hotel_id == 296) ? $HotelRoom->location : "0$HotelRoom->location";
-            $location = $HotelRoom->location;
+            #$location = (strlen($HotelRoom->location) > 3 && $hotel_id == 296) ? $HotelRoom->location : "0$HotelRoom->location";
+            #$location = $HotelRoom->location;
+            $location = str_pad($HotelRoom->location, 4, "0", STR_PAD_LEFT);
 
             \App\Jobs\Opera::dispatch($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)->onConnection('sqs-fifo');
         } else {
