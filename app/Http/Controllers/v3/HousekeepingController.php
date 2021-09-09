@@ -281,7 +281,7 @@ class HousekeepingController extends Controller
     {
         \Log::error("synergexSendHskChangeStatus");
         // $synergexUrl = 'https://75.112.128.89/Nuvola/Nuvola.aspx?UpdateRoomHKStatus';
-        $synergexUrl = "https://devsecure2.legacyvacationclub.com/nuvola/nuvola.aspx/";
+        $synergexUrl = "https://devsecure2.legacyvacationclub.com/Nuvola/Nuvola.aspx?UpdateRoomHKStatus";
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
@@ -305,7 +305,9 @@ class HousekeepingController extends Controller
         // echo $response;
 
         return response()->json([
-            "response" => $response
+            "response" => $response,
+            "hotel_id" => $request->hotel_id,
+                "room_status" => $request->room_status
         ]);
     }
 }
