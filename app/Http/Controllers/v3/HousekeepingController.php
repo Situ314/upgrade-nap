@@ -280,7 +280,8 @@ class HousekeepingController extends Controller
     public function synergexSendHskChangeStatus(Request $request)
     {
         \Log::error("synergexSendHskChangeStatus");
-        $synergexUrl = 'https://75.112.128.89/Nuvola/Nuvola.aspx?UpdateRoomHKStatus';
+        // $synergexUrl = 'https://75.112.128.89/Nuvola/Nuvola.aspx?UpdateRoomHKStatus';
+        $synergexUrl = "https://devsecure2.legacyvacationclub.com/nuvola/nuvola.aspx/";
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
