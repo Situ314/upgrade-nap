@@ -1454,7 +1454,7 @@ class Opera implements ShouldQueue
         </soap:Envelope>
         ';
         $curl = curl_init();
-        $actions = ($this->hotel_id != 281) && ($this->hotel_id != 266) && ($this->hotel_id != 296) && ($this->hotel_id != 238) && ($this->hotel_id != 314) && ($this->hotel_id != 289) && ($this->hotel_id != 303) ? array(
+        $actions = ($this->hotel_id != 281) && ($this->hotel_id != 266) && ($this->hotel_id != 296) && ($this->hotel_id != 238) && ($this->hotel_id != 314) && ($this->hotel_id != 289) && ($this->hotel_id != 303) && ($this->hotel_id != 443) ? array(
             "Content-Type: text/xml;charset=UTF-8",
             "SOAPAction: http://webservices.micros.com/htng/2008B/SingleGuestItinerary#ReservationLookup",
         ) : array(

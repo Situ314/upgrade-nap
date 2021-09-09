@@ -30,13 +30,11 @@ class OperaController extends Controller
         $reps = null;
 
         switch ($keys[0]) {
-            // ROOM STATUS
             case 'GuestStatusNotificationRequest':
             case 'GuestStatusNotificationExtRequest':
             case 'RoomStatusUpdateBERequest':
                 $resp = $this->reservationService($request);
                 break;
-                // PRFILE
             case 'NewProfileRequest':
             case 'UpdateProfileRequest':
                 $resp = $this->nameService($request);
@@ -109,7 +107,6 @@ class OperaController extends Controller
                 $created    = array_get($data, 'Header.Security.Timestamp.Created');
                 $expired    = array_get($data, 'Header.Security.Timestamp.Expires');
                 $unique_id  = array_get($data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
-                
                 $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, $data, $config));
 
                 $resp = $this->BuildXMLResponse($action, $unique_id, $created, $expired, $message_id);
@@ -497,8 +494,10 @@ class OperaController extends Controller
         
         if ($room_id) {
             $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('room_id', $room_id)->first();
-            $location = (strlen($HotelRoom->location) > 3 && ($hotel_id == 296 || $hotel_id == 238 || $hotel_id == 289  || $hotel_id == 314 || $hotel_id == 303)) ? $HotelRoom->location : "0$HotelRoom->location";
-            $location = $hotel_id== 314 ||  $hotel_id== 303 ||  $hotel_id== 266 ? $HotelRoom->location : $location;
+            #$location = (strlen($HotelRoom->location) > 3 && ($hotel_id == 296 || $hotel_id == 238 || $hotel_id == 289  || $hotel_id == 314 || $hotel_id == 303)) ? $HotelRoom->location : "0$HotelRoom->location";
+            #$location = $hotel_id== 314 ||  $hotel_id== 303 ||  $hotel_id== 266 ? $HotelRoom->location : $location;
+
+            $location = str_pad($HotelRoom->location, 4, "0", STR_PAD_LEFT);
 
             $this->dispatch((new \App\Jobs\Opera($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)));
             // $this->check_out_reserve($hotel_id);
@@ -553,8 +552,11 @@ class OperaController extends Controller
         $this->hsk_config = $IntegrationsActive->config['housekeeping'];
         if ($room_id) {
             $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('room_id', $room_id)->first();
-            $location = (strlen($HotelRoom->location) > 3 && $hotel_id == 296) ? $HotelRoom->location : "0$HotelRoom->location";
-            $location = $HotelRoom->location;
+            #$location = (strlen($HotelRoom->location) > 3 && $hotel_id == 296) ? $HotelRoom->location : "0$HotelRoom->location";
+            #$location = $HotelRoom->location;
+
+            $location = str_pad($HotelRoom->location, 4, "0", STR_PAD_LEFT);
+
         
             $this->dispatch((new \App\Jobs\Opera($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)));
         } else {
@@ -803,5 +805,57 @@ class OperaController extends Controller
         }else{
             return true;
         }
+    }
+
+    #Prueba
+    public function testingoperaSync($hotel_id, $room_id = null, $skip = 0)
+    {
+        $IntegrationsActive = \App\Models\IntegrationsActive::where('hotel_id', $hotel_id)
+            ->where('int_id', 5)
+            ->where('state', 1)
+            ->first();
+
+        $location = null;
+        echo('start sync Oracle');
+        
+        if ($room_id) {
+            $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('room_id', $room_id)->first();
+
+            $location = str_pad($HotelRoom->location, 4, "0", STR_PAD_LEFT);
+
+
+            #$location = (strlen($HotelRoom->location) > 3 && ($hotel_id == 296 || $hotel_id == 238 || $hotel_id == 289  || $hotel_id == 314 || $hotel_id == 303)) ? $HotelRoom->location : "0$HotelRoom->location";
+            #$location = $hotel_id== 314 ||  $hotel_id== 303 ||  $hotel_id== 266 ? $HotelRoom->location : $location;
+
+            echo('Location::::');
+            echo $location;
+
+            //$this->dispatch((new \App\Jobs\Opera($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)));
+
+            // $this->check_out_reserve($hotel_id);
+        } else {
+            $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('is_common_area', 0)->where('active', 1)->orderBy('location', 'ASC')->get();
+            foreach ($HotelRoom as $key=>$room) {
+		if($skip != 0 && $skip >= $key ){
+	            continue;
+		}		
+                $location = (strlen($room->location) > 3 && ($hotel_id == 296 || $hotel_id == 238 || $hotel_id == 289  || $hotel_id == 314 || $hotel_id == 303)) ? $room->location : "0$room->location";
+                $location = $hotel_id== 314 ||  $hotel_id== 303 ||  $hotel_id== 266 ? $room->location : $location;
+                $this->dispatch((new \App\Jobs\Opera($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)));
+		
+                if($location > 8000 and $hotel_id == 238){
+                    break;
+                }else{
+                    if ($location > 4000 && $hotel_id != 238) {
+                        break;
+                    }
+                }
+            }
+            // $this->check_out_reserve($hotel_id);
+        }
+
+        return response()->json([
+            'Sync' => true
+        ], 200);
     }
 }
