@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Spatie\ArrayToXml\ArrayToXml;
 use App\Models\HousekeepingCleanings;
 use App\Models\GuestCheckinDetails;
+use GuzzleHttp\Client;
 
 use DB;
 
@@ -28,6 +29,7 @@ class OperaController extends Controller
                 break;
             case 'NewProfileRequest':
             case 'UpdateProfileRequest':
+                // $this->sendXmlToAws($request->xml);
                 $resp = $this->nameService($request);
                 break;
 
@@ -769,6 +771,27 @@ class OperaController extends Controller
             }
         } else {
             return true;
+        }
+    }
+
+    private function sendXmlToAws($text)
+    {
+        try {
+            // $text = $request->getContent();
+            $client = new Client();
+            $promise = $client->postAsync(
+                'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/profile',
+                [
+                    'body' => $text,
+                    'headers' => ['Content-Type' => 'application/xml']
+                ]
+            )->then(function ($response) {
+            });
+            $promise->wait();
+            \Log::info("Send xml to aws");
+        } catch (\Exception $e) {
+            \Log::error('Error sendXmlToAws');
+            \Log::error($e);
         }
     }
 }
