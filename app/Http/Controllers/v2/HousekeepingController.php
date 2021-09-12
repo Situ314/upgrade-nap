@@ -30,12 +30,12 @@ class HousekeepingController extends Controller
             if (isset($request->all) && ($request->all == 'true' || $request->all == true)) {
 
                 //Se consultan todas las habitaciones con estado en caso de que lo tenga en formato lineal(habitacion-status)
-                $hsk = HotelRoom::select("cleaning_id","count_by_hotel_id","hk_status","front_desk_status","assigned_date","hotel_rooms.location", "hotel_rooms.room_id")
+                $hsk = HotelRoom::select("cleaning_id", "count_by_hotel_id", "hk_status", "front_desk_status", "assigned_date", "hotel_rooms.location", "hotel_rooms.room_id")
                     ->leftJoin("housekeeping_cleanings", "housekeeping_cleanings.room_id", "=", "hotel_rooms.room_id")
                     ->where("hotel_rooms.hotel_id", $hotel_id)
                     ->where("hotel_rooms.active", 1)
                     ->where("housekeeping_cleanings.is_active", 1)
-                    ->orderBy("housekeeping_cleanings.cleaning_id","DESC")
+                    ->orderBy("housekeeping_cleanings.cleaning_id", "DESC")
                     ->paginate($paginate);
 
                 // $hsk = HotelRoom::leftJoin('housekeeping_cleanings as hsk', function ($join) {
@@ -96,6 +96,21 @@ class HousekeepingController extends Controller
 
                 if (isset($request->room_id) && is_numeric($request->room_id)) {
                     $hsk = $hsk->where('room_id', $request->room_id);
+                }
+
+                if (isset($request->rooms)) {
+                    $rooms = \App\Models\HotelRoom::whereIn('location', explode(",", $request->rooms))
+                        ->where('hotel_id', $hotel_id)
+                        ->where('active', 1)
+                        ->get();
+
+                    $room_ids = [];
+                    if (count($rooms) > 0) {
+                        foreach ($rooms as $room) {
+                            $room_ids[] = $room->room_id;
+                        }
+                        $hsk = $hsk->whereIn('room_id', $room_ids);
+                    }
                 }
 
                 if (isset($request->assigned_date) && is_numeric($request->assigned_date)) {
@@ -188,10 +203,10 @@ class HousekeepingController extends Controller
                 /* configure timezone  by hotel */
                 $this->configTimeZone($hkc->hotel_id);
                 $HousekeepingData = [
-                    "hotel_id" => $hotel_id,
+                    "hotel_id" => $hkc->hotel_id,
                     "staff_id" => $request->user()->staff_id,
                     "rooms" => [
-                        "room_id"   => $hsk->room_id,
+                        "room_id"   => $hkc->room_id,
                         "hk_status" => $request->hsk['hk_status'],
                     ]
                 ];
@@ -311,7 +326,7 @@ class HousekeepingController extends Controller
 
                     //Capturar el huesped
                     $now = date('Y-m-d H:i:s');
-                    $__guest_checkin_details = GuestCheckinDetails::select(["room_no", "guest_id"])
+                    $__guest_checkin_details = \App\Models\GuestCheckinDetails::select(["room_no", "guest_id"])
                         ->where('status', 1)
                         ->where('hotel_id', $hotel_id)
                         ->whereRaw(DB::raw("'$now' >= check_in and '$now' <= check_out"))
