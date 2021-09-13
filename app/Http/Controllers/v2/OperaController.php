@@ -497,7 +497,11 @@ class OperaController extends Controller
             #$location = (strlen($HotelRoom->location) > 3 && ($hotel_id == 296 || $hotel_id == 238 || $hotel_id == 289  || $hotel_id == 314 || $hotel_id == 303)) ? $HotelRoom->location : "0$HotelRoom->location";
             #$location = $hotel_id== 314 ||  $hotel_id== 303 ||  $hotel_id== 266 ? $HotelRoom->location : $location;
 
-            $location = str_pad($HotelRoom->location, 4, "0", STR_PAD_LEFT);
+            if($hotel_id == 314){
+                $location = $HotelRoom->location;
+            }else{
+                $location = str_pad($HotelRoom->location, 4, "0", STR_PAD_LEFT);
+            }
 
             $this->dispatch((new \App\Jobs\Opera($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)));
             // $this->check_out_reserve($hotel_id);

@@ -1546,9 +1546,13 @@ class Opera implements ShouldQueue
                         $add = false;
                     }
                     if ($add) {
+                        $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM NUMBER HOTEL:");
                         $this->customWriteLog("sync_opera", $this->hotel_id, $room_no);
                         $room_status = array_get($room, 'RoomStatus');
                         $reservation_data = [];
+
+                        $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM STATUS:");
+                        $this->customWriteLog("sync_opera", $this->hotel_id, array_get($room, 'HouseKeepingStatus'));
 
                         // && $this->hotel_id != 289
                         if (array_get($room, 'HouseKeepingStatus') == 'OCC') {
