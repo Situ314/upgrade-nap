@@ -1219,6 +1219,7 @@ class Opera implements ShouldQueue
                     'state'             => '1',
                     'created_at'        => date('Y-m-d H:i:s')
                 ];
+
                 if ($reservation['ReservationID'] != '') {
                     $suites = $this->getSuites($reservation['roomNumber']);
                     if ($suites) {
@@ -1248,16 +1249,30 @@ class Opera implements ShouldQueue
                     }
                 }
             } else {
+
+                $this->customWriteLog("sync_opera", $this->hotel_id, "NO TIENE RESERVA STATUS:");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($value));
+
                 $this->configTimeZone($this->hotel_id);
                 $date = date('Y-m-d H:i:s');
                 $room = $this->getRoom(array_get($value, 'RoomNumber'));
+
+                $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM ENCONTRADO EN NUVOLA:");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($room));
+
                 if (!is_null($room)) {
                     $reservations = GuestCheckinDetails::where('hotel_id', $this->hotel_id)
                         ->where('room_no', $room['room_id'])
                         ->where('status', 1)
-                        ->where('reservation_status', 1)
-                        ->whereDate('check_out', '<=', date('Y-m-d'))->get();
+                        ->where('reservation_status', 1)->get();
+                        //->whereDate('check_out', '<=', date('Y-m-d'))->get();
                     // \Log::info(json_encode($reservations));
+
+                    //$this->customWriteLog("sync_opera", $this->hotel_id, "DATOS CONSULTA EN NUVOLA:");
+                    //$this->customWriteLog("sync_opera", $this->hotel_id, $this->hotel_id);
+                    //$this->customWriteLog("sync_opera", $this->hotel_id, $room['room_id']);
+                    //$this->customWriteLog("sync_opera", $this->hotel_id, date('Y-m-d'));
+
                     foreach ($reservations as $reservation) {
                         if ($reservation->reservation_status == 1) {
                             $reservation->status = 0;
@@ -1583,6 +1598,7 @@ class Opera implements ShouldQueue
                             'RoomStatus'        => $room_status,
                             'reservation_data'  => $reservation_data
                         ];
+                        $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM FINAL:");
                         $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($hsk_status));
                     }
                 }
