@@ -41,11 +41,13 @@ class EventsController extends Controller
         $guest_id = $request->exists('guest_id') ? $request->guest_id : 0;
         if (!is_numeric($guest_id)) return response()->json(["error" => "Guest id is not a number "], 400);
 
-        $room_number = $request->exists('room_number') ? $request->room_number : '';
-        $room_number = explode(",", $room_number);
+        $room_number = $request->exists('room_number') ? $request->room_number : null;
+        if($room_number) $room_number = explode(",", $room_number);
+        else $room_number = [];
+
         $room_ids = [];
         if (count($room_number) > 0) {
-            $hotelRooms = \App\Models\HotelRoom::select("room_id")->whereIn("location", $room_number)->get();
+            $hotelRooms = \App\Models\HotelRoom::select("room_id")->where('hotel_id', $hotel_id)->whereIn("location", $room_number)->get();
             foreach ($hotelRooms as $r) {
                 $room_ids[] = $r->room_id;
             }
