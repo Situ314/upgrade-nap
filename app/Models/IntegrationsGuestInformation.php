@@ -15,4 +15,9 @@ class IntegrationsGuestInformation extends Model
     ];
 
     protected $hidden = [];
+
+    public function GuestRegistration()
+    {
+        return $this->hasOne('App\Models\GuestRegistration', 'guest_id', 'guest_id');
+    }
 }

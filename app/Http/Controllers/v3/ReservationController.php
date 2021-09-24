@@ -164,6 +164,19 @@ class ReservationController extends Controller
             ]);
         }
 
+        try {
+            sendNotificationMessages(
+                $hotel_id,
+                $guest->guest_id,
+                $staff_id,
+                $guest->GuestRegistration->email_address,
+                $guest->GuestRegistration->phone_no
+            );
+        } catch (\Exception $e) {
+            \Log::error("Error in ReservationController > store > sendNotificationMessages");
+            \Log::error($e);
+        }
+
         return response()->json([
             'status'    => 'success',
             'message'   => "Successfully created",
