@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\v3;
 
+use App\Helpers\MainHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 use Validator;
+
 
 class ReservationController extends Controller
 {
@@ -45,7 +47,7 @@ class ReservationController extends Controller
 
         $this->configTimeZone($hotel_id);
 
-        $reservations = \App\Models\GuestCheckinDetails::with(["GuestPms","Room"])->where('hotel_id', $request->hotel_id);
+        $reservations = \App\Models\GuestCheckinDetails::with(["GuestPms", "Room"])->where('hotel_id', $request->hotel_id);
 
         if (count($roomIdsList) > 0) $reservations->whereIn("room_no", $roomIdsList);
 
@@ -68,7 +70,7 @@ class ReservationController extends Controller
                 "check_in"              => $value->check_in,
                 "check_out"             => $value->check_out,
                 "comment"               => $value->comment,
-                "room"                  => $value->Room->location      
+                "room"                  => $value->Room->location
             ];
         }
 
@@ -147,6 +149,7 @@ class ReservationController extends Controller
 
         $guest = \App\Models\IntegrationsGuestInformation::where('hotel_id', $hotel_id)->where('guest_number', $guest_number)->first();
         $data = [];
+        $send_welcome = false;
         foreach ($reservations as $key => $reservation) {
             $room = array_key_exists('room', $reservation) && !empty($reservation["room"]) ? $reservation["room"] : "";
             $room_id = 0;
@@ -154,6 +157,8 @@ class ReservationController extends Controller
                 $hotel_room = $this->findRoomId($hotel_id, $room);
                 $room_id = $hotel_room["room_id"];
             }
+
+            if ($reservation['reservation_status'] == 1) $send_welcome = true;
 
             $reservationData = [
                 'guest_id'              => $guest->guest_id,
@@ -182,13 +187,15 @@ class ReservationController extends Controller
         }
 
         try {
-            sendNotificationMessages(
-                $hotel_id,
-                $guest->guest_id,
-                $staff_id,
-                $guest->GuestRegistration->email_address,
-                $guest->GuestRegistration->phone_no
-            );
+            if ($send_welcome) {
+                MainHelper::sendNotificationMessages(
+                    $hotel_id,
+                    $guest->guest_id,
+                    $staff_id,
+                    $guest->GuestRegistration->email_address,
+                    $guest->GuestRegistration->phone_no
+                );
+            }
         } catch (\Exception $e) {
             \Log::error("Error in ReservationController > store > sendNotificationMessages");
             \Log::error($e);

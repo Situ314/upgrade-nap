@@ -1,9 +1,14 @@
 <?php
 
+namespace App\Helpers;
+
 use DB;
 
-if (!function_exists('sendNotificationMessages')) {
-    function sendNotificationMessages($hotel_id, $guest_id, $staff_id, $email = '', $phone = '', $welcome = true, $back = false, $angel = true)
+
+class MainHelper
+{
+
+    public static function sendNotificationMessages($hotel_id, $guest_id, $staff_id, $email = '', $phone = '', $welcome = true, $back = false, $angel = true)
     {
         try {
             $str_query =  "";
