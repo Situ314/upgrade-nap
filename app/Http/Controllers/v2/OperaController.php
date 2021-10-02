@@ -499,6 +499,8 @@ class OperaController extends Controller
 
             if($hotel_id == 314){
                 $location = $HotelRoom->location;
+            }else if($hotel_id == 207){
+                $location = str_pad($HotelRoom->location, 3, "0", STR_PAD_LEFT);
             }else{
                 $location = str_pad($HotelRoom->location, 4, "0", STR_PAD_LEFT);
             }
