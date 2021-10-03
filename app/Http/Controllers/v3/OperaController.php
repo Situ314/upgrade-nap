@@ -24,19 +24,18 @@ class OperaController extends Controller
         switch ($keys[0]) {
             case 'GuestStatusNotificationRequest':
             case 'GuestStatusNotificationExtRequest':
-            	$this->sendXmlReservationToAws($request->xml);
+            	//$this->sendXmlReservationToAws($request->xml);
                 $resp = $this->reservationService($request);
                 break;
             case 'RoomStatusUpdateBERequest':
-                $this->sendXmlHSKToAws($request->xml);
+                //$this->sendXmlHSKToAws($request->xml);
                 $resp = $this->reservationService($request);
                 break;
             case 'NewProfileRequest':
             case 'UpdateProfileRequest':
-                $this->sendXmlProfileToAws($request->xml);
+                //$this->sendXmlProfileToAws($request->xml);
                 $resp = $this->nameService($request);
                 break;
-
             case 'QueueRoomBERequest':
                 $resp = $this->QueueService($request);
                 break;
