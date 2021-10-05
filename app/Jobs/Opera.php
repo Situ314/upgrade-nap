@@ -770,6 +770,7 @@ class Opera implements ShouldQueue
                     }
                     if (array_get($value, '@attributes.phoneRole') == 'EMAIL' && $guest_data['email_address'] == '') {
                         $guest_data['email_address'] = array_get($value, 'PhoneNumber', '');
+                        $guest_data['email_address'] = substr($guest_data['email_address'], 0, 100);
                     }
                 }
             }
@@ -1055,7 +1056,7 @@ class Opera implements ShouldQueue
                 'xml'           => $this->xml,
                 'MessageID'     => $this->MessageID,
             ];
-            
+
             if (!is_array($data_elements)) {
                 $data_elements = [$data_elements];
             }
@@ -1265,7 +1266,7 @@ class Opera implements ShouldQueue
                         ->where('room_no', $room['room_id'])
                         ->where('status', 1)
                         ->where('reservation_status', 1)->get();
-                        //->whereDate('check_out', '<=', date('Y-m-d'))->get();
+                    //->whereDate('check_out', '<=', date('Y-m-d'))->get();
                     // \Log::info(json_encode($reservations));
 
                     //$this->customWriteLog("sync_opera", $this->hotel_id, "DATOS CONSULTA EN NUVOLA:");
@@ -1919,7 +1920,8 @@ class Opera implements ShouldQueue
     public function getAngelStatus()
     {
         $data = IntegrationsActive::where('hotel_id', $this->hotel_id)->first();
-        return $data->sms_angel_active == 1 ? true : false;
+        if($data) return $data->sms_angel_active == 1 ? true : false;
+        return false;
     }
 
     public function getSuites($room_number)
