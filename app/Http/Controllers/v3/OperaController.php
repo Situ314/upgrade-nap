@@ -33,9 +33,10 @@ class OperaController extends Controller
                 break;
             case 'NewProfileRequest':
             case 'UpdateProfileRequest':
-                //$this->sendXmlProfileToAws($request->xml);
+                $this->sendXmlProfileToAws($request->xml);
                 $resp = $this->nameService($request);
                 break;
+
             case 'QueueRoomBERequest':
                 $resp = $this->QueueService($request);
                 break;
@@ -54,7 +55,7 @@ class OperaController extends Controller
         $type       = 'ProfileRegistration';
         $keys       = array_keys(array_get($data, 'Body', []));
         $unique_id  = array_get($data, 'Body.' . $keys[0] . '.Profile.IDs.UniqueID', '');
-        \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, array_get($data, 'Body.' . $keys[0]), $config)->onConnection('sqs-fifo');
+        //\App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, array_get($data, 'Body.' . $keys[0]), $config)->onConnection('sqs-fifo');
         $action = str_replace('Request', 'Response', $keys[0]);
         $resp   = $this->BuildXMLProfileResponse($action, $unique_id);
 
@@ -783,7 +784,8 @@ class OperaController extends Controller
             // $text = $request->getContent();
             $client = new Client();
             $promise = $client->postAsync(
-                'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/profile',
+                //'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/profile',
+                'https://lht4g5xmvc.execute-api.us-east-1.amazonaws.com/Prod/profile',
                 [
                     'body' => $text,
                     'headers' => ['Content-Type' => 'application/xml']
