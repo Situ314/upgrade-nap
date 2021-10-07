@@ -19,7 +19,7 @@ class OperaController extends Controller
     {
         $data       = $request->data;
         $keys       = array_keys(array_get($data, 'Body', []));
-        $reps = null;
+        $resp = null;
 
         switch ($keys[0]) {
             case 'GuestStatusNotificationRequest':
