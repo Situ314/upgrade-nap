@@ -53,7 +53,8 @@ class GuestRegistration extends Model
         'custom_value_9',   // default null
         'custom_field_10',  // default null
         'custom_value_10',  // default null
-        'category'          // default 0
+        'category',         // default 0
+        'pms_unique_id',    // default null
     ];
     protected $hidden = [
         'hotel_id',

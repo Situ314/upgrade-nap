@@ -11,7 +11,7 @@ use App\Models\HousekeepingCleanings;
 use App\Models\HousekeepingTimeline;
 use App\Models\Integrations;
 use App\Models\IntegrationsActive;
-// use App\Models\IntegrationsGuestInformation;
+use App\Models\IntegrationsGuestInformation;
 use App\Models\IntegrationSuitesRoom;
 use App\Models\Log\OracleReservation;
 use Illuminate\Bus\Queueable;
@@ -84,8 +84,7 @@ class Opera implements ShouldQueue
         $ReservationID  = array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.ReservationID', '');
         $UniqueID       = array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
         $Profile        = null;
-        // $Profile        = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $UniqueID)->first();
-        $Profile = \App\Models\GuestRegistration::where('hotel_id', $this->hotel_id)->where('pms_unique_id', $UniqueID)->first();
+        $Profile        = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $UniqueID)->first();
         $state          = 0;
 
         // if ($Profile && $this->hotel_id != 289) {
@@ -169,8 +168,7 @@ class Opera implements ShouldQueue
         $UniqueID       = array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.ProfileIDs.UniqueID', '');
 
         $Profile = null;
-        // $Profile = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $UniqueID)->first();
-        $Profile = \App\Models\GuestRegistration::where("hotel_id", $this->hotel_id)->where('pms_unique_id', $UniqueID)->first();
+        $Profile = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $UniqueID)->first();
         $state = 0;
 
         // if ($Profile && $this->hotel_id != 289) {
@@ -284,8 +282,7 @@ class Opera implements ShouldQueue
                     }
                 }
                 if ($guest_id != '') {
-                    // $guest = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $guest_id)->first();
-                    $guest = \App\Models\GuestRegistration::where("hotel_id", $this->hotel_id)->where("pms_unique_id", $guest_id)->first();
+                    $guest = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $guest_id)->first();
                     if ($guest) {
                         $rs = GuestCheckinDetails::where('hotel_id', $this->hotel_id)->where('guest_id', $guest->guest_id)->whereDate('check_in', '>=', date('Y-m-d'))
                             ->where('reservation_status', 1)->orderBy('sno', 'DESC')->first();
@@ -339,11 +336,11 @@ class Opera implements ShouldQueue
 
             $this->configTimeZone($this->hotel_id);
 
-            // $IntegrationsGuestInformation = \App\Models\IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $reservation->UniqueID)->first();
-            $guest = \App\Models\GuestRegistration::where('hotel_id', $this->hotel_id)->where('pms_unique_id', $reservation->UniqueID)->first();
-            // if ($IntegrationsGuestInformation) {
-            if ($guest) {
-                $guest_id = $guest->guest_id;
+            $IntegrationsGuestInformation = \App\Models\IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)
+                ->where('guest_number', $reservation->UniqueID)
+                ->first();
+            if ($IntegrationsGuestInformation) {
+                $guest_id = $IntegrationsGuestInformation->guest_id;
                 $room_no = 0;
                 if (!empty($reservation->roomNumber)) {
                     $room           = $this->getRoom($reservation->roomNumber);
@@ -761,8 +758,7 @@ class Opera implements ShouldQueue
                     'language'      => '',
                     'comment'       => '',
                     'created_on'    => date('Y-m-d H:i:s'),
-                    'created_by'    => $this->staff_id,
-                    'pms_unique_id' => $unique_id,
+                    'created_by'    => $this->staff_id
                 ];
                 $phonesData = array_get($arrayData, 'Profile.Phones.NamePhone', []);
                 if (array_has($phonesData, '@attributes.phoneType')) {
@@ -774,114 +770,110 @@ class Opera implements ShouldQueue
                     }
                     if (array_get($value, '@attributes.phoneRole') == 'EMAIL' && $guest_data['email_address'] == '') {
                         $guest_data['email_address'] = array_get($value, 'PhoneNumber', '');
-                        $guest_data['email_address'] = substr($guest_data['email_address'], 0, 100);
                     }
                 }
             }
 
             if (!$unique_id == '') {
-                // $IntegrationsGuestInformation = \App\Models\IntegrationsGuestInformation::where('guest_number', $unique_id)->where('hotel_id', $this->hotel_id)->first();
-                $guest = \App\Models\GuestRegistration::where('hotel_id', $this->hotel_id)->where('pms_unique_id', $unique_id)->first();
+                $IntegrationsGuestInformation = \App\Models\IntegrationsGuestInformation::where('guest_number', $unique_id)->where('hotel_id', $this->hotel_id)->first();
+                if ($IntegrationsGuestInformation) {
+                    $old_guest = \App\Models\GuestRegistration::find($IntegrationsGuestInformation->guest_id);
+                    if ($old_guest) {
+                        $__update = '';
+                        if (is_string($guest_data['email_address']) && $guest_data['email_address'] != $old_guest->email_address) {
+                            $__update .= "email_address: $old_guest->email_address to " . $guest_data['email_address'] . ", ";
+                            $old_guest->email_address = $guest_data['email_address'];
+                        }
+                        $phone_no = str_replace(["-", ".", " ", "(", ")", "*", "/", "na", "+"], "", $guest_data['phone_no']);
+                        if (!empty($phone_no) && is_numeric($phone_no)) {
+                            $phone_no = "+$phone_no";
+                        } else {
+                            $phone_no = '';
+                        }
+                        $guest_data['phone_no'] = $phone_no;
 
-                // if ($IntegrationsGuestInformation) {
-                if ($guest) {
-                    // $old_guest = \App\Models\GuestRegistration::find($IntegrationsGuestInformation->guest_id);
-                    // if ($old_guest) {
-                    $__update = '';
-                    if (is_string($guest_data['email_address']) && $guest_data['email_address'] != $guest->email_address) {
-                        $__update .= "email_address: $guest->email_address to " . $guest_data['email_address'] . ", ";
-                        $guest->email_address = $guest_data['email_address'];
-                    }
-                    $phone_no = str_replace(["-", ".", " ", "(", ")", "*", "/", "na", "+"], "", $guest_data['phone_no']);
-                    if (!empty($phone_no) && is_numeric($phone_no)) {
-                        $phone_no = "+$phone_no";
+                        if ($old_guest->phone_no != $guest_data['phone_no'] && $guest_data['phone_no'] != '') {
+                            $__update .= "phone_no: $old_guest->phone_no to " . $guest_data['phone_no'] . ", ";
+                            $old_guest->phone_no = $guest_data['phone_no'];
+                        }
+
+                        if (is_string($guest_data['firstname']) && $guest_data['firstname'] != $old_guest->firstname) {
+                            if (!is_array($guest_data['firstname'])) {
+                                $__update .= "firstname: $old_guest->firstname to " . $guest_data['firstname'] . ", ";
+                                $old_guest->firstname = $guest_data['firstname'];
+                            }
+                        }
+                        if (is_string($guest_data['lastname']) && $guest_data['lastname'] != $old_guest->lastname) {
+                            $__update .= "lastname: $old_guest->lastname to " . $guest_data['lastname'] . ", ";
+                            $old_guest->lastname = $guest_data['lastname'];
+                        }
+
+                        if (is_string($guest_data['address']) && $guest_data['address'] != $old_guest->address) {
+                            $__update .= "address: $old_guest->address to " . $guest_data['address'] . ", ";
+                            $old_guest->address = $guest_data['address'];
+                            if (strlen($old_guest->address) >= 100) {
+                                $old_guest->address = substr($old_guest->address, 0, 99);
+                            }
+                        }
+                        if (is_string($guest_data['city']) && $guest_data['city'] != $old_guest->city) {
+                            $__update .= "city: $old_guest->city to " . $guest_data['city'] . ", ";
+                            $old_guest->city = $guest_data['city'];
+                        }
+                        if ($guest_data['zipcode'] != $old_guest->zipcode) {
+                            if (!is_array($guest_data['zipcode']) && !is_array($old_guest->zipcode)) {
+                                $__update .= "zipcode: $old_guest->zipcode to " . $guest_data['zipcode'] . ", ";
+                                $old_guest->zipcode = $guest_data['zipcode'];
+                            }
+                        }
+                        if ($guest_data['state'] != $old_guest->state) {
+                            if (!is_array($guest_data['state']) && !is_array($old_guest->state)) {
+                                $__update .= "state: $old_guest->state to " . $guest_data['state'] . ", ";
+                                $old_guest->state = $guest_data['state'];
+                            }
+                        }
+                        if ($__update != '') {
+                            $old_guest->updated_on = date('Y-m-d H:i:s');
+                            $old_guest->updated_by = $this->staff_id;
+                            $old_guest->save();
+                            $this->saveLogTracker([
+                                'hotel_id'  => $this->hotel_id,
+                                'module_id' => 8,
+                                'action'    => 'update',
+                                'prim_id'   => $old_guest->guest_id,
+                                'staff_id'  => $this->staff_id,
+                                'date_time' => date('Y-m-d H:i:s'),
+                                'comments'  => 'Guest Update',
+                                'type'      => 'API-OPERA'
+                            ]);
+                        }
                     } else {
-                        $phone_no = '';
-                    }
-                    $guest_data['phone_no'] = $phone_no;
+                        $phone_no = str_replace(["-", ".", " ", "(", ")", "*", "/", "na", "+"], "", $guest_data['phone_no']);
+                        if (!empty($phone_no) && is_numeric($phone_no)) {
+                            $phone_no = "+$phone_no";
+                        } else {
+                            $phone_no = '';
+                        }
+                        $guest_data['phone_no'] = $phone_no;
+                        $guest_data['angel_status'] =  $angel_status;
+                        $new_guest = \App\Models\GuestRegistration::create($guest_data);
+                        \App\Models\IntegrationsGuestInformation::create([
+                            'hotel_id'      => $this->hotel_id,
+                            'guest_id'      => $new_guest->guest_id,
+                            'guest_number'  => $unique_id
+                        ]);
+                        $IntegrationsGuestInformation->delete();
 
-                    if ($guest->phone_no != $guest_data['phone_no'] && $guest_data['phone_no'] != '') {
-                        $__update .= "phone_no: $guest->phone_no to " . $guest_data['phone_no'] . ", ";
-                        $guest->phone_no = $guest_data['phone_no'];
-                    }
-
-                    if (is_string($guest_data['firstname']) && $guest_data['firstname'] != $guest->firstname) {
-                        if (!is_array($guest_data['firstname'])) {
-                            $__update .= "firstname: $guest->firstname to " . $guest_data['firstname'] . ", ";
-                            $guest->firstname = $guest_data['firstname'];
-                        }
-                    }
-                    if (is_string($guest_data['lastname']) && $guest_data['lastname'] != $guest->lastname) {
-                        $__update .= "lastname: $guest->lastname to " . $guest_data['lastname'] . ", ";
-                        $guest->lastname = $guest_data['lastname'];
-                    }
-
-                    if (is_string($guest_data['address']) && $guest_data['address'] != $guest->address) {
-                        $__update .= "address: $guest->address to " . $guest_data['address'] . ", ";
-                        $guest->address = $guest_data['address'];
-                        if (strlen($guest->address) >= 100) {
-                            $guest->address = substr($guest->address, 0, 99);
-                        }
-                    }
-                    if (is_string($guest_data['city']) && $guest_data['city'] != $guest->city) {
-                        $__update .= "city: $guest->city to " . $guest_data['city'] . ", ";
-                        $guest->city = $guest_data['city'];
-                    }
-                    if ($guest_data['zipcode'] != $guest->zipcode) {
-                        if (!is_array($guest_data['zipcode']) && !is_array($guest->zipcode)) {
-                            $__update .= "zipcode: $guest->zipcode to " . $guest_data['zipcode'] . ", ";
-                            $guest->zipcode = $guest_data['zipcode'];
-                        }
-                    }
-                    if ($guest_data['state'] != $guest->state) {
-                        if (!is_array($guest_data['state']) && !is_array($guest->state)) {
-                            $__update .= "state: $guest->state to " . $guest_data['state'] . ", ";
-                            $guest->state = $guest_data['state'];
-                        }
-                    }
-                    if ($__update != '') {
-                        $guest->updated_on = date('Y-m-d H:i:s');
-                        $guest->updated_by = $this->staff_id;
-                        $guest->save();
                         $this->saveLogTracker([
                             'hotel_id'  => $this->hotel_id,
-                            'module_id' => 8,
-                            'action'    => 'update',
-                            'prim_id'   => $guest->guest_id,
                             'staff_id'  => $this->staff_id,
+                            'prim_id'   => $new_guest->guest_id,
+                            'module_id' => 8,
+                            'action'    => 'add',
                             'date_time' => date('Y-m-d H:i:s'),
-                            'comments'  => 'Guest Update',
+                            'comments'  => 'Guest Created',
                             'type'      => 'API-OPERA'
                         ]);
                     }
-                    // } else {
-                    //     $phone_no = str_replace(["-", ".", " ", "(", ")", "*", "/", "na", "+"], "", $guest_data['phone_no']);
-                    //     if (!empty($phone_no) && is_numeric($phone_no)) {
-                    //         $phone_no = "+$phone_no";
-                    //     } else {
-                    //         $phone_no = '';
-                    //     }
-                    //     $guest_data['phone_no'] = $phone_no;
-                    //     $guest_data['angel_status'] =  $angel_status;
-                    //     $new_guest = \App\Models\GuestRegistration::create($guest_data);
-                    //     \App\Models\IntegrationsGuestInformation::create([
-                    //         'hotel_id'      => $this->hotel_id,
-                    //         'guest_id'      => $new_guest->guest_id,
-                    //         'guest_number'  => $unique_id
-                    //     ]);
-                    //     $IntegrationsGuestInformation->delete();
-
-                    //     $this->saveLogTracker([
-                    //         'hotel_id'  => $this->hotel_id,
-                    //         'staff_id'  => $this->staff_id,
-                    //         'prim_id'   => $new_guest->guest_id,
-                    //         'module_id' => 8,
-                    //         'action'    => 'add',
-                    //         'date_time' => date('Y-m-d H:i:s'),
-                    //         'comments'  => 'Guest Created',
-                    //         'type'      => 'API-OPERA'
-                    //     ]);
-                    // }
                 } else {
                     $phone_no = str_replace(["-", ".", " ", "(", ")", "*", "/", "na", "+"], "", $guest_data['phone_no']);
                     if (!empty($phone_no) && is_numeric($phone_no)) {
@@ -916,7 +908,11 @@ class Opera implements ShouldQueue
                     $guest_data['email_address'] = is_string($guest_data['email_address']) ? $guest_data['email_address'] : '';
 
                     $new_guest = \App\Models\GuestRegistration::create($guest_data);
-                    // \App\Models\IntegrationsGuestInformation::create([ 'hotel_id'      => $this->hotel_id, 'guest_id'      => $new_guest->guest_id, 'guest_number'  => $unique_id ]);
+                    \App\Models\IntegrationsGuestInformation::create([
+                        'hotel_id'      => $this->hotel_id,
+                        'guest_id'      => $new_guest->guest_id,
+                        'guest_number'  => $unique_id
+                    ]);
 
                     $this->saveLogTracker([
                         'hotel_id'  => $this->hotel_id,
@@ -1059,7 +1055,7 @@ class Opera implements ShouldQueue
                 'xml'           => $this->xml,
                 'MessageID'     => $this->MessageID,
             ];
-
+            
             if (!is_array($data_elements)) {
                 $data_elements = [$data_elements];
             }
@@ -1223,7 +1219,6 @@ class Opera implements ShouldQueue
                     'state'             => '1',
                     'created_at'        => date('Y-m-d H:i:s')
                 ];
-
                 if ($reservation['ReservationID'] != '') {
                     $suites = $this->getSuites($reservation['roomNumber']);
                     if ($suites) {
@@ -1253,30 +1248,16 @@ class Opera implements ShouldQueue
                     }
                 }
             } else {
-
-                $this->customWriteLog("sync_opera", $this->hotel_id, "NO TIENE RESERVA STATUS:");
-                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($value));
-
                 $this->configTimeZone($this->hotel_id);
                 $date = date('Y-m-d H:i:s');
                 $room = $this->getRoom(array_get($value, 'RoomNumber'));
-
-                $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM ENCONTRADO EN NUVOLA:");
-                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($room));
-
                 if (!is_null($room)) {
                     $reservations = GuestCheckinDetails::where('hotel_id', $this->hotel_id)
                         ->where('room_no', $room['room_id'])
                         ->where('status', 1)
-                        ->where('reservation_status', 1)->get();
-                    //->whereDate('check_out', '<=', date('Y-m-d'))->get();
+                        ->where('reservation_status', 1)
+                        ->whereDate('check_out', '<=', date('Y-m-d'))->get();
                     // \Log::info(json_encode($reservations));
-
-                    //$this->customWriteLog("sync_opera", $this->hotel_id, "DATOS CONSULTA EN NUVOLA:");
-                    //$this->customWriteLog("sync_opera", $this->hotel_id, $this->hotel_id);
-                    //$this->customWriteLog("sync_opera", $this->hotel_id, $room['room_id']);
-                    //$this->customWriteLog("sync_opera", $this->hotel_id, date('Y-m-d'));
-
                     foreach ($reservations as $reservation) {
                         if ($reservation->reservation_status == 1) {
                             $reservation->status = 0;
@@ -1473,7 +1454,7 @@ class Opera implements ShouldQueue
         </soap:Envelope>
         ';
         $curl = curl_init();
-        $actions = ($this->hotel_id != 281) && ($this->hotel_id != 266) && ($this->hotel_id != 296) && ($this->hotel_id != 238) && ($this->hotel_id != 314) && ($this->hotel_id != 289) && ($this->hotel_id != 303) && ($this->hotel_id != 443) && ($this->hotel_id != 207) ? array(
+        $actions = ($this->hotel_id != 281) && ($this->hotel_id != 266) && ($this->hotel_id != 296) && ($this->hotel_id != 238) && ($this->hotel_id != 314) && ($this->hotel_id != 289) && ($this->hotel_id != 303) && ($this->hotel_id != 443) ? array(
             "Content-Type: text/xml;charset=UTF-8",
             "SOAPAction: http://webservices.micros.com/htng/2008B/SingleGuestItinerary#ReservationLookup",
         ) : array(
@@ -1602,7 +1583,6 @@ class Opera implements ShouldQueue
                             'RoomStatus'        => $room_status,
                             'reservation_data'  => $reservation_data
                         ];
-                        $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM FINAL:");
                         $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($hsk_status));
                     }
                 }
@@ -1718,15 +1698,14 @@ class Opera implements ShouldQueue
 
     public function syncProfileData()
     {
-        $IntegrationsActive = \App\Models\IntegrationsActive::where("hotel_id", $this->hotel_id)->first();
-        $pms_hotel_id = $IntegrationsActive->pms_hotel_id;
         $guest = GuestRegistration::where('hotel_id', $this->hotel_id)->whereDate('created_on', '>=', '2020-11-15')->where('phone_no', '')->get();
         foreach ($guest as $g) {
-            //     $int = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_id', $g->guest_id)->first();
-            if (!empty($g->pms_unique_id)) {
-                $guest_data = $this->getProfileData($g->pms_unique_id, $pms_hotel_id);
+            $int = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_id', $g->guest_id)->first();
+            if ($int) {
+                $guest_data = $this->getProfileData($int->guest_number, 'ZLQAA1');
+                // dd($guest_data);
                 \Log::alert(json_encode($guest_data));
-                $guest_data['ResortId'] = $pms_hotel_id;
+                $guest_data['ResortId'] = 'ZLQAA1';
                 $this->data = $guest_data;
                 $resp = $this->ProfileRegistration();
             } else {
@@ -1924,8 +1903,7 @@ class Opera implements ShouldQueue
     public function getAngelStatus()
     {
         $data = IntegrationsActive::where('hotel_id', $this->hotel_id)->first();
-        if($data) return $data->sms_angel_active == 1 ? true : false;
-        return false;
+        return $data->sms_angel_active == 1 ? true : false;
     }
 
     public function getSuites($room_number)
