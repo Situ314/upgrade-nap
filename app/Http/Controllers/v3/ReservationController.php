@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\v3;
 
+use App\Helpers\MainHelper;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 use Validator;
+
 
 class ReservationController extends Controller
 {
@@ -16,11 +18,12 @@ class ReservationController extends Controller
      */
     public function index(Request $request)
     {
-        $hotel_id           = isset($request->hotel_id) ? $request->hotel_id : null;
-        $reservation_status = isset($request->reservation_status) ? $request->reservation_status : null;
-        $reservation_status = 1;
+        $staff_id   = $request->user()->staff_id;
+        $hotel_id   = isset($request->hotel_id) ? $request->hotel_id : null;
+        $rooms      = isset($request->rooms) ? $request->rooms : null;
+        $roomIdsList = [];
 
-        $staff_id = $request->user()->staff_id;
+        $reservation_status = 1;
 
         if (!$this->validateHotelId($hotel_id, $staff_id)) {
             return response()->json([
@@ -30,11 +33,26 @@ class ReservationController extends Controller
             ], 400);
         }
 
+        if (!is_null($rooms)) {
+            $rooms = explode(',', $rooms);
+            if (count($rooms) > 0) {
+                $hotelRooms = \App\Models\HotelRoom::select(["location", "room_id"])->where("hotel_id", $hotel_id)->whereIn("location", $rooms)->get();
+                if (count($hotelRooms) > 0) {
+                    foreach ($hotelRooms as $key => $value) {
+                        $roomIdsList[] = $value->room_id;
+                    }
+                }
+            }
+        }
+
         $this->configTimeZone($hotel_id);
 
-        $reservations = \App\Models\GuestCheckinDetails::with("GuestPms")->where('hotel_id', $request->hotel_id);
+        $reservations = \App\Models\GuestCheckinDetails::with(["GuestPms", "Room"])->where('hotel_id', $request->hotel_id);
+
+        if (count($roomIdsList) > 0) $reservations->whereIn("room_no", $roomIdsList);
 
         if (!is_null($reservation_status)) $reservations->where('reservation_status', $reservation_status);
+
 
         $_data = $reservations->get();
         $data = [];
@@ -52,6 +70,7 @@ class ReservationController extends Controller
                 "check_in"              => $value->check_in,
                 "check_out"             => $value->check_out,
                 "comment"               => $value->comment,
+                "room"                  => $value->Room->location
             ];
         }
 
@@ -62,7 +81,7 @@ class ReservationController extends Controller
 
         return response()->json([
             'status'    => 'success',
-            'message'   => "Successfully updated",
+            'message'   => "",
             "data"      => $reservatons
         ], 200);
     }
@@ -130,6 +149,7 @@ class ReservationController extends Controller
 
         $guest = \App\Models\IntegrationsGuestInformation::where('hotel_id', $hotel_id)->where('guest_number', $guest_number)->first();
         $data = [];
+        $send_welcome = false;
         foreach ($reservations as $key => $reservation) {
             $room = array_key_exists('room', $reservation) && !empty($reservation["room"]) ? $reservation["room"] : "";
             $room_id = 0;
@@ -137,6 +157,8 @@ class ReservationController extends Controller
                 $hotel_room = $this->findRoomId($hotel_id, $room);
                 $room_id = $hotel_room["room_id"];
             }
+
+            if ($reservation['reservation_status'] == 1) $send_welcome = true;
 
             $reservationData = [
                 'guest_id'              => $guest->guest_id,
@@ -162,6 +184,21 @@ class ReservationController extends Controller
                 'hotel_id'  => $hotel_id,
                 'type'      => 'API-V3'
             ]);
+        }
+
+        try {
+            if ($send_welcome) {
+                MainHelper::sendNotificationMessages(
+                    $hotel_id,
+                    $guest->guest_id,
+                    $staff_id,
+                    $guest->GuestRegistration->email_address,
+                    $guest->GuestRegistration->phone_no
+                );
+            }
+        } catch (\Exception $e) {
+            \Log::error("Error in ReservationController > store > sendNotificationMessages");
+            \Log::error($e);
         }
 
         return response()->json([

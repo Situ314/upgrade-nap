@@ -774,6 +774,7 @@ class Opera implements ShouldQueue
                     }
                     if (array_get($value, '@attributes.phoneRole') == 'EMAIL' && $guest_data['email_address'] == '') {
                         $guest_data['email_address'] = array_get($value, 'PhoneNumber', '');
+                        $guest_data['email_address'] = substr($guest_data['email_address'], 0, 100);
                     }
                 }
             }
@@ -1222,6 +1223,7 @@ class Opera implements ShouldQueue
                     'state'             => '1',
                     'created_at'        => date('Y-m-d H:i:s')
                 ];
+
                 if ($reservation['ReservationID'] != '') {
                     $suites = $this->getSuites($reservation['roomNumber']);
                     if ($suites) {
@@ -1251,16 +1253,30 @@ class Opera implements ShouldQueue
                     }
                 }
             } else {
+
+                $this->customWriteLog("sync_opera", $this->hotel_id, "NO TIENE RESERVA STATUS:");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($value));
+
                 $this->configTimeZone($this->hotel_id);
                 $date = date('Y-m-d H:i:s');
                 $room = $this->getRoom(array_get($value, 'RoomNumber'));
+
+                $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM ENCONTRADO EN NUVOLA:");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($room));
+
                 if (!is_null($room)) {
                     $reservations = GuestCheckinDetails::where('hotel_id', $this->hotel_id)
                         ->where('room_no', $room['room_id'])
                         ->where('status', 1)
-                        ->where('reservation_status', 1)
-                        ->whereDate('check_out', '<=', date('Y-m-d'))->get();
+                        ->where('reservation_status', 1)->get();
+                    //->whereDate('check_out', '<=', date('Y-m-d'))->get();
                     // \Log::info(json_encode($reservations));
+
+                    //$this->customWriteLog("sync_opera", $this->hotel_id, "DATOS CONSULTA EN NUVOLA:");
+                    //$this->customWriteLog("sync_opera", $this->hotel_id, $this->hotel_id);
+                    //$this->customWriteLog("sync_opera", $this->hotel_id, $room['room_id']);
+                    //$this->customWriteLog("sync_opera", $this->hotel_id, date('Y-m-d'));
+
                     foreach ($reservations as $reservation) {
                         if ($reservation->reservation_status == 1) {
                             $reservation->status = 0;
@@ -1457,7 +1473,7 @@ class Opera implements ShouldQueue
         </soap:Envelope>
         ';
         $curl = curl_init();
-        $actions = ($this->hotel_id != 281) && ($this->hotel_id != 266) && ($this->hotel_id != 296) && ($this->hotel_id != 238) && ($this->hotel_id != 314) && ($this->hotel_id != 289) && ($this->hotel_id != 303) && ($this->hotel_id != 443) ? array(
+        $actions = ($this->hotel_id != 281) && ($this->hotel_id != 266) && ($this->hotel_id != 296) && ($this->hotel_id != 238) && ($this->hotel_id != 314) && ($this->hotel_id != 289) && ($this->hotel_id != 303) && ($this->hotel_id != 443) && ($this->hotel_id != 207) ? array(
             "Content-Type: text/xml;charset=UTF-8",
             "SOAPAction: http://webservices.micros.com/htng/2008B/SingleGuestItinerary#ReservationLookup",
         ) : array(
@@ -1586,6 +1602,7 @@ class Opera implements ShouldQueue
                             'RoomStatus'        => $room_status,
                             'reservation_data'  => $reservation_data
                         ];
+                        $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM FINAL:");
                         $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($hsk_status));
                     }
                 }
@@ -1907,7 +1924,8 @@ class Opera implements ShouldQueue
     public function getAngelStatus()
     {
         $data = IntegrationsActive::where('hotel_id', $this->hotel_id)->first();
-        return $data->sms_angel_active == 1 ? true : false;
+        if($data) return $data->sms_angel_active == 1 ? true : false;
+        return false;
     }
 
     public function getSuites($room_number)

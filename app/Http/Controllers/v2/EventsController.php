@@ -28,9 +28,7 @@ class EventsController extends Controller
         // Validar hotel
         if (!$request->exists('hotel_id')) return response()->json(["error" => "Hotel id not provided"], 400);
         $hotel_id = $request->hotel_id;
-        if (!is_numeric($hotel_id)) {
-            return response()->json(["sintaxis error" => "Hotel ID is numeric type"], 400);
-        }
+        if (!is_numeric($hotel_id)) return response()->json(["sintaxis error" => "Hotel ID is numeric type"], 400);
         // Validar acceso al hotel x usuario
         if (!$this->validateHotelId($hotel_id, $staff_id)) return response()->json(["error" => "User does not have access to the hotel"], 400);
         // Validar que el usuario tenga permisos para realizar esta operacion
@@ -41,10 +39,21 @@ class EventsController extends Controller
         $now = date('Y-m-d H:i:s');
 
         $guest_id = $request->exists('guest_id') ? $request->guest_id : 0;
-
         if (!is_numeric($guest_id)) return response()->json(["error" => "Guest id is not a number "], 400);
 
-        $query = Event::select([
+        $room_number = $request->exists('room_number') ? $request->room_number : null;
+        if($room_number) $room_number = explode(",", $room_number);
+        else $room_number = [];
+
+        $room_ids = [];
+        if (count($room_number) > 0) {
+            $hotelRooms = \App\Models\HotelRoom::select("room_id")->where('hotel_id', $hotel_id)->whereIn("location", $room_number)->get();
+            foreach ($hotelRooms as $r) {
+                $room_ids[] = $r->room_id;
+            }
+        }
+
+        $columns = [
             'event_id',
             'guest_id',
             'room_id',
@@ -52,7 +61,9 @@ class EventsController extends Controller
             'dept_tag_id',
             'date',
             'time'
-        ])
+        ];
+
+        $query = Event::select($columns)
             ->with([
                 'Room' => function ($q) {
                     return $q->select(['room_id', 'location']);
@@ -60,11 +71,14 @@ class EventsController extends Controller
                 'DepTag.departament',
                 'DepTag.tag'
             ])
-            ->where(function ($q) use ($hotel_id, $guest_id) {
+            ->where(function ($q) use ($hotel_id, $guest_id, $room_ids) {
                 $q->where('hotel_id', $hotel_id)->where('active', 1);
                 if ($guest_id > 0) $q->where('guest_id', $guest_id);
+                if (count($room_ids) > 0) $q->whereIn("room_id", $room_ids);
                 return $q;
-            })->orderBy('event_id', 'DESC');
+            })
+            ->orderBy('event_id', 'DESC');
+
         $data = $query->paginate($paginate);
         return response()->json($data, 200);
     }
@@ -624,7 +638,6 @@ class EventsController extends Controller
 
         return response()->json($data, 200);
     }
-
 
     // public function eventTest(Request $request)
     // {

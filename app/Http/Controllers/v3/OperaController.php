@@ -24,15 +24,18 @@ class OperaController extends Controller
         switch ($keys[0]) {
             case 'GuestStatusNotificationRequest':
             case 'GuestStatusNotificationExtRequest':
+            	//$this->sendXmlReservationToAws($request->xml);
+                $resp = $this->reservationService($request);
+                break;
             case 'RoomStatusUpdateBERequest':
+                //$this->sendXmlHSKToAws($request->xml);
                 $resp = $this->reservationService($request);
                 break;
             case 'NewProfileRequest':
             case 'UpdateProfileRequest':
-                // $this->sendXmlToAws($request->xml);
+                //$this->sendXmlProfileToAws($request->xml);
                 $resp = $this->nameService($request);
                 break;
-
             case 'QueueRoomBERequest':
                 $resp = $this->QueueService($request);
                 break;
@@ -774,7 +777,7 @@ class OperaController extends Controller
         }
     }
 
-    private function sendXmlToAws($text)
+    private function sendXmlProfileToAws($text)
     {
         try {
             // $text = $request->getContent();
@@ -794,4 +797,47 @@ class OperaController extends Controller
             \Log::error($e);
         }
     }
+    
+    private function sendXmlReservationToAws($text)
+    {
+        try {
+            // $text = $request->getContent();
+            $client = new Client();
+            $promise = $client->postAsync(
+                'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/reservation',
+                [
+                    'body' => $text,
+                    'headers' => ['Content-Type' => 'application/xml']
+                ]
+            )->then(function ($response) {
+            });
+            $promise->wait();
+            \Log::info("Send xml to aws");
+        } catch (\Exception $e) {
+            \Log::error('Error sendXmlToAws');
+            \Log::error($e);
+        }
+    }
+    
+    private function sendXmlHSKToAws($text)
+    {
+        try {
+            // $text = $request->getContent();
+            $client = new Client();
+            $promise = $client->postAsync(
+                'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/housekeeping',
+                [
+                    'body' => $text,
+                    'headers' => ['Content-Type' => 'application/xml']
+                ]
+            )->then(function ($response) {
+            });
+            $promise->wait();
+            \Log::info("Send xml to aws");
+        } catch (\Exception $e) {
+            \Log::error('Error sendXmlToAws');
+            \Log::error($e);
+        }
+    }
+    
 }

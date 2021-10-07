@@ -29,6 +29,7 @@ class HousekeepingController extends Controller
     {
         // Capturar hotel id, por default el valor es null, en caso de no enviarlo
         $hotel_id = isset($request->hotel_id) ? $request->hotel_id : null;
+        \Log::info("--> V3 HSK STATUS: " . json_encode(["data" => $request->all()]));
 
         $validator = Validator::make($request->all(), [
             "room_status" => "array|required",
@@ -110,7 +111,7 @@ class HousekeepingController extends Controller
                             ->orderBy('cleaning_id', 'DESC')
                             ->limit(1)
                             ->first();
-                            
+
                         if ($cleanings) {
                             $cleanings->in_queue = 0;
                             $cleanings->save();
@@ -152,7 +153,7 @@ class HousekeepingController extends Controller
         ], 200);
     }
 
-    private function queue($hotel_id, $staff_id,  $room_id, $flag)
+    private function queue($hotel_id, $staff_id, $room_id, $flag)
     {
         $cleanings = \App\Models\HousekeepingCleanings::where('hotel_id', $hotel_id)
             ->where('room_id', $room_id)
@@ -161,10 +162,17 @@ class HousekeepingController extends Controller
             ->limit(2)
             ->get();
 
+        $previous_value = 0;
+        $value = $flag ? 1 : 0;
+
         if (count($cleanings) > 0) {
             $currentCleanig = $cleanings[0];
-            $currentCleanig->in_queue = $flag ? 1 : 0;
+            $currentCleanig->in_queue = $value;
             $currentCleanig->save();
+
+            if (count($cleanings) == 2) {
+                $previous_value = $cleanings[1]->value;
+            }
         } else {
             $now = date("Y-m-d H:i:s");
             $yesterday = date("Y-m-d H:i:s", strtotime($now . " - 1 days"));
@@ -182,11 +190,14 @@ class HousekeepingController extends Controller
         \App\Models\HousekeepingTimeline::create([
             'item_id'       => $currentCleanig->cleaning_id,
             'hotel_id'      => $hotel_id,
-            'action'        => $flag ? 'CLEANING_CREATED' : 'CLEANING_DELETED',
+            'action'        => 'CLEANING_UPDATED',
             'is_active'     => 1,
             'changed_by'    => $staff_id,
             'changed_on'    => date('Y-m-d H:i:s'),
-            'platform'      => 'HSK API V3'
+            'platform'      => 'HSK API V3',
+            'changed_field' => 'in_queue',
+            'previous_value' => $previous_value,
+            'value'         => $value,
         ]);
     }
 
@@ -199,9 +210,12 @@ class HousekeepingController extends Controller
             ->limit(2)
             ->get();
 
+        $previous_value = 0;
+        $value = $flag ? 2 : 0;
+
         if (count($cleanings) > 0) {
             $currentCleanig = $cleanings[0];
-            $currentCleanig->in_queue = $flag ? 2 : 0;
+            $currentCleanig->in_queue = $value;
             $currentCleanig->save();
         } else {
             $now = date("Y-m-d H:i:s");
@@ -210,7 +224,7 @@ class HousekeepingController extends Controller
             $currentCleanig = \App\Models\HousekeepingCleanings::create([
                 "hotel_id"      => $hotel_id,
                 "room_id"       => $room_id,
-                "in_queue"      => $flag ? 2 : 0,
+                "in_queue"      => $value,
                 "is_active"     => 1,
                 "created_by"    => $yesterday,
                 "changed_by"    => $staff_id,
@@ -220,11 +234,14 @@ class HousekeepingController extends Controller
         \App\Models\HousekeepingTimeline::create([
             'item_id'       => $currentCleanig->cleaning_id,
             'hotel_id'      => $hotel_id,
-            'action'        => $flag ? 'CLEANING_CREATED' : 'CLEANING_DELETED',
+            'action'        => 'CLEANING_UPDATED',
             'is_active'     => 1,
             'changed_by'    => $staff_id,
             'changed_on'    => date('Y-m-d H:i:s'),
-            'platform'      => 'HSK API V3'
+            'platform'      => 'HSK API V3',
+            'changed_field' => 'in_queue',
+            'previous_value' => $previous_value,
+            'value'         => $value,
         ]);
     }
 
@@ -281,7 +298,8 @@ class HousekeepingController extends Controller
     {
         \Log::error("synergexSendHskChangeStatus");
         // $synergexUrl = 'https://75.112.128.89/Nuvola/Nuvola.aspx?UpdateRoomHKStatus';
-        $synergexUrl = "https://devsecure2.legacyvacationclub.com/Nuvola/Nuvola.aspx?UpdateRoomHKStatus";
+        //$synergexUrl = "https://devsecure2.legacyvacationclub.com/Nuvola/Nuvola.aspx?UpdateRoomHKStatus";
+        $synergexUrl = "https://devsecure.legacyvacationclub.com/Nuvola/Nuvola.aspx?UpdateRoomHKStatus";
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
@@ -300,14 +318,14 @@ class HousekeepingController extends Controller
             CURLOPT_HTTPHEADER      => ['Content-Type: application/json'],
         ));
         $response = curl_exec($curl);
-        \Log::error("--> response: ".$response);
+        \Log::error("--> response: " . $response);
         curl_close($curl);
         // echo $response;
 
         return response()->json([
             "response" => $response,
             "hotel_id" => $request->hotel_id,
-                "room_status" => $request->room_status
+            "room_status" => $request->room_status
         ]);
     }
 }
