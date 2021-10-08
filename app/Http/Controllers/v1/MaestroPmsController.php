@@ -18,19 +18,6 @@ class MaestroPmsController extends Controller
     public function index(Request $request)
     {
         try {
-            $text = $request->getContent();
-            $client = new Client();
-            $promise = $client->postAsync('https://c9ge7dpq3b.execute-api.us-east-1.amazonaws.com/', [
-                'body' => $text,
-                'headers'        => ['Content-Type' => 'application/xml']
-            ])->then(function ($response) {
-            });
-            $promise->wait();
-        } catch (\Exception $e) {
-            \Log::error('Error Sending Async Promise');
-        }
-
-        try {
             // if(strpos($request->getContent(), 'Offmarket')  !== false) {
             // \Log::info("XML MAESTRO" . json_encode(["xml_request" => $request->getContent()]));
             //     \Log::info('----------------------------------------');
@@ -41,6 +28,29 @@ class MaestroPmsController extends Controller
             $str_json   = json_encode($xml);
             $json       = json_decode($str_json);
 
+            if ($json->HotelId == '1425' && $json->Action == 'HousekeepingStatus') {
+                try {
+                    $text = $request->getContent();
+                    $client = new Client();
+                    $promise = $client->postAsync('https://c9ge7dpq3b.execute-api.us-east-1.amazonaws.com/', [
+                        'body' => $text,
+                        'headers'        => ['Content-Type' => 'application/xml']
+                    ])->then(function ($response) {
+                    });
+                    $promise->wait();
+                } catch (\Exception $e) {
+                    \Log::error('Error Sending Async Promise');
+                }
+
+                $xml_response = ArrayToXml::convert([
+                    'HotelId'       => $json->HotelId,
+                    'PasswordHash'  => $json->PasswordHash,
+                    'Status'        => 'success',
+                    'Message'       => ''
+                ], 'Response');
+                
+                return response($xml_response, 200)->header('Content-Type', 'text/xml');
+            }
 
             // if( $json->HotelId == '1803' || $json->HotelId == '2305' || $json->HotelId == '1802' || $json->HotelId == '1777') {
             //     \Log::info('------------------ Mensajes XML MAESTRO ----------------------');
@@ -90,7 +100,9 @@ class MaestroPmsController extends Controller
                         'Message'       => ''
                     ], 'Response');
 
+
                     $this->dispatch((new MaestroPmsLog($json, $request->getContent())));
+
                     // \Log::info("RESPUESTA MAESTRO" . json_encode(["xml_response" => $xml_response]));
                     return response($xml_response, 200)->header('Content-Type', 'text/xml');
                 }
