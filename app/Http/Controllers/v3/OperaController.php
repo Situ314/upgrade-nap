@@ -28,7 +28,7 @@ class OperaController extends Controller
                 $resp = $this->reservationService($request);
                 break;
             case 'RoomStatusUpdateBERequest':
-                //$this->sendXmlHSKToAws($request->xml);
+                $this->sendXmlHSKToAws($request->xml);
                 $resp = $this->reservationService($request);
                 break;
             case 'NewProfileRequest':
@@ -36,8 +36,8 @@ class OperaController extends Controller
                 $this->sendXmlProfileToAws($request->xml);
                 $resp = $this->nameService($request);
                 break;
-
             case 'QueueRoomBERequest':
+            	//$this->sendXmlHSKToAws($request->xml);
                 $resp = $this->QueueService($request);
                 break;
         }
@@ -115,7 +115,7 @@ class OperaController extends Controller
                 $action     = str_replace('Request', 'Response', $keys[0]);
                 $data       = array_get($data, 'Body.RoomStatusUpdateBERequest');
                 $resp       = $this->BuildXMLRoomResponse($action);
-                \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config, null, false, $MessageID, $xml)->onConnection('sqs-fifo');
+                //\App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config, null, false, $MessageID, $xml)->onConnection('sqs-fifo');
                 // $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, $data, $config, null, false, $MessageID, $xml));
                 break;
         }
@@ -827,7 +827,8 @@ class OperaController extends Controller
             // $text = $request->getContent();
             $client = new Client();
             $promise = $client->postAsync(
-                'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/housekeeping',
+                //'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/housekeeping',
+                'https://lht4g5xmvc.execute-api.us-east-1.amazonaws.com/Prod/housekeeping',
                 [
                     'body' => $text,
                     'headers' => ['Content-Type' => 'application/xml']
