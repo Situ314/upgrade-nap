@@ -28,7 +28,7 @@ class MaestroPmsController extends Controller
             $str_json   = json_encode($xml);
             $json       = json_decode($str_json);
 
-            if ($json->HotelId == '1425' && $json->Action == 'HousekeepingStatus') {
+            if ($json->HotelId == '1425' && isset($json->Action) && $json->Action == 'HousekeepingStatus') {
                 try {
                     $text = $request->getContent();
                     $client = new Client();

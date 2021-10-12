@@ -234,12 +234,6 @@ class ReservationController extends Controller
             ],
             "reservations" => "required|array",
             'reservations.*.reservation_status' => 'required|numeric|in:0,1,2,3', //0: reserved, 1:checked in, 2: cancelled, 3: checked out
-            // 'reservations.*.reservation_number' => [
-            //     'string',
-            //     'required',
-            //     'distinct',
-            //     Rule::exists('guest_checkin_details')->where('hotel_id', $hotel_id)
-            // ],
             "reservations.*.room" => [
                 'string',
                 'nullable',
@@ -279,6 +273,43 @@ class ReservationController extends Controller
             $guest_number = $request->guest_number;
             $guest = \App\Models\IntegrationsGuestInformation::where('hotel_id', $hotel_id)->where('guest_number', $guest_number)->first();
         }
+
+        // Validar si los registros anteriores pertenece a una suit, y el nuevo registro pretende pasar la reserva a una habitacion normal
+        // en dicho caso es necesario cancelar las 2 ó 3 habitaciones y solo dejar una.
+
+        $reservationToCancel = [];
+
+        $limit = 9;
+        foreach ($reservations as $key => $reservation) {
+            $rn = $reservation['reservation_number'];
+            if (strlen($rn) > $limit) {
+                $reservation_number = substr($rn, 0, $limit);
+                // $rooms              = substr($rn, -3);
+                $reservationToCancel[$reservation_number][] = $rn;
+            }
+        }
+
+        \Log::info("reservationToCancel:");
+        \Log::info($reservationToCancel);
+
+        foreach ($reservationToCancel as $key => $value) {
+            \Log::info("value:");
+            \Log::info($value);
+            if (count($value) == 1) {
+                $guestCheckinDetails = \App\Models\GuestCheckinDetails::where("hotel_id", $hotel_id)
+                    ->where("reservation_number", "LIKE", "$key%")
+                    ->get();
+
+                foreach ($guestCheckinDetails as $key => $r) {
+                    if ($key > 0) {
+                        $r->reservation_status = 0;
+                        $r->status = 0;
+                        $r->save();
+                    }
+                }
+            }
+        }
+
 
         foreach ($reservations as $key => $reservation) {
             $reservation_number = $reservation['reservation_number'];
