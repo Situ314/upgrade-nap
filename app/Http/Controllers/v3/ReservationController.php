@@ -289,12 +289,7 @@ class ReservationController extends Controller
             }
         }
 
-        \Log::info("reservationToCancel:");
-        \Log::info($reservationToCancel);
-
         foreach ($reservationToCancel as $key => $value) {
-            \Log::info("value:");
-            \Log::info($value);
             if (count($value) == 1) {
                 $guestCheckinDetails = \App\Models\GuestCheckinDetails::where("hotel_id", $hotel_id)
                     ->where("reservation_number", "LIKE", "$key%")
