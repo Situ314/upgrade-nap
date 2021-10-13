@@ -590,12 +590,15 @@ class Opera implements ShouldQueue
     }
 
     private function ProfileRegistration($dataLog = null)
-    {
+    {   
+        #$this->customWriteLog("sync_opera", $this->hotel_id, "=========ENTRO AL PROFILE LOG========");
         date_default_timezone_set('UTC');
         try {
             $sw = false;
             $profile_log_data = null;
+            #$this->customWriteLog("sync_opera", $this->hotel_id, "=========ANTES DEL IF========");
             if (!$dataLog) {
+                #$this->customWriteLog("sync_opera", $this->hotel_id, "=========DESPUES DEL IF========");
                 $unique_id = array_get($this->data, 'Profile.IDs.UniqueID');
                 if (array_has(!$this->data, 'Profile')) {
                     return false;
@@ -668,27 +671,33 @@ class Opera implements ShouldQueue
                     $profile_log_data->save();
                 } catch (\Exception $th) {
                     \Log::error("Error en ProfileRegistration 1");
+                    #$this->customWriteLog("sync_opera", $this->hotel_id, "Error en ProfileRegistration 1");
                     \Log::error($th);
                 }
 
                 $dataLog['idLog'] = $profile_log_data->id;
                 $this->sendMonitoringApp($dataLog, 'LogOpera_Profile');
             } else {
+                #$this->customWriteLog("sync_opera", $this->hotel_id, "=========DESPUES DEL IF #2========");
                 $sw         = true;
                 $unique_id  = array_get($dataLog, 'UniqueID');
                 $resort_id  = array_get($this->data, 'resortId');
                 $profile_log_data = new \App\Models\Log\OracleProfile($dataLog);
+                #$this->customWriteLog("sync_opera", $this->hotel_id, "========= DATA LOG ========");
+                #$this->customWriteLog("sync_opera", $this->hotel_id, json_encode($dataLog));
                 $this->NewGuest($dataLog, $sw);
                 try {
                     $profile_log_data->save();
                 } catch (\Exception $th) {
                     \Log::error("Error en ProfileRegistration 2");
+                    #$this->customWriteLog("sync_opera", $this->hotel_id, "Error en ProfileRegistration 2");
                     \Log::error($th);
                 }
             }
             return true;
         } catch (Exception $e) {
             \Log::error('Error Create Log Profile');
+            #$this->customWriteLog("sync_opera", $this->hotel_id, "Error Create Log Profile");
             \Log::error($e);
             return false;
         }
@@ -713,6 +722,8 @@ class Opera implements ShouldQueue
             $unique_id = '';
             $this->configTimeZone($this->hotel_id);
 
+            #$this->customWriteLog("sync_opera", $this->hotel_id, "========= ANTES DEL SW EN CREATE NEW_GUEST ========");
+
             if ($sw) {
                 $unique_id = array_get($arrayData, 'UniqueID');
                 $guest_zip_code = '';
@@ -730,8 +741,12 @@ class Opera implements ShouldQueue
                     'phone_no'      => '',
                     'hotel_id'      => $this->hotel_id,
                     'language'      => '',
-                    'comment'       => ''
+                    'comment'       => '',
+                    'pms_unique_id' => $unique_id
                 ];
+
+                #$this->customWriteLog("sync_opera", $this->hotel_id, "========= GUEST DATA 1 ========");
+                #$this->customWriteLog("sync_opera", $this->hotel_id, json_encode($guest_data));
             } else {
                 $addressString = '';
                 $addressData = array_get($arrayData, 'Profile.Addresses.NameAddress.AddressLine', '');
@@ -777,6 +792,9 @@ class Opera implements ShouldQueue
                         $guest_data['email_address'] = substr($guest_data['email_address'], 0, 100);
                     }
                 }
+
+                #$this->customWriteLog("sync_opera", $this->hotel_id, "========= GUEST DATA 2 ========");
+                #$this->customWriteLog("sync_opera", $this->hotel_id, json_encode($guest_data));
             }
 
             if (!$unique_id == '') {
@@ -1224,6 +1242,9 @@ class Opera implements ShouldQueue
                     'created_at'        => date('Y-m-d H:i:s')
                 ];
 
+                $this->customWriteLog("sync_opera", $this->hotel_id, "DATOS DENTRO DE HSK RESERVARION:");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($reservation));
+
                 if ($reservation['ReservationID'] != '') {
                     $suites = $this->getSuites($reservation['roomNumber']);
                     if ($suites) {
@@ -1244,6 +1265,7 @@ class Opera implements ShouldQueue
                             $this->sendMonitoringApp($reservation, 'LogOpera_Reservation');
                         }
                     } else {
+                        $this->customWriteLog("sync_opera", $this->hotel_id, "NO == ES UN SUITE");
                         $this->removeSuitesReservation($reservation['ReservationID']);
 
                         $OracleReservation = \App\Models\Log\OracleReservation::create($reservation);
