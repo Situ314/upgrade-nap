@@ -735,7 +735,10 @@ class OperaController extends Controller
             <soap:Body>
                 <ReservationLookupRequest xmlns="http://htng.org/PWS/2008B/SingleGuestItinerary/Reservation/Types" xmlns:a="http://htng.org/PWS/2008B/SingleGuestItinerary/Activity/Types" xmlns:c="http://htng.org/PWS/2008B/SingleGuestItinerary/Common/Types">
                     <ReservationLookupData reservationStatus="RESERVED">
-                        <RoomNumber>4129</RoomNumber>
+                        <DateRange>
+                            <Start xmlns="http://htng.org/PWS/2008B/SingleGuestItinerary/Activity/Types">2021-10-14T00:00:00</Start>
+                            <End xmlns="http://htng.org/PWS/2008B/SingleGuestItinerary/Activity/Types">2021-10-15T00:00:00</End>
+                        </DateRange>
                         <ResortId>' . $pms_hotel_id . '</ResortId>
                     </ReservationLookupData>
                 </ReservationLookupRequest>

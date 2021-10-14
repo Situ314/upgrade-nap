@@ -1514,8 +1514,12 @@ class Opera implements ShouldQueue
             CURLOPT_HTTPHEADER => $actions,
         ));
 
+
+        $this->customWriteLog("sync_opera", $this->hotel_id, "XML SEND RESERVATION ROOM");
+        $this->customWriteLog("sync_opera", $this->hotel_id, $xml);
+
         $response = curl_exec($curl);
-        $this->customWriteLog("sync_opera", $this->hotel_id, 'END CURL ReservationLookupRequest');
+        //$this->customWriteLog("sync_opera", $this->hotel_id, 'END CURL ReservationLookupRequest');
         $err = curl_error($curl);
         curl_close($curl);
         date_default_timezone_set('UTC');
@@ -1527,6 +1531,11 @@ class Opera implements ShouldQueue
         } else {
             $xmlString  = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
             // \Log::alert($response);
+
+            $this->customWriteLog("sync_opera", $this->hotel_id, "RESPONSE XML");
+            $this->customWriteLog("sync_opera", $this->hotel_id, $response);
+
+
             $xml        = simplexml_load_string($xmlString);
             $str_json   = json_encode($xml);
             $json       = json_decode($str_json, true);
@@ -1593,10 +1602,10 @@ class Opera implements ShouldQueue
                         $reservation_data = [];
 
                         $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM STATUS:");
-                        $this->customWriteLog("sync_opera", $this->hotel_id, array_get($room, 'HouseKeepingStatus'));
+                        $this->customWriteLog("sync_opera", $this->hotel_id, array_get($room, 'FrontOfficeStatus'));
 
                         // && $this->hotel_id != 289
-                        if (array_get($room, 'HouseKeepingStatus') == 'OCC') {
+                        if (array_get($room, 'FrontOfficeStatus') == 'OCC') {
                             // $room_status = 'Clean';
 
                             $reservation = $this->getReservationRoom($room_no, $IntegrationsActive->config, $IntegrationsActive->pms_hotel_id);
