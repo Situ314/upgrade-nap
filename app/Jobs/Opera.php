@@ -335,6 +335,7 @@ class Opera implements ShouldQueue
     private function GuestRegistration($reservation)
     {
         // DB::beginTransaction();
+        $this->customWriteLog("sync_opera", $this->hotel_id, "ENTRO GUEST REGISTRATION");
         try {
 
             $this->configTimeZone($this->hotel_id);
@@ -343,6 +344,9 @@ class Opera implements ShouldQueue
             $guest = \App\Models\GuestRegistration::where('hotel_id', $this->hotel_id)->where('pms_unique_id', $reservation->UniqueID)->first();
             // if ($IntegrationsGuestInformation) {
             if ($guest) {
+
+                $this->customWriteLog("sync_opera", $this->hotel_id, "ENCONTRO GUEST REGISTRATION");
+                
                 $guest_id = $guest->guest_id;
                 $room_no = 0;
                 if (!empty($reservation->roomNumber)) {
@@ -353,7 +357,13 @@ class Opera implements ShouldQueue
                     }
                 }
 
+                $this->customWriteLog("sync_opera", $this->hotel_id, "DATOS DEL ROOM NUMBER");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($room_no));
+
                 if (!is_null($room_no)) {
+                    
+                    $this->customWriteLog("sync_opera", $this->hotel_id, "ENTRO AL ROOM NUMBER");
+
                     $status = 0;
                     $reservation_status = 0;
 
@@ -361,6 +371,7 @@ class Opera implements ShouldQueue
                     $time2 = '23:59:59';
                     switch ($reservation->reservationStatus) {
                         case 'RESERVED':
+                        case 'OTHER':
                             $reservation_status = 0;
                             $status = 1;
                             break;
@@ -591,14 +602,14 @@ class Opera implements ShouldQueue
 
     private function ProfileRegistration($dataLog = null)
     {   
-        #$this->customWriteLog("sync_opera", $this->hotel_id, "=========ENTRO AL PROFILE LOG========");
+        $this->customWriteLog("sync_opera", $this->hotel_id, "=========ENTRO AL PROFILE LOG========");
         date_default_timezone_set('UTC');
         try {
             $sw = false;
             $profile_log_data = null;
-            #$this->customWriteLog("sync_opera", $this->hotel_id, "=========ANTES DEL IF========");
+            $this->customWriteLog("sync_opera", $this->hotel_id, "=========ANTES DEL IF========");
             if (!$dataLog) {
-                #$this->customWriteLog("sync_opera", $this->hotel_id, "=========DESPUES DEL IF========");
+                $this->customWriteLog("sync_opera", $this->hotel_id, "=========DESPUES DEL IF========");
                 $unique_id = array_get($this->data, 'Profile.IDs.UniqueID');
                 if (array_has(!$this->data, 'Profile')) {
                     return false;
@@ -671,33 +682,33 @@ class Opera implements ShouldQueue
                     $profile_log_data->save();
                 } catch (\Exception $th) {
                     \Log::error("Error en ProfileRegistration 1");
-                    #$this->customWriteLog("sync_opera", $this->hotel_id, "Error en ProfileRegistration 1");
+                    $this->customWriteLog("sync_opera", $this->hotel_id, "Error en ProfileRegistration 1");
                     \Log::error($th);
                 }
 
                 $dataLog['idLog'] = $profile_log_data->id;
                 $this->sendMonitoringApp($dataLog, 'LogOpera_Profile');
             } else {
-                #$this->customWriteLog("sync_opera", $this->hotel_id, "=========DESPUES DEL IF #2========");
+                $this->customWriteLog("sync_opera", $this->hotel_id, "=========DESPUES DEL IF #2========");
                 $sw         = true;
                 $unique_id  = array_get($dataLog, 'UniqueID');
                 $resort_id  = array_get($this->data, 'resortId');
                 $profile_log_data = new \App\Models\Log\OracleProfile($dataLog);
-                #$this->customWriteLog("sync_opera", $this->hotel_id, "========= DATA LOG ========");
-                #$this->customWriteLog("sync_opera", $this->hotel_id, json_encode($dataLog));
+                $this->customWriteLog("sync_opera", $this->hotel_id, "========= DATA LOG ========");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($dataLog));
                 $this->NewGuest($dataLog, $sw);
                 try {
                     $profile_log_data->save();
                 } catch (\Exception $th) {
                     \Log::error("Error en ProfileRegistration 2");
-                    #$this->customWriteLog("sync_opera", $this->hotel_id, "Error en ProfileRegistration 2");
+                    $this->customWriteLog("sync_opera", $this->hotel_id, "Error en ProfileRegistration 2");
                     \Log::error($th);
                 }
             }
             return true;
         } catch (Exception $e) {
             \Log::error('Error Create Log Profile');
-            #$this->customWriteLog("sync_opera", $this->hotel_id, "Error Create Log Profile");
+            $this->customWriteLog("sync_opera", $this->hotel_id, "Error Create Log Profile");
             \Log::error($e);
             return false;
         }
@@ -722,7 +733,7 @@ class Opera implements ShouldQueue
             $unique_id = '';
             $this->configTimeZone($this->hotel_id);
 
-            #$this->customWriteLog("sync_opera", $this->hotel_id, "========= ANTES DEL SW EN CREATE NEW_GUEST ========");
+            $this->customWriteLog("sync_opera", $this->hotel_id, "========= ANTES DEL SW EN CREATE NEW_GUEST ========");
 
             if ($sw) {
                 $unique_id = array_get($arrayData, 'UniqueID');
@@ -745,8 +756,8 @@ class Opera implements ShouldQueue
                     'pms_unique_id' => $unique_id
                 ];
 
-                #$this->customWriteLog("sync_opera", $this->hotel_id, "========= GUEST DATA 1 ========");
-                #$this->customWriteLog("sync_opera", $this->hotel_id, json_encode($guest_data));
+                $this->customWriteLog("sync_opera", $this->hotel_id, "========= GUEST DATA 1 ========");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($guest_data));
             } else {
                 $addressString = '';
                 $addressData = array_get($arrayData, 'Profile.Addresses.NameAddress.AddressLine', '');
@@ -793,16 +804,23 @@ class Opera implements ShouldQueue
                     }
                 }
 
-                #$this->customWriteLog("sync_opera", $this->hotel_id, "========= GUEST DATA 2 ========");
-                #$this->customWriteLog("sync_opera", $this->hotel_id, json_encode($guest_data));
+                $this->customWriteLog("sync_opera", $this->hotel_id, "========= GUEST DATA 2 ========");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($guest_data));
             }
 
             if (!$unique_id == '') {
+
+                $this->customWriteLog("sync_opera", $this->hotel_id, "========= DENTRO DE LA INFO DEL  GUEST ========");
+
+
                 // $IntegrationsGuestInformation = \App\Models\IntegrationsGuestInformation::where('guest_number', $unique_id)->where('hotel_id', $this->hotel_id)->first();
                 $guest = \App\Models\GuestRegistration::where('hotel_id', $this->hotel_id)->where('pms_unique_id', $unique_id)->first();
 
                 // if ($IntegrationsGuestInformation) {
                 if ($guest) {
+
+                    $this->customWriteLog("sync_opera", $this->hotel_id, "========= ENCONTRO AL GUEST ========");
+
                     // $old_guest = \App\Models\GuestRegistration::find($IntegrationsGuestInformation->guest_id);
                     // if ($old_guest) {
                     $__update = '';
@@ -1268,6 +1286,9 @@ class Opera implements ShouldQueue
                         $this->customWriteLog("sync_opera", $this->hotel_id, "NO == ES UN SUITE");
                         $this->removeSuitesReservation($reservation['ReservationID']);
 
+                        $this->customWriteLog("sync_opera", $this->hotel_id, "DATA DEL RESERVATION");
+                        $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($reservation));
+
                         $OracleReservation = \App\Models\Log\OracleReservation::create($reservation);
                         $reservation['idLog'] = $OracleReservation->id;
                         $this->GuestRegistration($OracleReservation);
@@ -1549,6 +1570,122 @@ class Opera implements ShouldQueue
         }
     }
 
+
+    /**
+     * Obtener los datos del Guest pero con una reserva
+     */
+    public function getReservationRoomReserved($room_id, $config, $pms_hotel_id)
+    {
+        $this->configTimeZone($this->hotel_id);
+        date_default_timezone_set('UTC');
+
+        $timestamp  = date('Y-m-d\TH:i:s\Z');
+        $username   = $config['username_send'];
+        $password   = $config['password_send'];
+        $url        = $config['url_sync'];
+        $from       = $config['from_send'];
+
+        $xml = '<?xml version="1.0" encoding="utf-8"?>
+        <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+            xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" 
+            xmlns:wsse="http://docs.oasisopen.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" 
+            xmlns:wsu="http://docs.oasisopen.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+            <soap:Header>
+                <wsa:Action>http://webservices.micros.com/htng/2008B/SingleGuestItinerary#ReservationLookup
+                </wsa:Action>
+                <wsa:From>
+                    <wsa:Address>urn:' . $from . '</wsa:Address>
+                </wsa:From>
+                <wsa:MessageID>urn:uuid:09a2b665-41d0-4654-b49d-86e7d437e371</wsa:MessageID>
+                <wsa:ReplyTo>
+                    <wsa:Address>http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</wsa:Address>
+                </wsa:ReplyTo>
+                <wsa:To>http://www.micros.com/HTNGActivity/</wsa:To>
+                <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+                    <wsu:Timestamp wsu:Id="TS-1DB19FB15198FE10A2159249621088842">
+                        <wsu:Created>' . $timestamp . '</wsu:Created>
+                        <wsu:Expires>' . date('Y-m-d\TH:i:s\Z', strtotime($timestamp . ' +5 minutes')) . '</wsu:Expires>
+                    </wsu:Timestamp>
+                    <wsse:UsernameToken wsu:Id="UsernameToken-1DB19FB15198FE10A2159249621088841">
+                        <wsse:Username>' . $username . '</wsse:Username>
+                        <wsse:Password Type="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText">' . $password . '</wsse:Password>
+                        <wsu:Created>' . $timestamp . '</wsu:Created>
+                    </wsse:UsernameToken>
+                </wsse:Security>
+            </soap:Header>
+            <soap:Body>
+                <ReservationLookupRequest xmlns="http://htng.org/PWS/2008B/SingleGuestItinerary/Reservation/Types" xmlns:a="http://htng.org/PWS/2008B/SingleGuestItinerary/Activity/Types" xmlns:c="http://htng.org/PWS/2008B/SingleGuestItinerary/Common/Types">
+                    <ReservationLookupData reservationStatus="RESERVED">
+                        <RoomNumber>' . $room_id . '</RoomNumber>
+                        <ResortId>' . $pms_hotel_id . '</ResortId>
+                    </ReservationLookupData>
+                </ReservationLookupRequest>
+            </soap:Body>
+        </soap:Envelope>
+        ';
+        $curl = curl_init();
+        $actions = ($this->hotel_id != 281) && ($this->hotel_id != 266) && ($this->hotel_id != 296) && ($this->hotel_id != 238) && ($this->hotel_id != 314) && ($this->hotel_id != 289) && ($this->hotel_id != 303) && ($this->hotel_id != 443) && ($this->hotel_id != 207) ? array(
+            "Content-Type: text/xml;charset=UTF-8",
+            "SOAPAction: http://webservices.micros.com/htng/2008B/SingleGuestItinerary#ReservationLookup",
+        ) : array(
+            "Content-Type: text/xml;charset=UTF-8",
+            "Action: http://webservices.micros.com/htng/2008B/SingleGuestItinerary#ReservationLookup",
+        );
+        $this->customWriteLog("sync_opera", $this->hotel_id, 'START CURL ReservationLookupRequest');
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => "",
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => "POST",
+            CURLOPT_POSTFIELDS     => $xml,
+            CURLOPT_HTTPHEADER => $actions,
+        ));
+
+
+        $this->customWriteLog("sync_opera", $this->hotel_id, "XML SEND RESERVATION ROOM");
+        $this->customWriteLog("sync_opera", $this->hotel_id, $xml);
+
+        $response = curl_exec($curl);
+        //$this->customWriteLog("sync_opera", $this->hotel_id, 'END CURL ReservationLookupRequest');
+        $err = curl_error($curl);
+        curl_close($curl);
+        date_default_timezone_set('UTC');
+        if ($err) {
+            \Log::error("Error en getReservationRoom curl");
+            \Log::error($err);
+
+            return null;
+        } else {
+            $xmlString  = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
+            // \Log::alert($response);
+
+            $this->customWriteLog("sync_opera", $this->hotel_id, "RESPONSE XML");
+            $this->customWriteLog("sync_opera", $this->hotel_id, $response);
+
+
+            $xml        = simplexml_load_string($xmlString);
+            $str_json   = json_encode($xml);
+            $json       = json_decode($str_json, true);
+            $resp = array_get($json, 'Body.ReservationLookupResponse.ReservationLookups.ReservationLookup');
+
+
+            #$this->customWriteLog("sync_opera", $this->hotel_id, "RESPONSE XML a Enviar");
+            #$this->customWriteLog("sync_opera", $this->hotel_id, json_encode($resp));
+
+
+            try {
+                $resp[0];
+            } catch (\Exception $e) {
+                $resp = [$resp];
+            }
+            return $resp[0];
+        }
+    }
+
     public function SyncOracleHSK()
     {
         $IntegrationsActive = \App\Models\IntegrationsActive::where('hotel_id', $this->hotel_id)
@@ -1628,6 +1765,136 @@ class Opera implements ShouldQueue
                                 'reservationStatus' => array_get($reservation, '@attributes.reservationStatus')
                             ];
                         }
+
+
+                        //Validamos si la Room está VAC
+                        
+
+
+                        $hsk_status['rooms'][] = [
+                            'RoomNumber'        => $room_no,
+                            'RoomStatus'        => $room_status,
+                            'reservation_data'  => $reservation_data
+                        ];
+                        $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM FINAL:");
+                        $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($hsk_status));
+                    }
+                }
+
+                $this->OracleSync($hsk_status);
+                $HousekeepingPreferences = \App\Models\HousekeepingPreferences::where('hotel_id', $this->hotel_id)->first();
+                if ($HousekeepingPreferences) {
+                    $HousekeepingPreferences->sync_last_update = date('Y-m-d H:i:s');
+                    $HousekeepingPreferences->save();
+                }
+                // $this->saveLogTracker([
+                //     'hotel_id'  => $this->hotel_id,
+                //     'module_id' => 17,
+                //     'action'    => 'resync',
+                //     'prim_id'   => 0,
+                //     'staff_id'  => $this->staff_id,
+                //     'date_time' => date('Y-m-d H:i:s'),
+                //     'comments'  => 'Sync-Opera',
+                //     'type'      => 'API-OPERA'
+                //     ]);
+                if (!$this->room_id) {
+                    // $this->check_out_reserve();
+                }
+                date_default_timezone_set('UTC');
+            }
+        }
+    }
+
+
+
+    /**
+     * Function SYNC Reserved
+     */
+    public function SyncOracleHSKReserved()
+    {
+        $IntegrationsActive = \App\Models\IntegrationsActive::where('hotel_id', $this->hotel_id)
+            ->where('int_id', 5)
+            ->where('state', 1)
+            ->first();
+        $this->customWriteLog("sync_opera", $this->hotel_id, 'START SYNC');
+
+        if ($IntegrationsActive) {
+            $this->configTimeZone($this->hotel_id);
+            $data = $this->GetOracleRoomSync($IntegrationsActive->config, $IntegrationsActive->pms_hotel_id);
+            if ($data) {
+                $hsk_status = [
+                    'hotel_id' => $this->hotel_id,
+                    'staff_id' => $IntegrationsActive->created_by,
+                    'rooms'    => []
+                ];
+                $fetch_room = array_get($data, 'FetchRoomStatus', []);
+                try {
+                    $fetch_room[0];
+                } catch (\Exception $e) {
+                    $fetch_room = [$fetch_room];
+                }
+                $this->customWriteLog("sync_opera", $this->hotel_id, "FETCH ROOM DATA:");
+                $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($fetch_room));
+                foreach ($fetch_room as $room) {
+                    $this->customWriteLog("sync_opera", $this->hotel_id, json_encode($room));
+                    $room_no = array_get($room, 'RoomNumber');
+
+                    if (!$room_no) {
+                        $room_no  = $this->room_id ? $this->room_id : null;
+                    }
+                    if ($room_no > 4000 && $this->hotel_id == 289) {
+                        $add = false;
+                        \Log::info('entra');
+                    }
+                    $add = true;
+                    if (($IntegrationsActive->pms_hotel_id == 'MI01' || $IntegrationsActive->pms_hotel_id == 'CVS') && is_numeric($room_no) && $room_no >= 9000 && $room_no <= 9600) {
+                        $add = false;
+                    }
+                    if ($IntegrationsActive->pms_hotel_id == 'MI01' && substr($room_no, 0, 3) == 'CAB') {
+                        $add = false;
+                    }
+                    if (($IntegrationsActive->pms_hotel_id == '04130' || $IntegrationsActive->pms_hotel_id == 'MCOGR') && (($room_no >= 9000 && $room_no <= 9600))) {
+                        $add = false;
+                    }
+                    if ($add) {
+                        $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM NUMBER HOTEL:");
+                        $this->customWriteLog("sync_opera", $this->hotel_id, $room_no);
+                        $room_status = array_get($room, 'RoomStatus');
+                        $reservation_data = [];
+
+                        $this->customWriteLog("sync_opera", $this->hotel_id, "ROOM STATUS:");
+                        $this->customWriteLog("sync_opera", $this->hotel_id, array_get($room, 'FrontOfficeStatus'));
+
+                        // && $this->hotel_id != 289
+                        //if (array_get($room, 'FrontOfficeStatus') == 'OCC') {
+                            // $room_status = 'Clean';
+
+                            $reservation = $this->getReservationRoomReserved($room_no, $IntegrationsActive->config, $IntegrationsActive->pms_hotel_id);
+                            $this->customWriteLog("sync_opera", $this->hotel_id, $room_no . json_encode($IntegrationsActive->config) . $IntegrationsActive->pms_hotel_id);
+                            $this->customWriteLog("sync_opera", $this->hotel_id, 'reservation sync' . json_encode($reservation));
+
+                            $reservation_data = [
+                                'ReservationID'     => array_get($reservation, 'ReservationID', ''),
+                                'ProfileID'         => array_get($reservation, 'ProfileID', ''),
+                                'Start'             => array_get($reservation, 'DateRange.Start', ''),
+                                'End'               => array_get($reservation, 'DateRange.End', ''),
+                                'FirstName'         => array_get($reservation, 'ProfileInfo.FirstName', ''),
+                                'LastName'          => array_get($reservation, 'ProfileInfo.LastName', ''),
+                                'AddressLine'       => array_get($reservation, 'ReservationAddress.AddressLine', ''),
+                                'CityName'          => array_get($reservation, 'ReservationAddress.CityName', ''),
+                                'StateProv'         => array_get($reservation, 'ReservationAddress.StateProv', ''),
+                                'CountryCode'       => array_get($reservation, 'ReservationAddress.CountryCode', ''),
+                                'PostalCode'        => array_get($reservation, 'ReservationAddress.PostalCode', ''),
+                                'ResortId'          => array_get($reservation, 'ResortId', ''),
+                                'reservationStatus' => array_get($reservation, '@attributes.reservationStatus')
+                            ];
+                        //}
+
+
+                        //Validamos si la Room está VAC
+                        
+
+
                         $hsk_status['rooms'][] = [
                             'RoomNumber'        => $room_no,
                             'RoomStatus'        => $room_status,

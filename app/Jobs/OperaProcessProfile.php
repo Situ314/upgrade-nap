@@ -26,6 +26,6 @@ class OperaProcessProfile implements ShouldQueue
     {
         $xml = OperaHelper::getProfileData($this->resort_id, $this->unique_id);
         \Log::info($xml);
-        if ($xml) OperaHelper::sendXmlToAws($xml);
+        if ($xml) OperaHelper::sendXmlToAws($xml, $this->resort_id);
     }
 }

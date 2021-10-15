@@ -16,8 +16,8 @@ class OperaHelper
 
             if ($integrationsActive) {
                 $config     = $integrationsActive->config;
-                $username   = $config['username'];
-                $password   = $config['password'];
+                $username   = $config['username_send'];
+                $password   = $config['password_send'];
                 $from       = $config['from_send'];
                 $url        = $config['url_sync'];
                 $date1      = date('Y-m-d\TH:i:s\Z');
@@ -93,13 +93,23 @@ class OperaHelper
         }
     }
 
-    public static function sendXmlToAws($xml)
-    {
+    public static function sendXmlToAws($xml, $resort_id)
+    {   
+
+        $integrationsActive = \App\Models\IntegrationsActive::where('pms_hotel_id', $resort_id)
+                ->where('int_id', 5)
+                ->where('state', 1)
+                ->first();
+
+        $config     = $integrationsActive->config;
+        $username   = $config['username'];
+        $password   = $config['password'];
+
         try {
-            $url = 'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/profile';
+            $url = 'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/profile?resort_id='.$resort_id.'&username='.$username.'&password='.$password;
             $options = [
                 'headers' => ['Content-Type' => 'application/xml'],
-                'body' => $xml,
+                'body' => $xml
             ];
 
             $client = new Client();

@@ -534,6 +534,37 @@ class OperaController extends Controller
     }
 
 
+
+    public function SyncOracleHSKReserved($hotel_id, $room_id = null, $skip = 0)
+    {
+        $IntegrationsActive = \App\Models\IntegrationsActive::where('hotel_id', $hotel_id)
+            ->where('int_id', 5)
+            ->where('state', 1)
+            ->first();
+
+        $location = null;
+        echo('start sync Oracle');
+        
+        if ($room_id) {
+            $HotelRoom = \App\Models\HotelRoom::where('hotel_id', $hotel_id)->where('room_id', $room_id)->first();
+            if($hotel_id == 314){
+                $location = $HotelRoom->location;
+            }else if($hotel_id == 207){
+                $location = str_pad($HotelRoom->location, 3, "0", STR_PAD_LEFT);
+            }else{
+                $location = str_pad($HotelRoom->location, 4, "0", STR_PAD_LEFT);
+            }
+
+            $this->dispatch((new \App\Jobs\Opera($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSKReserved', [], $IntegrationsActive->config, $location)));
+            // $this->check_out_reserve($hotel_id);
+        } 
+
+        return response()->json([
+            'Sync' => true
+        ], 200);
+    }
+
+
     public function syncProfileData($hotel_id, $room_id = null)
     {
         $IntegrationsActive = \App\Models\IntegrationsActive::where('hotel_id', $hotel_id)
