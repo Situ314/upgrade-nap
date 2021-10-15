@@ -305,5 +305,7 @@ Route::group(['prefix' => 'v3'], function () {
  * Routes Testing
  */
 
- #Testing Rooms Opera
+#Testing Rooms Opera
 Route::post('/testingoperaSync/{hotel_id}/{room_id?}',    'v2\OperaController@testingoperaSync');
+
+Route::post('/opera/process-profile', 'v3\OperaController@processProfile');

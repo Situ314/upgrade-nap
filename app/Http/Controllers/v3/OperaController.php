@@ -8,7 +8,6 @@ use Spatie\ArrayToXml\ArrayToXml;
 use App\Models\HousekeepingCleanings;
 use App\Models\GuestCheckinDetails;
 use GuzzleHttp\Client;
-
 use DB;
 
 class OperaController extends Controller
@@ -24,7 +23,7 @@ class OperaController extends Controller
         switch ($keys[0]) {
             case 'GuestStatusNotificationRequest':
             case 'GuestStatusNotificationExtRequest':
-            	//$this->sendXmlReservationToAws($request->xml);
+                //$this->sendXmlReservationToAws($request->xml);
                 $resp = $this->reservationService($request);
                 break;
             case 'RoomStatusUpdateBERequest':
@@ -37,7 +36,7 @@ class OperaController extends Controller
                 $resp = $this->nameService($request);
                 break;
             case 'QueueRoomBERequest':
-            	//$this->sendXmlHSKToAws($request->xml);
+                //$this->sendXmlHSKToAws($request->xml);
                 $resp = $this->QueueService($request);
                 break;
         }
@@ -799,7 +798,7 @@ class OperaController extends Controller
             \Log::error($e);
         }
     }
-    
+
     private function sendXmlReservationToAws($text)
     {
         try {
@@ -820,7 +819,7 @@ class OperaController extends Controller
             \Log::error($e);
         }
     }
-    
+
     private function sendXmlHSKToAws($text)
     {
         try {
@@ -842,5 +841,12 @@ class OperaController extends Controller
             \Log::error($e);
         }
     }
-    
+
+    public function processProfile(Request $request)
+    {
+        \App\Jobs\OperaProcessProfile::dispatch($request->resort_id, $request->unique_id);
+        return response()->json([
+            "status" => true
+        ], 200);
+    }
 }
