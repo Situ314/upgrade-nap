@@ -8,6 +8,7 @@ use Spatie\ArrayToXml\ArrayToXml;
 use App\Models\HousekeepingCleanings;
 use App\Models\GuestCheckinDetails;
 use GuzzleHttp\Client;
+
 use DB;
 
 class OperaController extends Controller
@@ -23,7 +24,7 @@ class OperaController extends Controller
         switch ($keys[0]) {
             case 'GuestStatusNotificationRequest':
             case 'GuestStatusNotificationExtRequest':
-                //$this->sendXmlReservationToAws($request->xml);
+                // $this->sendXmlReservationToAws($request->xml);
                 $resp = $this->reservationService($request);
                 break;
             case 'RoomStatusUpdateBERequest':

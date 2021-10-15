@@ -23,19 +23,9 @@ class OperaHelper
                 $date1      = date('Y-m-d\TH:i:s\Z');
                 $date2      = date('Y-m-d\TH:i:s\Z', strtotime($date1 . ' +5 minutes'));
 
-                $xml = "<soap:Envelope 
-                    xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/' 
-                    xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing' 
-                    xmlns:wsse='http://docs.oasisopen.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' 
-                    xmlns:wsu='http://docs.oasisopen.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' 
-                    xmlns:xsd='http://www.w3.org/2001/XMLSchema' 
-                    xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
-                >
+                $xml = "<soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/' xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing' xmlns:wsse='http://docs.oasisopen.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' xmlns:wsu='http://docs.oasisopen.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' xmlns:xsd='http://www.w3.org/2001/XMLSchema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' >
                     <soap:Header>
-                        <wsse:Security 
-                            xmlns:wsse='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' 
-                            xmlns:wsu='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd'
-                        >
+                        <wsse:Security xmlns:wsse='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' xmlns:wsu='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' >
                             <wsu:Timestamp wsu:Id='TS-1DB19FB15198FE10A2159249621088842'>
                                 <wsu:Created>$date1</wsu:Created>
                                 <wsu:Expires>$date2</wsu:Expires>
@@ -65,6 +55,9 @@ class OperaHelper
                 </soap:Envelope>
                 ";
 
+                \Log::info("OperaHelper::getProfileData xml");
+                \Log::info($xml);
+
                 $header = [
                     "Content-Type: text/xml;charset=UTF-8",
                     "SOAPAction: http://htng.org/PWS/2008B/SingleGuestItinerary#FetchProfile"
@@ -86,8 +79,10 @@ class OperaHelper
                 $response = curl_exec($curl);
                 $err = curl_error($curl);
                 curl_close($curl);
-                if($err) return null;
+                if ($err) return null;
                 return $response;
+            } else {
+                \Log::error("OperaHelper::getProfileData no integrationsActive");
             }
 
             return null;
@@ -110,9 +105,8 @@ class OperaHelper
             $client = new Client();
             $promise = $client->postAsync($url, $options)->then(function ($response) {
             });
-            
-            $promise->wait();
 
+            $promise->wait();
         } catch (\Exception $e) {
             \Log::error('Error in OperaHelper::sendXmlToAwl');
             \Log::error($e);
