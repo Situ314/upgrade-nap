@@ -237,7 +237,11 @@ Route::group(['prefix' => 'v2/stayntouch'], function () {
 });
 
 Route::post('/maestroSync/{hotel_id}/{room_id?}',  'v1\MaestroPmsController@GetDataSync');
+
 Route::post('/operaSync/{hotel_id}/{room_id?}',    'v2\OperaController@SyncOracleHSK');
+Route::post('/operaSyncReserved/{hotel_id}/{room_id?}',    'v2\OperaController@SyncOracleHSKReserved');
+
+
 Route::post('/operaSyncLite/{hotel_id}/{room_id?}',    'v2\OperaController@SyncOracleHSKLite');
 Route::post('/operaSyncOne/{hotel_id}/{room_id?}',    'v2\OperaController@SyncOracleHSKOne');
 Route::post('/operafetch/{hotel_id}',    'v2\OperaController@fetch');
