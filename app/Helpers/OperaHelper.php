@@ -16,8 +16,8 @@ class OperaHelper
 
             if ($integrationsActive) {
                 $config     = $integrationsActive->config;
-                $username   = $config['username'];
-                $password   = $config['password'];
+                $username   = $config['username_send'];
+                $password   = $config['password_send'];
                 $from       = $config['from_send'];
                 $url        = $config['url_sync'];
                 $date1      = date('Y-m-d\TH:i:s\Z');
