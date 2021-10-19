@@ -160,12 +160,24 @@ class ReservationController extends Controller
 
             if ($reservation['reservation_status'] == 1) $send_welcome = true;
 
+            /**
+             * Add Hour 23 to Check in & Check out
+             */
+            $check_in = $reservation["check_in"];
+            $check_out = $reservation["check_out"];
+            if($reservation['reservation_status'] == 0){ #Reserved
+                $check_in = date('Y-m-d', strtotime("$check_in")) . " 23:59:00";
+                $check_out = date('Y-m-d', strtotime("$check_out")) . " 23:59:00";
+            }else if($reservation['reservation_status'] == 1){ #Check in
+                $check_out = date('Y-m-d', strtotime("$check_out")) . " 23:59:00";
+            }
+
             $reservationData = [
                 'guest_id'              => $guest->guest_id,
                 'hotel_id'              => $hotel_id,
                 'room_no'               => $room_id,
-                'check_in'              => $reservation["check_in"],
-                'check_out'             => $reservation["check_out"],
+                'check_in'              => $check_in, #$reservation["check_in"],
+                'check_out'             => $check_out, #$reservation["check_out"],
                 'reservation_number'    => $reservation['reservation_number'],
                 'reservation_status'    => $reservation['reservation_status'],
                 'comment'               => array_key_exists('comment', $reservation) ? $reservation['comment'] : "",
@@ -337,10 +349,23 @@ class ReservationController extends Controller
                     ]);
                 }
 
+
+                /**
+                 * Add Hour 23 to Check in & Check out
+                 */
+                $check_in = $reservation["check_in"];
+                $check_out = $reservation["check_out"];
+                if($reservation['reservation_status'] == 0){ #Reserved
+                    $check_in = date('Y-m-d', strtotime("$check_in")) . " 23:59:00";
+                    $check_out = date('Y-m-d', strtotime("$check_out")) . " 23:59:00";
+                }else if($reservation['reservation_status'] == 1){ #Check in
+                    $check_out = date('Y-m-d', strtotime("$check_out")) . " 23:59:00";
+                }
+
                 $reservationData = [
                     'room_no'               => $room_id,
-                    'check_in'              => $reservation["check_in"],
-                    'check_out'             => $reservation["check_out"],
+                    'check_in'              => $check_in, #$reservation["check_in"],
+                    'check_out'             => $check_out, #$reservation["check_out"],
                     'reservation_number'    => $reservation['reservation_number'],
                     'reservation_status'    => $reservation['reservation_status'],
                     'comment'               => array_key_exists('comment', $reservation) ? $reservation['comment'] : "",
