@@ -30,13 +30,35 @@ class HousekeepingController extends Controller
             if (isset($request->all) && ($request->all == 'true' || $request->all == true)) {
 
                 //Se consultan todas las habitaciones con estado en caso de que lo tenga en formato lineal(habitacion-status)
-                $hsk = HotelRoom::select("cleaning_id", "count_by_hotel_id", "hk_status", "front_desk_status", "assigned_date", "hotel_rooms.location", "hotel_rooms.room_id")
-                    ->leftJoin("housekeeping_cleanings", "housekeeping_cleanings.room_id", "=", "hotel_rooms.room_id")
-                    ->where("hotel_rooms.hotel_id", $hotel_id)
-                    ->where("hotel_rooms.active", 1)
-                    ->where("housekeeping_cleanings.is_active", 1)
-                    ->orderBy("housekeeping_cleanings.cleaning_id", "DESC")
-                    ->paginate($paginate);
+                
+                // $hsk = HotelRoom::select("cleaning_id", "count_by_hotel_id", "hk_status", "front_desk_status", "assigned_date", "hotel_rooms.location", "hotel_rooms.room_id")
+                //     ->leftJoin("housekeeping_cleanings", "housekeeping_cleanings.room_id", "=", "hotel_rooms.room_id")
+                //     ->where("hotel_rooms.hotel_id", $hotel_id)
+                //     ->where("hotel_rooms.active", 1)
+                //     ->where("housekeeping_cleanings.is_active", 1)
+                //     ->orderBy("housekeeping_cleanings.cleaning_id", "DESC")
+                //     ->paginate($paginate);
+
+
+                $query="SELECT
+                            hc.cleaning_id,
+                            hc.count_by_hotel_id,
+                            hc.hk_status,
+                            hc.front_desk_status,
+                            hc.assigned_date,
+                            hr.location,
+                            hr.room_id,
+                            hc.created_on 
+                        FROM
+                            `hotel_rooms` `hr`
+                            LEFT JOIN `housekeeping_cleanings` `hc` ON `hr`.`room_id` = `hc`.`room_id` 
+                            AND `hc`.`hotel_id` = `hr`.`hotel_id` 
+                            AND `hc`.`cleaning_id` = ( SELECT Max( `housekeeping_cleanings`.`cleaning_id` ) FROM `housekeeping_cleanings` WHERE `housekeeping_cleanings`.`room_id` = `hr`.`room_id` AND `housekeeping_cleanings`.`hotel_id` = `hr`.`hotel_id` ) 
+                        WHERE
+                            hr.hotel_id = $hotel_id
+                            AND hr.active = 1";
+
+                $hsk = \DB::select($query);
 
                 // $hsk = HotelRoom::leftJoin('housekeeping_cleanings as hsk', function ($join) {
                 //     $join->on('hotel_rooms.room_id', '=', 'hsk.room_id')

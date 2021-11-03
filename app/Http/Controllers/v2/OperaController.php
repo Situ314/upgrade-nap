@@ -336,7 +336,7 @@ class OperaController extends Controller
                 <wsse:Security>
                     <wsu:Timestamp wsu:Id="Timestamp-fbd379f8-e4b5-4219-a498-85cfefb9afa5">
                         <wsu:Created>' . $timestamp . '</wsu:Created>
-                        <wsu:Expires>' . date('Y-m-d\TH:i:s\Z', strtotime($timestamp . ' +5 minutes')) . '</wsu:Expires>
+                        <wsu:Expires>' . date('Y-m-d\TH:i:s\Z', strtotime($timestamp . ' +35 minutes')) . '</wsu:Expires>
                     </wsu:Timestamp>
                     <wsse:UsernameToken xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="SecurityToken-35e70b4f-57e8-4ebf-b9e2-eaf8269587f2">
                         <wsse:Username>' . $username . '</wsse:Username>
@@ -406,7 +406,7 @@ class OperaController extends Controller
                 <wsse:Security>
                     <wsu:Timestamp wsu:Id="Timestamp-fbd379f8-e4b5-4219-a498-85cfefb9afa5">
                         <wsu:Created>' . $timestamp . '</wsu:Created>
-                        <wsu:Expires>' . date('Y-m-d\TH:i:s\Z', strtotime($timestamp . ' +5 minutes')) . '</wsu:Expires>
+                        <wsu:Expires>' . date('Y-m-d\TH:i:s\Z', strtotime($timestamp . ' +35 minutes')) . '</wsu:Expires>
                     </wsu:Timestamp>
                     <wsse:UsernameToken xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis200401-wss-wssecurity-utility-1.0.xsd" wsu:Id="SecurityToken-35e70b4f-57e8-4ebf-b9e2-eaf8269587f2">
                         <wsse:Username>' . $username . '</wsse:Username>
@@ -661,7 +661,7 @@ class OperaController extends Controller
                 <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
                     <wsu:Timestamp wsu:Id="TS-1DB19FB15198FE10A2159249621088842">
                         <wsu:Created>' . $timestamp . '</wsu:Created>
-                        <wsu:Expires>' . date('Y-m-d\TH:i:s\Z', strtotime($timestamp . ' +5 minutes')) . '</wsu:Expires>
+                        <wsu:Expires>' . date('Y-m-d\TH:i:s\Z', strtotime($timestamp . ' +35 minutes')) . '</wsu:Expires>
                     </wsu:Timestamp>
                     <wsse:UsernameToken wsu:Id="UsernameToken-1DB19FB15198FE10A2159249621088841">
                         <wsse:Username>' . $username . '</wsse:Username>
@@ -754,7 +754,7 @@ class OperaController extends Controller
                 <wsse:Security xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
                     <wsu:Timestamp wsu:Id="TS-1DB19FB15198FE10A2159249621088842">
                         <wsu:Created>' . $timestamp . '</wsu:Created>
-                        <wsu:Expires>' . date('Y-m-d\TH:i:s\Z', strtotime($timestamp . ' +5 minutes')) . '</wsu:Expires>
+                        <wsu:Expires>' . date('Y-m-d\TH:i:s\Z', strtotime($timestamp . ' +35 minutes')) . '</wsu:Expires>
                     </wsu:Timestamp>
                     <wsse:UsernameToken wsu:Id="UsernameToken-1DB19FB15198FE10A2159249621088841">
                         <wsse:Username>' . $username . '</wsse:Username>
