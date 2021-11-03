@@ -24,7 +24,7 @@ class OperaController extends Controller
         switch ($keys[0]) {
             case 'GuestStatusNotificationRequest':
             case 'GuestStatusNotificationExtRequest':
-                // $this->sendXmlReservationToAws($request->xml);
+                $this->sendXmlReservationToAws($request->xml);
                 $resp = $this->reservationService($request);
                 break;
             case 'RoomStatusUpdateBERequest':
@@ -37,7 +37,7 @@ class OperaController extends Controller
                 $resp = $this->nameService($request);
                 break;
             case 'QueueRoomBERequest':
-                //$this->sendXmlHSKToAws($request->xml);
+                $this->sendXmlHSKToAws($request->xml);
                 $resp = $this->QueueService($request);
                 break;
         }
@@ -71,7 +71,7 @@ class OperaController extends Controller
 
         $type       = 'QueueRoomStatus';
         $keys       = array_keys(array_get($data, 'Body', []));
-        \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, array_get($data, 'Body.' . $keys[0]), $config)->onConnection('sqs-fifo');
+        //\App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, array_get($data, 'Body.' . $keys[0]), $config)->onConnection('sqs-fifo');
         $action = str_replace('Request', 'Response', $keys[0]);
         return $this->BuildXMLQueueResponse($action);
     }
@@ -97,7 +97,7 @@ class OperaController extends Controller
                 $created    = array_get($data, 'Header.Security.Timestamp.Created');
                 $expired    = array_get($data, 'Header.Security.Timestamp.Expires');
                 $unique_id  = array_get($data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
-                \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config)->onConnection('sqs-fifo');
+                //\App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config)->onConnection('sqs-fifo');
                 $resp = $this->BuildXMLResponse($action, $unique_id, $created, $expired, $message_id);
                 break;
             case 'GuestStatusNotificationExtRequest':
@@ -107,7 +107,7 @@ class OperaController extends Controller
                 $created    = array_get($data, 'Header.Security.Timestamp.Created');
                 $expired    = array_get($data, 'Header.Security.Timestamp.Expires');
                 $unique_id  = array_get($data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.ProfileIDs.UniqueID', '');
-                \App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config)->onConnection('sqs-fifo');
+                //\App\Jobs\Opera::dispatch($hotel_id, $staff_id, $type, $data, $config)->onConnection('sqs-fifo');
                 $resp = $this->BuildXMLResponse($action, $unique_id, $created, $expired, $message_id);
                 break;
             case 'RoomStatusUpdateBERequest':
@@ -793,9 +793,9 @@ class OperaController extends Controller
             )->then(function ($response) {
             });
             $promise->wait();
-            \Log::info("Send xml to aws");
+            \Log::info("Send profile xml to aws");
         } catch (\Exception $e) {
-            \Log::error('Error sendXmlToAws');
+            \Log::error('Error sendXmlToAws profile');
             \Log::error($e);
         }
     }
@@ -806,7 +806,8 @@ class OperaController extends Controller
             // $text = $request->getContent();
             $client = new Client();
             $promise = $client->postAsync(
-                'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/reservation',
+                //'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/reservation',
+                'https://lht4g5xmvc.execute-api.us-east-1.amazonaws.com/Prod/reservation',
                 [
                     'body' => $text,
                     'headers' => ['Content-Type' => 'application/xml']
@@ -814,9 +815,9 @@ class OperaController extends Controller
             )->then(function ($response) {
             });
             $promise->wait();
-            \Log::info("Send xml to aws");
+            \Log::info("Send reservation xml to aws");
         } catch (\Exception $e) {
-            \Log::error('Error sendXmlToAws');
+            \Log::error('Error sendXmlToAws reservation');
             \Log::error($e);
         }
     }
@@ -836,9 +837,9 @@ class OperaController extends Controller
             )->then(function ($response) {
             });
             $promise->wait();
-            \Log::info("Send xml to aws");
+            \Log::info("Send hsk xml to aws");
         } catch (\Exception $e) {
-            \Log::error('Error sendXmlToAws');
+            \Log::error('Error sendXmlToAws hsk');
             \Log::error($e);
         }
     }
