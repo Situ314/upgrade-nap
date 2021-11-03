@@ -106,7 +106,8 @@ class OperaHelper
         $password   = $config['password'];
 
         try {
-            $url = 'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/profile?resort_id='.$resort_id.'&username='.$username.'&password='.$password;
+            //$url = 'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/profile?resort_id='.$resort_id.'&username='.$username.'&password='.$password;
+            $url = 'https://lht4g5xmvc.execute-api.us-east-1.amazonaws.com/Prod/profile?resort_id='.$resort_id.'&username='.$username.'&password='.$password;
             $options = [
                 'headers' => ['Content-Type' => 'application/xml'],
                 'body' => $xml
