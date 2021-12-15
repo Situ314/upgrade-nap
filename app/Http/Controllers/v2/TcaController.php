@@ -15,8 +15,8 @@ use DB;
 class TcaController extends Controller
 {
     public function index(Request $request) {
-        // \Log::info('TCA');
-        // \Log::info($request->getContent());
+        \Log::info('TCA');
+        \Log::info($request->getContent());
 
         $response = $request->getContent();                
         $xmlString = preg_replace("/(<\/?)([a-zA-Z0-9_-]+):([^>]*>)/", "$1$2$3", $response);        

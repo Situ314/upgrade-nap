@@ -211,7 +211,9 @@ class HousekeepingController extends Controller
     {
         DB::beginTransaction();
         try {
-            $hkc = \App\Models\HousekeepingCleanings::find($id);
+            $hkc = \App\Models\HousekeepingCleanings::find($id);         
+            
+                
             //dd($hkc);
             if ($hkc) {
                 /* Validate send object */
@@ -222,19 +224,42 @@ class HousekeepingController extends Controller
                         "description" => []
                     ], 400);
                 }
+                
+                
+                
                 /* configure timezone  by hotel */
-                $this->configTimeZone($hkc->hotel_id);
-                $HousekeepingData = [
+                /* $this->configTimeZone($hkc->hotel_id);*/               
+               
+                $HousekeepingData = [];
+	        $HousekeepingData["hotel_id"] = $hkc->hotel_id;
+        	$HousekeepingData["staff_id"] = $request->user()->staff_id;
+	        $HousekeepingData["rooms"]    = [];
+	        
+	        $_d["room_id"] = $hkc->room_id;
+	        $_d["hk_status"] = $request->hsk['hk_status'];
+	        
+	        $HousekeepingData["rooms"][] = $_d;
+	        
+                /*$HousekeepingData = array( 
                     "hotel_id" => $hkc->hotel_id,
                     "staff_id" => $request->user()->staff_id,
+                    $HousekeepingData["rooms"][] 
                     "rooms" => [
                         "room_id"   => $hkc->room_id,
-                        "hk_status" => $request->hsk['hk_status'],
-                    ]
-                ];
+                        "hk_status" => $request->hsk[0]['hk_status'],
+                    ])
+                ;*/
+                
+                /*return response()->json([
+                    'update' => true,
+                    'message' => 'updated',
+                    'description' =>  json_encode($HousekeepingData )
+                ], 200);*/
+
+                
                 $curl = curl_init();
                 curl_setopt_array($curl, array(
-                    CURLOPT_URL             => "https://integrations.mynuvola.com/index.php/housekeeping/pmsHKChange",
+                    CURLOPT_URL             => "https://hotel.mynuvola.com/index.php/housekeeping/pmsHKChange",
                     CURLOPT_RETURNTRANSFER  => true,
                     CURLOPT_ENCODING        => "",
                     CURLOPT_MAXREDIRS       => 10,
@@ -244,18 +269,23 @@ class HousekeepingController extends Controller
                     CURLOPT_POSTFIELDS      => json_encode($HousekeepingData)
                 ));
                 $response = curl_exec($curl);
-                $err = curl_error($curl);
-                curl_close($curl);
-                dd($response);
                 return response()->json([
                     'update' => true,
                     'message' => 'updated',
-                    'description' =>  $id
+                    'description' =>  $response
                 ], 200);
+                $err = curl_error($curl);
+                curl_close($curl);
+                //dd($response);
+                /*return response()->json([
+                    'update' => true,
+                    'message' => 'updated',
+                    'description' =>  $id
+                ], 200);*/
             } else {
                 return response()->json([
                     'update' => false,
-                    'message' => 'Record not foun',
+                    'message' => 'Record not found',
                     'description' =>  []
                 ], 400);
             }

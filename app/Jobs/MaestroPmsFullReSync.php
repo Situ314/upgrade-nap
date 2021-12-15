@@ -260,7 +260,7 @@ class MaestroPmsFullReSync implements ShouldQueue
 
         if ($err) {
             //echo "cURL Error #:" . $err;
-            // \Log::error($err);
+            \Log::error($err);
             return null;
         } else {
             //\Log::info($response);
