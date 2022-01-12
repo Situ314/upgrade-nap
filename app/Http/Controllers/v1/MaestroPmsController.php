@@ -27,9 +27,34 @@ class MaestroPmsController extends Controller
             $xml        = simplexml_load_string($text);
             $str_json   = json_encode($xml);
             $json       = json_decode($str_json);
+            
+            \Log::error('XML Maestro received: '.$json->HotelId);
+            
+            
+            
+            // if (isset($json->Action)) {           	
+            // 	try {
+            //         $text = $request->getContent();
+            //         $client = new Client();
+            //         $promise = $client->postAsync('https://cytluzl4uk.execute-api.us-east-1.amazonaws.com/', [
+            //             'body' => $text,
+            //             'headers'        => ['Content-Type' => 'application/xml']
+            //         ])->then(function ($response) {
+            //         });
+            //         $promise->wait();
+            //     } catch (\Exception $e) {
+            //         \Log::error('Error Sending Async Promise TO DEV');
+            //     }
+            //     \Log::error('After try Sending Async Promise TO DEV');                
+            // }
 
-            if ($json->HotelId == '1425' && isset($json->Action) && $json->Action == 'HousekeepingStatus') {
-                try {
+//            if ($json->HotelId == '1425' && isset($json->Action) && ($json->Action == 'HousekeepingStatus' || $json->Action == 'CheckIn' || $json->Action == 'CheckOut')) {
+//if (($json->HotelId == '1425' || $json->HotelId == '1777') && isset($json->Action)) {
+            
+		if (isset($json->Action)) {
+            
+            	\Log::info('Before try Sending Async Promise to PROD from hotel: '.$json->HotelId);
+            	try {
                     $text = $request->getContent();
                     $client = new Client();
                     $promise = $client->postAsync('https://c9ge7dpq3b.execute-api.us-east-1.amazonaws.com/', [
@@ -39,8 +64,9 @@ class MaestroPmsController extends Controller
                     });
                     $promise->wait();
                 } catch (\Exception $e) {
-                    \Log::error('Error Sending Async Promise');
+                    \Log::error('Error Sending Async Promise to PROD from hotel: '.$json->HotelId);
                 }
+                \Log::error('After try Sending Async Promise to PROD from hotel: '.$json->HotelId);
 
                 $xml_response = ArrayToXml::convert([
                     'HotelId'       => $json->HotelId,

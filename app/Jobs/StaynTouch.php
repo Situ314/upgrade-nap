@@ -180,6 +180,7 @@ class StaynTouch implements ShouldQueue
     {
         DB::beginTransaction();
         try {
+        \Log::info("entro a jobs de reserva");
             if ($this->validateReservationData($this->data)) {
                 $reservation_number = $this->data['reservation_number'];
                 $hotel_id = $this->hotel_id;

@@ -19,6 +19,7 @@ class GuestController extends Controller
     public function store(Request $request)
     {
         // Capturar hotel id, por default el valor es null, en caso de no enviarlo
+        \Log::error("Guest Received from synergex ".($request));
         $hotel_id = isset($request->hotel_id) ? $request->hotel_id : null;
         // 
         $validator = Validator::make($request->all(), [

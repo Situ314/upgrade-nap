@@ -21,7 +21,9 @@ class MaestroPmsController extends Controller
             //     \Log::info('----------------------------------------');
             // }
             
-            $xml        = simplexml_load_string($request->getContent());
+            $text = $request->getContent();
+            $text = preg_replace('/&(?!#?[a-z0-9]+;)/', '&amp;', $text);
+            $xml        = simplexml_load_string($text);
             $str_json   = json_encode($xml);            
             $json       = json_decode($str_json);
 
@@ -66,7 +68,7 @@ class MaestroPmsController extends Controller
 
                 $validatePasswordHash = $this->validatePasswordHash($hotel_id, $json->PasswordHash, $agreed_upon_key);
                 if ($validatePasswordHash) {
-                    \App\Jobs\MaestroPms::dispatch($maestroIntegration, $json)->onConnection('sqs-fifo_maestro');
+                    \App\Jobs\MaestroPmsv3::dispatch($maestroIntegration, $json)->onConnection('sqs-fifo_maestro');
                    // $this->dispatch((new MaestroPms($maestroIntegration, $json)));
 
                     $xml_response = ArrayToXml::convert([
@@ -210,7 +212,7 @@ class MaestroPmsController extends Controller
             ->first();
 
         if ($integration) {
-            \App\Jobs\MaestroPms::dispatch($integration, null, true, $room_id)->onConnection('sqs-fifo_maestro');
+            \App\Jobs\MaestroPmsv3::dispatch($integration, null, true, $room_id)->onConnection('sqs-fifo_maestro');
            // $this->dispatch((new MaestroPms($integration, null, true, $room_id)));
             return response()->json(['sync' => true], 200);
         }
@@ -218,3 +220,4 @@ class MaestroPmsController extends Controller
         return response()->json(['sync' => false], 200);
     }
 }
+

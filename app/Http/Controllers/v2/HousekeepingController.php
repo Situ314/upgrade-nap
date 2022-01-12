@@ -211,7 +211,9 @@ class HousekeepingController extends Controller
     {
         DB::beginTransaction();
         try {
-            $hkc = \App\Models\HousekeepingCleanings::find($id);
+            $hkc = \App\Models\HousekeepingCleanings::find($id);         
+            
+                
             //dd($hkc);
             if ($hkc) {
                 /* Validate send object */
@@ -222,6 +224,9 @@ class HousekeepingController extends Controller
                         "description" => []
                     ], 400);
                 }
+                
+                
+                
                 /* configure timezone  by hotel */
                 $this->configTimeZone($hkc->hotel_id);
                 // $HousekeepingData = [
@@ -248,7 +253,7 @@ class HousekeepingController extends Controller
 
                 $curl = curl_init();
                 curl_setopt_array($curl, array(
-                    CURLOPT_URL             => "https://integrations.mynuvola.com/index.php/housekeeping/pmsHKChange",
+                    CURLOPT_URL             => "https://hotel.mynuvola.com/index.php/housekeeping/pmsHKChange",
                     CURLOPT_RETURNTRANSFER  => true,
                     CURLOPT_ENCODING        => "",
                     CURLOPT_MAXREDIRS       => 10,
@@ -258,18 +263,23 @@ class HousekeepingController extends Controller
                     CURLOPT_POSTFIELDS      => json_encode($HousekeepingData)
                 ));
                 $response = curl_exec($curl);
-                $err = curl_error($curl);
-                curl_close($curl);
-                dd($response);
                 return response()->json([
                     'update' => true,
                     'message' => 'updated',
-                    'description' =>  $id
+                    'description' =>  $response
                 ], 200);
+                $err = curl_error($curl);
+                curl_close($curl);
+                //dd($response);
+                /*return response()->json([
+                    'update' => true,
+                    'message' => 'updated',
+                    'description' =>  $id
+                ], 200);*/
             } else {
                 return response()->json([
                     'update' => false,
-                    'message' => 'Record not foun',
+                    'message' => 'Record not found',
                     'description' =>  []
                 ], 400);
             }

@@ -95,9 +95,6 @@ class ReservationController extends Controller
     public function store(Request $request)
     {
         // Capturar hotel id, por default el valor es null, en caso de no enviarlo
-        
-               
-        
         $hotel_id = isset($request->hotel_id) ? $request->hotel_id : null;
 
         $validator = Validator::make($request->all(), [
@@ -163,24 +160,12 @@ class ReservationController extends Controller
 
             if ($reservation['reservation_status'] == 1) $send_welcome = true;
 
-            /**
-             * Add Hour 23 to Check in & Check out
-             */
-            $check_in = $reservation["check_in"];
-            $check_out = $reservation["check_out"];
-            if($reservation['reservation_status'] == 0){ #Reserved
-                $check_in = date('Y-m-d', strtotime("$check_in")) . " 23:59:00";
-                $check_out = date('Y-m-d', strtotime("$check_out")) . " 23:59:00";
-            }else if($reservation['reservation_status'] == 1){ #Check in
-                $check_out = date('Y-m-d', strtotime("$check_out")) . " 23:59:00";
-            }
-
             $reservationData = [
                 'guest_id'              => $guest->guest_id,
                 'hotel_id'              => $hotel_id,
                 'room_no'               => $room_id,
-                'check_in'              => $check_in, #$reservation["check_in"],
-                'check_out'             => $check_out, #$reservation["check_out"],
+                'check_in'              => $reservation["check_in"],
+                'check_out'             => $reservation["check_out"],
                 'reservation_number'    => $reservation['reservation_number'],
                 'reservation_status'    => $reservation['reservation_status'],
                 'comment'               => array_key_exists('comment', $reservation) ? $reservation['comment'] : "",
@@ -249,6 +234,12 @@ class ReservationController extends Controller
             ],
             "reservations" => "required|array",
             'reservations.*.reservation_status' => 'required|numeric|in:0,1,2,3', //0: reserved, 1:checked in, 2: cancelled, 3: checked out
+            // 'reservations.*.reservation_number' => [
+            //     'string',
+            //     'required',
+            //     'distinct',
+            //     Rule::exists('guest_checkin_details')->where('hotel_id', $hotel_id)
+            // ],
             "reservations.*.room" => [
                 'string',
                 'nullable',
@@ -289,38 +280,6 @@ class ReservationController extends Controller
             $guest = \App\Models\IntegrationsGuestInformation::where('hotel_id', $hotel_id)->where('guest_number', $guest_number)->first();
         }
 
-        // Validar si los registros anteriores pertenece a una suit, y el nuevo registro pretende pasar la reserva a una habitacion normal
-        // en dicho caso es necesario cancelar las 2 ó 3 habitaciones y solo dejar una.
-
-        $reservationToCancel = [];
-
-        $limit = 9;
-        foreach ($reservations as $key => $reservation) {
-            $rn = $reservation['reservation_number'];
-            if (strlen($rn) > $limit) {
-                $reservation_number = substr($rn, 0, $limit);
-                // $rooms              = substr($rn, -3);
-                $reservationToCancel[$reservation_number][] = $rn;
-            }
-        }
-
-        foreach ($reservationToCancel as $key => $value) {
-            if (count($value) == 1) {
-                $guestCheckinDetails = \App\Models\GuestCheckinDetails::where("hotel_id", $hotel_id)
-                    ->where("reservation_number", "LIKE", "$key%")
-                    ->get();
-
-                foreach ($guestCheckinDetails as $key => $r) {
-                    if ($key > 0) {
-                        $r->reservation_status = 0;
-                        $r->status = 0;
-                        $r->save();
-                    }
-                }
-            }
-        }
-
-
         foreach ($reservations as $key => $reservation) {
             $reservation_number = $reservation['reservation_number'];
 
@@ -352,23 +311,10 @@ class ReservationController extends Controller
                     ]);
                 }
 
-
-                /**
-                 * Add Hour 23 to Check in & Check out
-                 */
-                $check_in = $reservation["check_in"];
-                $check_out = $reservation["check_out"];
-                if($reservation['reservation_status'] == 0){ #Reserved
-                    $check_in = date('Y-m-d', strtotime("$check_in")) . " 23:59:00";
-                    $check_out = date('Y-m-d', strtotime("$check_out")) . " 23:59:00";
-                }else if($reservation['reservation_status'] == 1){ #Check in
-                    $check_out = date('Y-m-d', strtotime("$check_out")) . " 23:59:00";
-                }
-
                 $reservationData = [
                     'room_no'               => $room_id,
-                    'check_in'              => $check_in, #$reservation["check_in"],
-                    'check_out'             => $check_out, #$reservation["check_out"],
+                    'check_in'              => $reservation["check_in"],
+                    'check_out'             => $reservation["check_out"],
                     'reservation_number'    => $reservation['reservation_number'],
                     'reservation_status'    => $reservation['reservation_status'],
                     'comment'               => array_key_exists('comment', $reservation) ? $reservation['comment'] : "",

@@ -19,7 +19,6 @@ Route::get('/', function() {
 */
 Route::post('maestro-pms', 'v1\MaestroPmsController@index');
 Route::post('maestro-pms/v3', 'v3\MaestroPmsController@index');
-
 /*
 |--------------------------------------------------------------------------
 | DOCUMENTATION

@@ -46,7 +46,6 @@ class StayNTouchController extends Controller
     }
     public function Reservation(Request $request, $hotel_id)
     {
-        // \Log::info($request);
 
         if ($request->event == 'room_status' || $request->event == 'room_status_service') {
             // $this->Housekeeping($request, $hotel_id);
@@ -57,7 +56,7 @@ class StayNTouchController extends Controller
                 if ($this->getIntegration($request->data['hotel_id'])) {
                     $this->configTimeZone($this->hotel_id);
                     $now = date('Y-m-d H:i:s');
-                    $this->CheckToken();
+                    $this->CheckToken();                    
                     $data  = $this->GetData($id, 'reservations');
                     $data = $this->formatReservation($data);
                     $this->dispatch(new \App\Jobs\StaynTouch($data, $this->hotel_id, $this->pms_hotel_id, $this->config, $this->staff_id, $now));
@@ -109,7 +108,7 @@ class StayNTouchController extends Controller
     }
 
     private function GetToken()
-    {
+        {    
         try {
             $config = IntegrationsActive::where('int_id', 8)->where('pms_hotel_id', $this->pms_hotel_id)->first();
             $curl = curl_init();
@@ -124,8 +123,9 @@ class StayNTouchController extends Controller
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => "POST",
                 CURLOPT_POSTFIELDS => array('client_id' => $config->config['client_id'], 'client_secret' =>  $config->config['client_secret'], 'grant_type' => $config->config['grant_type']),
-            ));
-            dd($this->config['url_token']);
+            ));            
+            //dd($this->config['url_token']);
+            
             $response = curl_exec($curl);
             $err        = curl_error($curl);
             curl_close($curl);
@@ -133,6 +133,7 @@ class StayNTouchController extends Controller
                 return null;
             }
             $token = json_decode($response);
+            
             $config_data = $config->config;
             $config_data['access_token'] = $token->access_token;
             $config_data['expires_in'] = date('Y-m-d H:i:s', $token->created_at + $token->expires_in);

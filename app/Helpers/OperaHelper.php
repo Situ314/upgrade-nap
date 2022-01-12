@@ -83,6 +83,8 @@ class OperaHelper
                 return $response;
             } else {
                 \Log::error("OperaHelper::getProfileData no integrationsActive");
+                \Log::error("From hotel: ".$resort_id);
+                \Log::error("For unique_id: ".$unique_id);
             }
 
             return null;
@@ -112,14 +114,14 @@ class OperaHelper
                 'headers' => ['Content-Type' => 'application/xml'],
                 'body' => $xml
             ];
-
+	    \Log::error('Sending from OperaHelper: '.$resort_id);
             $client = new Client();
             $promise = $client->postAsync($url, $options)->then(function ($response) {
             });
 
             $promise->wait();
         } catch (\Exception $e) {
-            \Log::error('Error in OperaHelper::sendXmlToAwl');
+            \Log::error('Error in OperaHelper::sendXmlToAwl'.$resort_id);
             \Log::error($e);
         }
     }

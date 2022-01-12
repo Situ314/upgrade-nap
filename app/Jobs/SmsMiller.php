@@ -909,7 +909,7 @@ class SmsMiller implements ShouldQueue
                     $rs['send_angel'] = $send_angel;
                     $rs['send_welcome'] = $send_welcome;
                     $this->count_message++;
-                    // \Log::alert('se envi√≥ una vez');
+                    // \Log::alert('se envi®Æ una vez');
                     // \Log::alert("$guest_id,$phone");
                     return $rs;
                 }

@@ -34,7 +34,7 @@ class Kernel extends ConsoleKernel
     {
         // monitorear los datos por hora
         // $schedule->command('monitoring:register')->cron('*/15 * * * *')->timezone('UTC');
-        // Enviar correos con posible integraciones que no estan enviando informaciÃ³n
+        // Enviar correos con posible integraciones que no estan enviando informaci¨®n
         $time = 59;
         // $schedule->command("monitoring:sendmailmaestro $time")->cron("*/$time * * * *")->timezone('UTC');
         $time = 59;

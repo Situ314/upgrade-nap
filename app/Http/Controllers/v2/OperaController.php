@@ -497,7 +497,7 @@ class OperaController extends Controller
             #$location = (strlen($HotelRoom->location) > 3 && ($hotel_id == 296 || $hotel_id == 238 || $hotel_id == 289  || $hotel_id == 314 || $hotel_id == 303)) ? $HotelRoom->location : "0$HotelRoom->location";
             #$location = $hotel_id== 314 ||  $hotel_id== 303 ||  $hotel_id== 266 ? $HotelRoom->location : $location;
 
-            if($hotel_id == 314){
+            if($hotel_id == 314 || $hotel_id == 388){
                 $location = $HotelRoom->location;
             }else if($hotel_id == 207){
                 $location = str_pad($HotelRoom->location, 3, "0", STR_PAD_LEFT);
