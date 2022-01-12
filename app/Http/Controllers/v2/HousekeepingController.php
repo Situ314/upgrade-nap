@@ -224,14 +224,28 @@ class HousekeepingController extends Controller
                 }
                 /* configure timezone  by hotel */
                 $this->configTimeZone($hkc->hotel_id);
-                $HousekeepingData = [
-                    "hotel_id" => $hkc->hotel_id,
-                    "staff_id" => $request->user()->staff_id,
-                    "rooms" => [
-                        "room_id"   => $hkc->room_id,
-                        "hk_status" => $request->hsk['hk_status'],
-                    ]
-                ];
+                // $HousekeepingData = [
+                //     "hotel_id" => $hkc->hotel_id,
+                //     "staff_id" => $request->user()->staff_id,
+                //     "rooms" => [
+                //         "room_id"   => $hkc->room_id,
+                //         "hk_status" => $request->hsk['hk_status'],
+                //     ]
+                // ];
+
+                /* configure timezone  by hotel */
+                /* $this->configTimeZone($hkc->hotel_id);*/               
+               
+                $HousekeepingData = [];
+                $HousekeepingData["hotel_id"] = $hkc->hotel_id;
+                $HousekeepingData["staff_id"] = $request->user()->staff_id;
+                $HousekeepingData["rooms"]    = [];
+                
+                $_d["room_id"] = $hkc->room_id;
+                $_d["hk_status"] = $request->hsk[0]['hk_status'];
+                
+                $HousekeepingData["rooms"][] = $_d;
+
                 $curl = curl_init();
                 curl_setopt_array($curl, array(
                     CURLOPT_URL             => "https://integrations.mynuvola.com/index.php/housekeeping/pmsHKChange",
