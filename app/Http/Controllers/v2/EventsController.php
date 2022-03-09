@@ -10,6 +10,7 @@ use \App\Models\Event;
 use \App\Models\GuestCheckinDetails;
 use Illuminate\Validation\Rule;
 use \App\Models\DeptTag;
+use \App\Models\Staff;
 // use App\Models\EventStay; ESTA SOLO EN DEVELOP PERO NO EN PRODUCTION
 use App\Models\IntegrationsActive;
 use App\Models\IntegrationsStay;
@@ -60,7 +61,10 @@ class EventsController extends Controller
             'issue',
             'dept_tag_id',
             'date',
-            'time'
+            'time',
+            'status',
+            'completed_on',
+            'completed_by'
         ];
 
         $query = Event::select($columns)
@@ -69,7 +73,8 @@ class EventsController extends Controller
                     return $q->select(['room_id', 'location']);
                 },
                 'DepTag.departament',
-                'DepTag.tag'
+                'DepTag.tag',
+                'StaffCompleted'
             ])
             ->where(function ($q) use ($hotel_id, $guest_id, $room_ids) {
                 $q->where('hotel_id', $hotel_id)->where('active', 1);
@@ -290,6 +295,7 @@ class EventsController extends Controller
             $event["created_by"]        = $staff_id;
             $event["created_on"]        = $now;
             $event["pending_by"]        = $staff_id;
+            $event["requested_by"]      = 1;
 
             if (!isset($event["date"])) {
                 $date = date('Y-m-d');

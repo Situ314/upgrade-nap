@@ -50,7 +50,8 @@ class Event extends Model
         'child_recurr',
         'count_by_hotel_id',
         'in_shift',
-        'cancel_by_guest'
+        'cancel_by_guest',
+        'requested_by'
     ];
     protected $hidden = [
         'dept_tag_id',
@@ -73,7 +74,7 @@ class Event extends Model
         'owner',
         'pending_on',
         'pending_by',
-        'completed_on',
+        //'completed_on',
         'completed_by',
         'active',
         'is_guest',
@@ -92,7 +93,8 @@ class Event extends Model
         'child_recurr',
         'count_by_hotel_id',
         'in_shift',
-        'cancel_by_guest'
+        'cancel_by_guest',
+        'requested_by'
     ];
 
     public function Guest()
@@ -108,6 +110,11 @@ class Event extends Model
     public function DepTag()
     {
         return $this->hasOne('App\Models\DeptTag','dept_tag_id','dept_tag_id');
+    }
+    
+    public function StaffCompleted()
+    {
+        return $this->hasOne('App\Models\Staff','staff_id','completed_by');
     }
 
 }
