@@ -4,6 +4,7 @@ namespace App\Http\Controllers\v2;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class SMSMillerController extends Controller
 {
@@ -18,12 +19,12 @@ class SMSMillerController extends Controller
             $now = date('Y-m-d H:i:s');
 
             $data = $request->data;
-            $keys = array_keys(array_get($data, 'Body'));
+            $keys = array_keys(Arr::get($data, 'Body'));
             switch ($keys[0]) {
                 case 'bookingcollection':
-                    $booking = array_get($data, 'Body.bookingcollection', []);
-                    $count = array_get($booking, 'bookingresults.@attributes.count');
-                    $shareresults = array_get($booking, 'bookingresults.shareresults');
+                    $booking = Arr::get($data, 'Body.bookingcollection', []);
+                    $count = Arr::get($booking, 'bookingresults.@attributes.count');
+                    $shareresults = Arr::get($booking, 'bookingresults.shareresults');
                     if ($count < 2) {
                         $shareresults = [$shareresults];
                     }
@@ -39,9 +40,9 @@ class SMSMillerController extends Controller
                     break;
 
                 case 'checkincollection':
-                    $check_in = array_get($data, 'Body.checkincollection', []);
-                    $count = array_get($check_in, 'checkinresults.@attributes.count');
-                    $shareresults = array_get($check_in, 'checkinresults.shareresults');
+                    $check_in = Arr::get($data, 'Body.checkincollection', []);
+                    $count = Arr::get($check_in, 'checkinresults.@attributes.count');
+                    $shareresults = Arr::get($check_in, 'checkinresults.shareresults');
                     if ($count < 2) {
                         $shareresults = [$shareresults];
                     }
@@ -58,7 +59,7 @@ class SMSMillerController extends Controller
                     break;
 
                 case 'checkoutresults':
-                    $check_out = array_get($data, 'Body.checkoutresults', []);
+                    $check_out = Arr::get($data, 'Body.checkoutresults', []);
                     $process_data = $this->proccessDataCheckOut($check_out, $hotel_id);
                     $resp = $this->responseCheckOut();
                     $this->dispatch(new \App\Jobs\SmsMiller($hotel_id, $staff_id, 'checkOut', $process_data, $config, $now));
@@ -69,15 +70,15 @@ class SMSMillerController extends Controller
                     break;
 
                 case 'roommoveresults':
-                    $room_move = array_get($data, $keys[0], []);
+                    $room_move = Arr::get($data, $keys[0], []);
 
                     return $this->responseCheckOut();
 
                     break;
                 case 'HousekeepingStatusResults':
 
-                    $housekeeping = array_get($data, 'Body.HousekeepingStatusResults.HousekeepingStatus', []);
-                    if (array_has($housekeeping, 'Code')) {
+                    $housekeeping = Arr::get($data, 'Body.HousekeepingStatusResults.HousekeepingStatus', []);
+                    if (Arr::has($housekeeping, 'Code')) {
                         $housekeeping = [$housekeeping];
                     }
                     $process_data = [];
@@ -85,8 +86,8 @@ class SMSMillerController extends Controller
                         $process_data[] = $this->proccessDataHousekeeping($value, $hotel_id);
                     }
                     $v1 = isset($housekeeping[0]) ? $housekeeping[0]['@attributes']['unum'] : '';
-                    $v2 = array_get($process_data, 0, []);
-                    $v3 = array_get($v2, 'status', '');
+                    $v2 = Arr::get($process_data, 0, []);
+                    $v3 = Arr::get($v2, 'status', '');
                     $resp = $this->responseHousekeepingRS($v1, $v3);
                     $this->dispatch(new \App\Jobs\SmsMiller($hotel_id, $staff_id, 'housekeeping', $process_data, $config, $now));
                     $this->dispatch(new \App\Jobs\SmsMillerLogs($hotel_id, $staff_id, 'housekeeping', $housekeeping, 'HousekeepingStatusResults'));
@@ -95,8 +96,8 @@ class SMSMillerController extends Controller
                     break;
                 case 'HousekeepingStatusRS':
 
-                    $housekeeping = array_get($data, 'Body.HousekeepingStatusRS.HousekeepingStatus', []);
-                    if (array_has($housekeeping, 'Code')) {
+                    $housekeeping = Arr::get($data, 'Body.HousekeepingStatusRS.HousekeepingStatus', []);
+                    if (Arr::has($housekeeping, 'Code')) {
                         $housekeeping = [$housekeeping];
                     }
                     $process_data = [];
@@ -104,8 +105,8 @@ class SMSMillerController extends Controller
                         $process_data[] = $this->proccessDataHousekeeping($value, $hotel_id);
                     }
                     $v1 = isset($housekeeping[0]) ? $housekeeping[0]['@attributes']['unum'] : '';
-                    $v2 = array_get($process_data, 0, []);
-                    $v3 = array_get($v2, 'status', '');
+                    $v2 = Arr::get($process_data, 0, []);
+                    $v3 = Arr::get($v2, 'status', '');
                     $resp = $this->responseHousekeepingRS($v1, $v3);
                     $this->dispatch(new \App\Jobs\SmsMiller($hotel_id, $staff_id, 'housekeeping', $process_data, $config, $now));
                     $this->dispatch(new \App\Jobs\SmsMillerLogs($hotel_id, $staff_id, 'housekeeping', $housekeeping, 'HousekeepingStatusResults'));
@@ -113,8 +114,8 @@ class SMSMillerController extends Controller
                     return response($resp, 200)->header('Content-Type', 'application/soap+xml; charset=utf-8');
                     break;
                 case 'HouseKeepingStatusResults':
-                    $housekeeping = array_get($data, 'Body.HouseKeepingStatusResults.HousekeepingStatus', []);
-                    if (array_has($housekeeping, 'Code')) {
+                    $housekeeping = Arr::get($data, 'Body.HouseKeepingStatusResults.HousekeepingStatus', []);
+                    if (Arr::has($housekeeping, 'Code')) {
                         $housekeeping = [$housekeeping];
                     }
                     $process_data = [];
@@ -122,8 +123,8 @@ class SMSMillerController extends Controller
                         $process_data[] = $this->proccessDataHousekeeping($value, $hotel_id);
                     }
                     $v1 = isset($housekeeping[0]) ? $housekeeping[0]['@attributes']['unum'] : '';
-                    $v2 = array_get($process_data, 0, []);
-                    $v3 = array_get($v2, 'status', '');
+                    $v2 = Arr::get($process_data, 0, []);
+                    $v3 = Arr::get($v2, 'status', '');
                     $resp = $this->responseHousekeepingRS($v1, $v3);
                     $this->dispatch(new \App\Jobs\SmsMiller($hotel_id, $staff_id, 'housekeeping', $process_data, $config, $now));
                     $this->dispatch(new \App\Jobs\SmsMillerLogs($hotel_id, $staff_id, 'housekeeping', $housekeeping, 'HousekeepingStatusResults'));
@@ -151,20 +152,20 @@ class SMSMillerController extends Controller
 
             'hotel_id' => $hotel_id,
 
-            'reservation_number' => array_get($data, '@attributes.resno'),
-            'guest_number' => array_get($data, 'guestresults.@attributes.guestnum'),
-            'lastname' => ! empty(array_get($data, 'guestresults.last', '')) ? array_get($data, 'guestresults.last', '') : '',
-            'firstname' => ! empty(array_get($data, 'guestresults.first', '')) ? array_get($data, 'guestresults.first', '') : '',
-            'address' => ! empty(array_get($data, 'guestresults.address2', '')) ? array_get($data, 'guestresults.address2', '') : '',
-            'city' => ! empty(array_get($data, 'guestresults.city', '')) ? array_get($data, 'guestresults.city', '') : '',
-            'state' => ! empty(array_get($data, 'guestresults.state', '')) ? array_get($data, 'guestresults.state', '') : '',
-            'zipcode' => ! empty(array_get($data, 'guestresults.zip', '')) ? array_get($data, 'guestresults.zip', '') : '',
-            'city' => ! empty(array_get($data, 'guestresults.city', '')) ? array_get($data, 'guestresults.city', '') : '',
-            'dob' => ! empty(array_get($data, 'guestresults.bday', '')) ? array_get($data, 'guestresults.bday', '') : '',
-            'phone_no' => ! empty(array_get($data, 'guestresults.phone', '')) ? array_get($data, 'guestresults.phone', '') : '',
-            'email_address' => ! empty(array_get($data, 'guestresults.email', '')) ? array_get($data, 'guestresults.email', '') : '',
-            'check_in' => ! empty(array_get($data, 'reservationresults.arrival', '')) ? array_get($data, 'reservationresults.arrival', '') : '',
-            'check_out' => ! empty(array_get($data, 'reservationresults.depart', '')) ? array_get($data, 'reservationresults.depart', '') : '',
+            'reservation_number' => Arr::get($data, '@attributes.resno'),
+            'guest_number' => Arr::get($data, 'guestresults.@attributes.guestnum'),
+            'lastname' => ! empty(Arr::get($data, 'guestresults.last', '')) ? Arr::get($data, 'guestresults.last', '') : '',
+            'firstname' => ! empty(Arr::get($data, 'guestresults.first', '')) ? Arr::get($data, 'guestresults.first', '') : '',
+            'address' => ! empty(Arr::get($data, 'guestresults.address2', '')) ? Arr::get($data, 'guestresults.address2', '') : '',
+            'city' => ! empty(Arr::get($data, 'guestresults.city', '')) ? Arr::get($data, 'guestresults.city', '') : '',
+            'state' => ! empty(Arr::get($data, 'guestresults.state', '')) ? Arr::get($data, 'guestresults.state', '') : '',
+            'zipcode' => ! empty(Arr::get($data, 'guestresults.zip', '')) ? Arr::get($data, 'guestresults.zip', '') : '',
+            'city' => ! empty(Arr::get($data, 'guestresults.city', '')) ? Arr::get($data, 'guestresults.city', '') : '',
+            'dob' => ! empty(Arr::get($data, 'guestresults.bday', '')) ? Arr::get($data, 'guestresults.bday', '') : '',
+            'phone_no' => ! empty(Arr::get($data, 'guestresults.phone', '')) ? Arr::get($data, 'guestresults.phone', '') : '',
+            'email_address' => ! empty(Arr::get($data, 'guestresults.email', '')) ? Arr::get($data, 'guestresults.email', '') : '',
+            'check_in' => ! empty(Arr::get($data, 'reservationresults.arrival', '')) ? Arr::get($data, 'reservationresults.arrival', '') : '',
+            'check_out' => ! empty(Arr::get($data, 'reservationresults.depart', '')) ? Arr::get($data, 'reservationresults.depart', '') : '',
             'location' => '',
             'reservation_status' => '',
             'status' => '',
@@ -191,10 +192,10 @@ class SMSMillerController extends Controller
 
         $__data['phone_no'] = $phone_no;
 
-        if (! empty(array_get($data, 'reservationresults.primaryshare', '')) && array_get($data, 'reservationresults.primaryshare', '') == 'yes') {
-            if (! is_array(array_get($data, 'reservationresults.name'))) {
-                if (! empty(array_get($data, 'reservationresults.group', ''))) {
-                    $name_option = array_get($data, 'reservationresults.name');
+        if (! empty(Arr::get($data, 'reservationresults.primaryshare', '')) && Arr::get($data, 'reservationresults.primaryshare', '') == 'yes') {
+            if (! is_array(Arr::get($data, 'reservationresults.name'))) {
+                if (! empty(Arr::get($data, 'reservationresults.group', ''))) {
+                    $name_option = Arr::get($data, 'reservationresults.name');
 
                     $name_option = explode(',', str_replace(' ', '', $name_option));
                     if (isset($name_option[0])) {
@@ -205,7 +206,7 @@ class SMSMillerController extends Controller
                         $__data['firstname'] = $name_option[1];
                     }
                 } else {
-                    $name_option = array_get($data, 'reservationresults.name');
+                    $name_option = Arr::get($data, 'reservationresults.name');
 
                     $name_option = explode(',', str_replace(' ', '', $name_option));
                     if (isset($name_option[0])) {
@@ -219,26 +220,26 @@ class SMSMillerController extends Controller
             }
         }
 
-        if (array_has($data, 'reservationresults.unum') && array_has($data, 'reservationresults.utyp')) {
-            if (array_get($data, 'reservationresults.unum') != array_get($data, 'reservationresults.utyp')) {
-                $__data['location'] = ! empty(array_get($data, 'reservationresults.unum', '')) ? array_get($data, 'reservationresults.unum') : '';
+        if (Arr::has($data, 'reservationresults.unum') && Arr::has($data, 'reservationresults.utyp')) {
+            if (Arr::get($data, 'reservationresults.unum') != Arr::get($data, 'reservationresults.utyp')) {
+                $__data['location'] = ! empty(Arr::get($data, 'reservationresults.unum', '')) ? Arr::get($data, 'reservationresults.unum') : '';
             }
         }
 
-        if ($__data['location'] != '' && array_has($data, 'unitresults')) {
+        if ($__data['location'] != '' && Arr::has($data, 'unitresults')) {
             $__data['suites'] = $this->getRoomsSuites($data['unitresults']);
         } else {
             $__data['suites'] = [];
         }
 
-        if (array_has($data, 'reservationresults.noshow') && ! empty(array_get($data, 'reservationresults.noshow'))) {
+        if (Arr::has($data, 'reservationresults.noshow') && ! empty(Arr::get($data, 'reservationresults.noshow'))) {
             $__data['status'] = 0;
             $__data['reservation_status'] = 4;
         } else {
-            if (array_has($data, 'reservationresults.level') && ! empty(array_get($data, 'reservationresults.level'))) {
+            if (Arr::has($data, 'reservationresults.level') && ! empty(Arr::get($data, 'reservationresults.level'))) {
                 $time1 = '22:00:00';
                 $time2 = '23:59:59';
-                switch (array_get($data, 'reservationresults.level')) {
+                switch (Arr::get($data, 'reservationresults.level')) {
                     case 'INH':
                         $__data['status'] = 1;
                         $__data['reservation_status'] = 1;
@@ -273,8 +274,8 @@ class SMSMillerController extends Controller
     {
         $__data = [
             'hotel_id' => $hotel_id,
-            'reservation_number' => array_get($data, '@attributes.resno'),
-            'guest_number' => array_get($data, 'guestnum'),
+            'reservation_number' => Arr::get($data, '@attributes.resno'),
+            'guest_number' => Arr::get($data, 'guestnum'),
             'status' => 0,
             'reservation_status' => 3,
         ];
@@ -285,8 +286,8 @@ class SMSMillerController extends Controller
     public function proccessDataHousekeeping($data, $hotel_id)
     {
         $__data = [
-            'location' => array_get($data, '@attributes.unum'),
-            'status' => array_get($data, 'Code'),
+            'location' => Arr::get($data, '@attributes.unum'),
+            'status' => Arr::get($data, 'Code'),
         ];
 
         return $__data;
@@ -593,7 +594,7 @@ class SMSMillerController extends Controller
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body');
+            return Arr::get($json, 'Body');
         }
     }
 
@@ -605,8 +606,8 @@ class SMSMillerController extends Controller
             ->first();
 
         $data = $this->getRoomStatusData($hotel_id);
-        $housekeeping = array_get($data, 'HousekeepingStatusRS.HousekeepingStatus', []);
-        if (array_has($housekeeping, 'Code')) {
+        $housekeeping = Arr::get($data, 'HousekeepingStatusRS.HousekeepingStatus', []);
+        if (Arr::has($housekeeping, 'Code')) {
             $housekeeping = [$housekeeping];
         }
         $process_data = [];
@@ -633,11 +634,11 @@ class SMSMillerController extends Controller
         $now = date('Y-m-d H:i:s');
         if (! $room_no) {
             $data = $this->getReservationData($hotel_id);
-            $check_in = array_get($data, 'checkincollection.checkinresults', []);
+            $check_in = Arr::get($data, 'checkincollection.checkinresults', []);
             $__process_data = [];
             foreach ($check_in as $value) {
-                $count = array_get($value, '@attributes.count');
-                $shareresults = array_get($value, 'shareresults');
+                $count = Arr::get($value, '@attributes.count');
+                $shareresults = Arr::get($value, 'shareresults');
                 if ($count < 2) {
                     $shareresults = [$shareresults];
                 }
@@ -657,9 +658,9 @@ class SMSMillerController extends Controller
         } else {
             $room = $this->getRoom($hotel_id, $IntegrationsActive->created_by, $room_no);
             $data = $this->getCheckInDataRoom($hotel_id, $room['room']);
-            $check_in = array_get($data, 'checkincollection', []);
-            $count = array_get($check_in, 'checkinresults.@attributes.count');
-            $shareresults = array_get($check_in, 'checkinresults.shareresults');
+            $check_in = Arr::get($data, 'checkincollection', []);
+            $count = Arr::get($check_in, 'checkinresults.@attributes.count');
+            $shareresults = Arr::get($check_in, 'checkinresults.shareresults');
             if ($count < 2) {
                 $shareresults = [$shareresults];
             }
@@ -748,7 +749,7 @@ class SMSMillerController extends Controller
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body');
+            return Arr::get($json, 'Body');
         }
     }
 
@@ -822,7 +823,7 @@ class SMSMillerController extends Controller
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body');
+            return Arr::get($json, 'Body');
         }
     }
 
@@ -896,18 +897,18 @@ class SMSMillerController extends Controller
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body');
+            return Arr::get($json, 'Body');
         }
     }
 
     public function fetchData($hotel_id)
     {
         $data = $this->getReservationData($hotel_id);
-        $check_in = array_get($data, 'checkincollection.checkinresults', []);
+        $check_in = Arr::get($data, 'checkincollection.checkinresults', []);
         $__process_data = [];
         foreach ($check_in as $value) {
-            $count = array_get($value, '@attributes.count');
-            $shareresults = array_get($value, 'shareresults');
+            $count = Arr::get($value, '@attributes.count');
+            $shareresults = Arr::get($value, 'shareresults');
             if ($count < 2) {
                 $shareresults = [$shareresults];
             }
@@ -928,8 +929,8 @@ class SMSMillerController extends Controller
     public function fetchHSK($hotel_id)
     {
         $data = $this->getRoomStatusData($hotel_id);
-        $housekeeping = array_get($data, 'HousekeepingStatusRS.HousekeepingStatus', []);
-        if (array_has($housekeeping, 'Code')) {
+        $housekeeping = Arr::get($data, 'HousekeepingStatusRS.HousekeepingStatus', []);
+        if (Arr::has($housekeeping, 'Code')) {
             $housekeeping = [$housekeeping];
         }
         $process_data = [];
@@ -949,8 +950,8 @@ class SMSMillerController extends Controller
         $data = [];
 
         foreach ($resp['multipropresult'] as $key => $multipropresult) {
-            foreach (array_get($multipropresult, 'roomtyperesults.roomtyperesult', []) as $key2 => $roomtyperesult) {
-                foreach (array_get($roomtyperesult, 'unitresults.unitresult', []) as $key3 => $unitresults) {
+            foreach (Arr::get($multipropresult, 'roomtyperesults.roomtyperesult', []) as $key2 => $roomtyperesult) {
+                foreach (Arr::get($roomtyperesult, 'unitresults.unitresult', []) as $key3 => $unitresults) {
                     if ($unitresults['currentzone'] == 98) {
                         $data[] = [
                             'location' => $unitresults['@attributes']['code'],
@@ -1040,7 +1041,7 @@ class SMSMillerController extends Controller
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body.allcodesresult.multipropresults');
+            return Arr::get($json, 'Body.allcodesresult.multipropresults');
         }
     }
 }

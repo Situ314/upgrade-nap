@@ -7,6 +7,7 @@ use App\Models\GuestRegistration;
 use App\Models\Hotel;
 use App\Models\IntegrationsActive;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Spatie\ArrayToXml\ArrayToXml;
 
 class CancelReservation extends Command
@@ -59,7 +60,7 @@ class CancelReservation extends Command
 
             foreach ($this->integrations as $value) {
                 $this->integration = $value;
-                if (array_has($this->integration->config, 'url')) {
+                if (Arr::has($this->integration->config, 'url')) {
                     $this->url = $this->integration->config['url'];
                     $this->hotel_id = $this->integration->hotel_id;
                     $hotel = Hotel::findOrFail($this->hotel_id);

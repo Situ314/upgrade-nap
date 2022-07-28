@@ -8,6 +8,7 @@ use App\Models\GuestRegistration;
 use App\Models\IntegrationsGuestInformation;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Spatie\ArrayToXml\ArrayToXml;
 
 class InforController extends Controller
@@ -82,35 +83,35 @@ class InforController extends Controller
              *  Si es un mensaje de tipo "OTA_HotelResNotifRQ" se enviara a su respectivo enrutador.
              *  Si es un mensaje de tipo "HTNG_metodo" se realizara un enrutamiento especial para cada metodo que se recibe de HTNG
              */
-            if (array_has($arrayData, 'Body.HTNG_HotelRoomMoveNotifRQ')) {
+            if (Arr::has($arrayData, 'Body.HTNG_HotelRoomMoveNotifRQ')) {
                 $route_action = 'HTNG_HotelRoomMoveNotifRQ';
                 $this->route_action = 'HTNG_HotelRoomMoveNotifRS';
                 $is_found = true;
             }
 
-            if (array_has($arrayData, 'Body.OTA_HotelResNotifRQ')) {
+            if (Arr::has($arrayData, 'Body.OTA_HotelResNotifRQ')) {
                 $route_action = 'OTA_HotelResNotifRQ';
                 $is_found = true;
             }
-            if (array_has($arrayData, 'Body.HTNG_HotelRoomStatusUpdateNotifRQ')) {
+            if (Arr::has($arrayData, 'Body.HTNG_HotelRoomStatusUpdateNotifRQ')) {
                 $route_action = 'HTNG_HotelRoomStatusUpdateNotifRQ';
                 $this->route_action = 'HTNG_HotelRoomStatusUpdateNotifRS';
                 $is_found = true;
             }
 
-            if (array_has($arrayData, 'Body.HTNG_HotelCheckInNotifRQ')) {
+            if (Arr::has($arrayData, 'Body.HTNG_HotelCheckInNotifRQ')) {
                 $route_action = 'HTNG_HotelCheckInNotifRQ';
                 $this->route_action = 'HTNG_HotelCheckInNotifRS';
                 $is_found = true;
             }
 
-            if (array_has($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ')) {
+            if (Arr::has($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ')) {
                 $route_action = 'HTNG_HotelStayUpdateNotifRQ';
                 $this->route_action = 'HTNG_HotelStayUpdateNotifRS';
                 $is_found = true;
             }
 
-            if (array_has($arrayData, 'Body.HTNG_HotelCheckOutNotifRQ')) {
+            if (Arr::has($arrayData, 'Body.HTNG_HotelCheckOutNotifRQ')) {
                 $route_action = 'HTNG_HotelCheckOutNotifRQ';
                 $this->route_action = 'HTNG_HotelCheckOutNotifRS';
                 $is_found = true;
@@ -118,9 +119,9 @@ class InforController extends Controller
 
             /** Si el tipo de mensaje no se identifica en los metodos anteriores este devolvera aun asi un codigo 200 como respuesta
              *       esto con el fin de que el PMS no reciba algun tipo de error */
-            if ($is_found == false && array_has($arrayData, 'Header.Action') && substr(array_get($arrayData, 'Header.Action'), 0, 4) == 'HTNG') {
-                $route_action = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', array_get($arrayData, 'Header.Action'));
-                $this->TimeStamp = array_get($arrayData, 'Body.'.$route_action.'.@attributes.TimeStamp');
+            if ($is_found == false && Arr::has($arrayData, 'Header.Action') && substr(Arr::get($arrayData, 'Header.Action'), 0, 4) == 'HTNG') {
+                $route_action = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', Arr::get($arrayData, 'Header.Action'));
+                $this->TimeStamp = Arr::get($arrayData, 'Body.'.$route_action.'.@attributes.TimeStamp');
                 $this->route_action = str_replace('NotifRQ', 'NotifRS', $route_action);
                 $xml_resp = $this->SuccessChangeHSK();
                 $this->CurlHTNG($xml_resp);
@@ -165,17 +166,17 @@ class InforController extends Controller
                 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.ResGlobalInfo.HotelReservationIDs.HotelReservationID',
             ];
 
-            if (array_has($arrayData, $validate)) {
-                $action = array_get($arrayData, 'Body.OTA_HotelResNotifRQ.@attributes.ResStatus');
-                $data = array_get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation');
-                $subAction = array_get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.@attributes.ResStatus');
+            if (Arr::has($arrayData, $validate)) {
+                $action = Arr::get($arrayData, 'Body.OTA_HotelResNotifRQ.@attributes.ResStatus');
+                $data = Arr::get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation');
+                $subAction = Arr::get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.@attributes.ResStatus');
 
-                $this->TimeStamp = array_get($arrayData, 'Body.OTA_HotelResNotifRQ.@attributes.TimeStamp');
-                $this->UniqueID_Type = array_get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.UniqueID.@attributes.Type');
-                $this->UniqueID_ID = array_get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.UniqueID.@attributes.ID');
-                $this->MessageId = array_get($arrayData, 'Header.MessageID', '');
-                $this->HotelReservationID = array_get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.ResGlobalInfo.HotelReservationIDs.HotelReservationID');
-                $this->Lockedroom = array_get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.@attributes.RoomNumberLockedIndicator', false);
+                $this->TimeStamp = Arr::get($arrayData, 'Body.OTA_HotelResNotifRQ.@attributes.TimeStamp');
+                $this->UniqueID_Type = Arr::get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.UniqueID.@attributes.Type');
+                $this->UniqueID_ID = Arr::get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.UniqueID.@attributes.ID');
+                $this->MessageId = Arr::get($arrayData, 'Header.MessageID', '');
+                $this->HotelReservationID = Arr::get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.ResGlobalInfo.HotelReservationIDs.HotelReservationID');
+                $this->Lockedroom = Arr::get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.@attributes.RoomNumberLockedIndicator', false);
                 if (! is_array($this->HotelReservationID)) {
                     $this->HotelReservationID = [$this->HotelReservationID];
                 }
@@ -212,18 +213,18 @@ class InforController extends Controller
                 'Body.HTNG_HotelRoomMoveNotifRQ.SourceRoomInformation',
                 'Body.HTNG_HotelRoomMoveNotifRQ.DestinationRoomInformation.HotelReservations.HotelReservation.UniqueID.@attributes.ID',
             ];
-            if (array_has($arrayData, $is_HotelRoom)) {
-                $NewRoom = array_get($arrayData, 'Body.HTNG_HotelRoomMoveNotifRQ.DestinationRoomInformation.Room');
-                $HotelReservation = array_get(
+            if (Arr::has($arrayData, $is_HotelRoom)) {
+                $NewRoom = Arr::get($arrayData, 'Body.HTNG_HotelRoomMoveNotifRQ.DestinationRoomInformation.Room');
+                $HotelReservation = Arr::get(
                     $arrayData,
                     'Body.HTNG_HotelRoomMoveNotifRQ.DestinationRoomInformation.HotelReservations.HotelReservation'
                 );
-                $this->TimeStamp = array_get($arrayData, 'Body.HTNG_HotelRoomMoveNotifRQ.@attributes.TimeStamp');
-                $this->UniqueID_Type = array_get($HotelReservation, 'UniqueID.@attributes.Type');
-                $this->UniqueID_ID = array_get($HotelReservation, 'UniqueID.@attributes.ID');
-                $this->MessageId = array_get($arrayData, 'Header.MessageID', '');
-                $this->HotelReservationID = array_get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.ResGlobalInfo.HotelReservationIDs.HotelReservationID', []);
-                $this->Lockedroom = array_get($HotelReservation, '@attributes.RoomNumberLockedIndicator', false);
+                $this->TimeStamp = Arr::get($arrayData, 'Body.HTNG_HotelRoomMoveNotifRQ.@attributes.TimeStamp');
+                $this->UniqueID_Type = Arr::get($HotelReservation, 'UniqueID.@attributes.Type');
+                $this->UniqueID_ID = Arr::get($HotelReservation, 'UniqueID.@attributes.ID');
+                $this->MessageId = Arr::get($arrayData, 'Header.MessageID', '');
+                $this->HotelReservationID = Arr::get($arrayData, 'Body.OTA_HotelResNotifRQ.HotelReservations.HotelReservation.ResGlobalInfo.HotelReservationIDs.HotelReservationID', []);
+                $this->Lockedroom = Arr::get($HotelReservation, '@attributes.RoomNumberLockedIndicator', false);
 
                 return $this->RoomMove($NewRoom);
             }
@@ -254,17 +255,17 @@ class InforController extends Controller
                 'Body.HTNG_HotelRoomStatusUpdateNotifRQ.@attributes.TimeStamp',
                 'Body.HTNG_HotelRoomStatusUpdateNotifRQ.Room',
             ];
-            $this->TimeStamp = array_get($arrayData, 'Body.HTNG_HotelRoomStatusUpdateNotifRQ.@attributes.TimeStamp');
-            if (array_has($arrayData, $validate)) {
-                $room_data = array_get($arrayData, 'Body.HTNG_HotelRoomStatusUpdateNotifRQ.Room');
-                if (! array_has($arrayData, 'Body.HTNG_HotelRoomStatusUpdateNotifRQ.Room.0')) {
+            $this->TimeStamp = Arr::get($arrayData, 'Body.HTNG_HotelRoomStatusUpdateNotifRQ.@attributes.TimeStamp');
+            if (Arr::has($arrayData, $validate)) {
+                $room_data = Arr::get($arrayData, 'Body.HTNG_HotelRoomStatusUpdateNotifRQ.Room');
+                if (! Arr::has($arrayData, 'Body.HTNG_HotelRoomStatusUpdateNotifRQ.Room.0')) {
                     $room_data = [$room_data];
                 }
                 $rooms = [];
                 foreach ($room_data as $room) {
                     $rooms[] = [
-                        'status' => array_get($room, 'HKStatus'),
-                        'location' => array_get($room, '@attributes.RoomID'),
+                        'status' => Arr::get($room, 'HKStatus'),
+                        'location' => Arr::get($room, '@attributes.RoomID'),
                     ];
                 }
 
@@ -295,13 +296,13 @@ class InforController extends Controller
             'Body.HTNG_HotelCheckInNotifRQ.Room.@attributes.RoomID',
             'Body.HTNG_HotelCheckInNotifRQ.Room.HKStatus',
         ];
-        if (array_has($arrayData, $validate)) {
+        if (Arr::has($arrayData, $validate)) {
             DB::beginTransaction();
             try {
-                $this->TimeStamp = array_get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.@attributes.TimeStamp');
-                $data = array_get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.HotelReservations.HotelReservation');
-                $reservation_number = array_get($data, 'UniqueID.@attributes.ID');
-                $location = array_get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.Room.@attributes.RoomID');
+                $this->TimeStamp = Arr::get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.@attributes.TimeStamp');
+                $data = Arr::get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.HotelReservations.HotelReservation');
+                $reservation_number = Arr::get($data, 'UniqueID.@attributes.ID');
+                $location = Arr::get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.Room.@attributes.RoomID');
                 $reservations = GuestCheckinDetails::where('hotel_id', $this->hotel_id)->where('reservation_number', $reservation_number)->where('status', 1)->get();
                 if ($reservations) {
                     foreach ($reservations as $reservation) {
@@ -331,7 +332,7 @@ class InforController extends Controller
                     }
                     $rooms = [];
                     $rooms[] = [
-                        'status' => array_get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.Room.HKStatus'),
+                        'status' => Arr::get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.Room.HKStatus'),
                         'location' => $location,
                     ];
 
@@ -372,13 +373,13 @@ class InforController extends Controller
             'Body.HTNG_HotelCheckOutNotifRQ.HotelReservations.HotelReservation.UniqueID.@attributes.ID',
             'Body.HTNG_HotelCheckInNotifRQ.Room.HKStatus',
         ];
-        if (array_has($arrayData, $validate)) {
+        if (Arr::has($arrayData, $validate)) {
             DB::beginTransaction();
             try {
-                $this->TimeStamp = array_get($arrayData, 'Body.HTNG_HotelCheckOutNotifRQ.@attributes.TimeStamp');
-                $data = array_get($arrayData, 'Body.HTNG_HotelCheckOutNotifRQ.HotelReservations.HotelReservation');
-                $reservation_number = array_get($data, 'UniqueID.@attributes.ID');
-                $location = array_get($arrayData, 'Body.HTNG_HotelCheckOutNotifRQ.Room.@attributes.RoomID');
+                $this->TimeStamp = Arr::get($arrayData, 'Body.HTNG_HotelCheckOutNotifRQ.@attributes.TimeStamp');
+                $data = Arr::get($arrayData, 'Body.HTNG_HotelCheckOutNotifRQ.HotelReservations.HotelReservation');
+                $reservation_number = Arr::get($data, 'UniqueID.@attributes.ID');
+                $location = Arr::get($arrayData, 'Body.HTNG_HotelCheckOutNotifRQ.Room.@attributes.RoomID');
                 $reservations = GuestCheckinDetails::where('hotel_id', $this->hotel_id)->where('reservation_number', $reservation_number)->where('status', 1)->get();
                 if ($reservations) {
                     foreach ($reservations as $reservation) {
@@ -408,7 +409,7 @@ class InforController extends Controller
 
                     $rooms = [];
                     $rooms[] = [
-                        'status' => array_get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.Room.HKStatus'),
+                        'status' => Arr::get($arrayData, 'Body.HTNG_HotelCheckInNotifRQ.Room.HKStatus'),
                         'location' => $location,
                     ];
 
@@ -449,13 +450,13 @@ class InforController extends Controller
             'Body.HTNG_HotelStayUpdateNotifRQ.HotelReservations.HotelReservation.UniqueID.@attributes.ID',
         ];
 
-        if (array_has($arrayData, $validate)) {
-            $this->TimeStamp = array_get($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ.@attributes.TimeStamp');
-            $data = array_get($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ.HotelReservations.HotelReservation');
-            $location = array_get($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ.Room.@attributes.RoomID');
+        if (Arr::has($arrayData, $validate)) {
+            $this->TimeStamp = Arr::get($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ.@attributes.TimeStamp');
+            $data = Arr::get($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ.HotelReservations.HotelReservation');
+            $location = Arr::get($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ.Room.@attributes.RoomID');
             $rooms = [];
             $rooms[] = [
-                'status' => array_get($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ.Room.HKStatus'),
+                'status' => Arr::get($arrayData, 'Body.HTNG_HotelStayUpdateNotifRQ.Room.HKStatus'),
                 'location' => $location,
             ];
 
@@ -478,16 +479,16 @@ class InforController extends Controller
         try {
             $__guests = null;
             $guests = [];
-            if (array_has($data, 'ResGuests.ResGuest.Profiles.ProfileInfo')) {
-                $ProfileInfo = array_get($data, 'ResGuests.ResGuest.Profiles.ProfileInfo');
-                if (! array_has($ProfileInfo, '0')) {
+            if (Arr::has($data, 'ResGuests.ResGuest.Profiles.ProfileInfo')) {
+                $ProfileInfo = Arr::get($data, 'ResGuests.ResGuest.Profiles.ProfileInfo');
+                if (! Arr::has($ProfileInfo, '0')) {
                     $ProfileInfo = [$ProfileInfo];
                 }
-                $__guests = array_where($ProfileInfo, function ($value) {
+                $__guests = Arr::where($ProfileInfo, function ($value) {
                     $isCustomer = false;
-                    $UniqueID = array_get($value, 'Profile.UserID', []);
+                    $UniqueID = Arr::get($value, 'Profile.UserID', []);
 
-                    if (! array_has($UniqueID, '0')) {
+                    if (! Arr::has($UniqueID, '0')) {
                         $UniqueID = [$UniqueID];
                     }
 
@@ -512,18 +513,18 @@ class InforController extends Controller
                         'UniqueID.@attributes.ID',
                     ];
 
-                    if (array_has($data, $validate)) {
-                        $check_in = array_get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.Start');
-                        $check_out = array_get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.End');
-                        $comment = array_get($data, 'Services.Service.ServiceDetails.Comments.Comment.Text', '');
-                        $locations = array_get($data, 'RoomStays.RoomStay.RoomRates.RoomRate', []);
+                    if (Arr::has($data, $validate)) {
+                        $check_in = Arr::get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.Start');
+                        $check_out = Arr::get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.End');
+                        $comment = Arr::get($data, 'Services.Service.ServiceDetails.Comments.Comment.Text', '');
+                        $locations = Arr::get($data, 'RoomStays.RoomStay.RoomRates.RoomRate', []);
 
-                        if (! array_has($locations, '0')) {
+                        if (! Arr::has($locations, '0')) {
                             $locations = [$locations];
                         }
 
                         if (count($locations) > 0) {
-                            $location = array_get($locations[0], '@attributes.RoomID', '');
+                            $location = Arr::get($locations[0], '@attributes.RoomID', '');
                             if (! empty($location)) {
                                 $room = $this->getRoom($this->hotel_id, $this->staff_id, $location);
                                 $room_no = $room['room_id'];
@@ -532,7 +533,7 @@ class InforController extends Controller
                         foreach ($guests as  $guest) {
                             $__update = '';
                             $reservation = GuestCheckinDetails::where('hotel_id', $this->hotel_id)
-                                ->where('reservation_number', array_get($data, 'UniqueID.@attributes.ID', ''))
+                                ->where('reservation_number', Arr::get($data, 'UniqueID.@attributes.ID', ''))
                                 ->where('guest_id', $guest->guest_id)
                                 ->where('status', 1)
                                 ->first();
@@ -690,16 +691,16 @@ class InforController extends Controller
         try {
             $__guests = null;
             $guests = [];
-            if (array_has($data, 'ResGuests.ResGuest.Profiles.ProfileInfo')) {
-                $ProfileInfo = array_get($data, 'ResGuests.ResGuest.Profiles.ProfileInfo');
-                if (! array_has($ProfileInfo, '0')) {
+            if (Arr::has($data, 'ResGuests.ResGuest.Profiles.ProfileInfo')) {
+                $ProfileInfo = Arr::get($data, 'ResGuests.ResGuest.Profiles.ProfileInfo');
+                if (! Arr::has($ProfileInfo, '0')) {
                     $ProfileInfo = [$ProfileInfo];
                 }
-                $__guests = array_where($ProfileInfo, function ($value, $key) {
+                $__guests = Arr::where($ProfileInfo, function ($value, $key) {
                     $isCustomer = false;
-                    $UniqueID = array_get($value, 'UniqueID', []);
+                    $UniqueID = Arr::get($value, 'UniqueID', []);
 
-                    if (! array_has($UniqueID, '0')) {
+                    if (! Arr::has($UniqueID, '0')) {
                         $UniqueID = [$UniqueID];
                     }
                     foreach ($UniqueID as $key => $value) {
@@ -712,8 +713,8 @@ class InforController extends Controller
                     return $isCustomer;
                 });
                 if (count($__guests) > 0) {
-                    $__guests = array_values(array_sort($__guests, function ($value) {
-                        return array_get($value, 'Profile.@attributes.ProfileType');
+                    $__guests = array_values(Arr::sort($__guests, function ($value) {
+                        return Arr::get($value, 'Profile.@attributes.ProfileType');
                     }));
                     foreach ($__guests as  $__guest) {
                         $rs = $this->GuestRegistration($__guest);
@@ -727,19 +728,19 @@ class InforController extends Controller
                         'UniqueID.@attributes.ID',
                     ];
 
-                    if (array_has($data, $validate)) {
-                        $is_reservation = GuestCheckinDetails::where('reservation_number', array_get($data, 'UniqueID.@attributes.ID'))
+                    if (Arr::has($data, $validate)) {
+                        $is_reservation = GuestCheckinDetails::where('reservation_number', Arr::get($data, 'UniqueID.@attributes.ID'))
                             ->where('hotel_id', $this->hotel_id)->first();
                         if (! $is_reservation) {
                             $room_no = 0;
-                            $locations = array_get($data, 'RoomStays.RoomStay.RoomRates.RoomRate', []);
+                            $locations = Arr::get($data, 'RoomStays.RoomStay.RoomRates.RoomRate', []);
 
-                            if (! array_has($locations, '0')) {
+                            if (! Arr::has($locations, '0')) {
                                 $locations = [$locations];
                             }
 
                             if (count($locations) > 0) {
-                                $location = array_get($locations[0], '@attributes.RoomID', '');
+                                $location = Arr::get($locations[0], '@attributes.RoomID', '');
                                 if (! empty($location)) {
                                     $room = $this->getRoom($this->hotel_id, $this->staff_id, $location);
                                     $room_no = $room['room_id'];
@@ -752,12 +753,12 @@ class InforController extends Controller
                                     'guest_id' => $guest->guest_id,
                                     'hotel_id' => $this->hotel_id,
                                     'room_no' => $room_no,
-                                    'check_in' => array_get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.Start'),
-                                    'check_out' => array_get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.End'),
-                                    'comment' => array_get($data, 'Services.Service.ServiceDetails.Comments.Comment.Text', ''),
+                                    'check_in' => Arr::get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.Start'),
+                                    'check_out' => Arr::get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.End'),
+                                    'comment' => Arr::get($data, 'Services.Service.ServiceDetails.Comments.Comment.Text', ''),
                                     'status' => 1,
                                     'reservation_status' => 0,
-                                    'reservation_number' => array_get($data, 'UniqueID.@attributes.ID', ''),
+                                    'reservation_number' => Arr::get($data, 'UniqueID.@attributes.ID', ''),
                                     'main_guest' => $main_guest,
                                 ]);
                                 if ($key == 0) {
@@ -799,42 +800,42 @@ class InforController extends Controller
         try {
             $guest_number = 0;
             $UniqueID = $is_HTNG ? $guest['Profile']['UserID'] : $guest['UniqueID'];
-            if (! array_has($UniqueID, '0')) {
+            if (! Arr::has($UniqueID, '0')) {
                 $UniqueID = [$UniqueID];
             }
             $guest_number = $UniqueID[0]['@attributes']['ID'];
             $guestRelation = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $guest_number)->first();
 
-            $firstname = array_get($guest, 'Profile.Customer.PersonName.GivenName', ' ');
+            $firstname = Arr::get($guest, 'Profile.Customer.PersonName.GivenName', ' ');
             if (is_array($firstname)) {
                 $firstname = '';
             }
-            $lastname = array_get($guest, 'Profile.Customer.PersonName.Surname', ' ');
+            $lastname = Arr::get($guest, 'Profile.Customer.PersonName.Surname', ' ');
             if (is_array($lastname)) {
                 $lastname = '';
             }
-            $email_address = array_get($guest, 'Profile.Customer.Email', ' ');
+            $email_address = Arr::get($guest, 'Profile.Customer.Email', ' ');
             if (is_array($email_address)) {
                 $email_address = '';
             }
-            $phone_no = array_get($guest, 'Profile.Customer.Telephone', []);
+            $phone_no = Arr::get($guest, 'Profile.Customer.Telephone', []);
             if (! is_array($phone_no)) {
                 $phone_no[] = $phone_no;
             }
-            $phone_no = array_get($phone_no, '0.@attributes.PhoneNumber', array_get($phone_no, '@attributes.PhoneNumber', ''));
-            $address = array_get($guest, 'Profile.Customer.Address.AddressLine', '');
+            $phone_no = Arr::get($phone_no, '0.@attributes.PhoneNumber', Arr::get($phone_no, '@attributes.PhoneNumber', ''));
+            $address = Arr::get($guest, 'Profile.Customer.Address.AddressLine', '');
             if (is_array($address)) {
                 $address = '';
             }
-            $state = array_get($guest, 'Profile.Customer.Address.StateProv.@attributes.StateCode', ' ');
+            $state = Arr::get($guest, 'Profile.Customer.Address.StateProv.@attributes.StateCode', ' ');
             if (is_array($state)) {
                 $state = '';
             }
-            $zipcode = array_get($guest, 'Profile.Customer.Address.PostalCode', ' ');
+            $zipcode = Arr::get($guest, 'Profile.Customer.Address.PostalCode', ' ');
             if (is_array($zipcode)) {
                 $zipcode = '';
             }
-            $city = array_get($guest, 'Profile.Customer.Address.CityName', ' ');
+            $city = Arr::get($guest, 'Profile.Customer.Address.CityName', ' ');
             if (is_array($city)) {
                 $city = '';
             }
@@ -981,8 +982,8 @@ class InforController extends Controller
         foreach ($this->HotelReservationID as $value) {
             $__HotelReservationID[] = [
                 '_attributes' => [
-                    'ResID_Type' => array_get($value, '@attributes.ResID_Type', ''),
-                    'ResID_Value' => array_get($value, '@attributes.ResID_Value', ''),
+                    'ResID_Type' => Arr::get($value, '@attributes.ResID_Type', ''),
+                    'ResID_Value' => Arr::get($value, '@attributes.ResID_Value', ''),
                     'ResID_Source' => 'HMS',
                     'ResID_SourceContext' => 'PMS',
                     'ForGuest' => 'true',
@@ -1078,15 +1079,15 @@ class InforController extends Controller
         try {
             $__guests = null;
             $guests = [];
-            if (array_has($data, 'ResGuests.ResGuest.Profiles.ProfileInfo')) {
-                $ProfileInfo = array_get($data, 'ResGuests.ResGuest.Profiles.ProfileInfo');
-                if (! array_has($ProfileInfo, '0')) {
+            if (Arr::has($data, 'ResGuests.ResGuest.Profiles.ProfileInfo')) {
+                $ProfileInfo = Arr::get($data, 'ResGuests.ResGuest.Profiles.ProfileInfo');
+                if (! Arr::has($ProfileInfo, '0')) {
                     $ProfileInfo = [$ProfileInfo];
                 }
-                $__guests = array_where($ProfileInfo, function ($value) {
+                $__guests = Arr::where($ProfileInfo, function ($value) {
                     $isCustomer = false;
-                    $UniqueID = array_get($value, 'UniqueID', []);
-                    if (! array_has($UniqueID, '0')) {
+                    $UniqueID = Arr::get($value, 'UniqueID', []);
+                    if (! Arr::has($UniqueID, '0')) {
                         $UniqueID = [$UniqueID];
                     }
                     foreach ($UniqueID as $key => $value) {
@@ -1098,8 +1099,8 @@ class InforController extends Controller
                     return $isCustomer;
                 });
                 if (count($__guests) > 0) {
-                    $__guests = array_values(array_sort($__guests, function ($value) {
-                        return array_get($value, 'Profile.@attributes.ProfileType');
+                    $__guests = array_values(Arr::sort($__guests, function ($value) {
+                        return Arr::get($value, 'Profile.@attributes.ProfileType');
                     }));
                     foreach ($__guests as  $__guest) {
                         $rs = $this->GuestRegistration($__guest);
@@ -1113,19 +1114,19 @@ class InforController extends Controller
                         'UniqueID.@attributes.ID',
                     ];
 
-                    if (array_has($data, $validate)) {
-                        $check_in = array_get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.Start');
-                        $check_out = array_get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.End');
-                        $comment = array_get($data, 'Services.Service.ServiceDetails.Comments.Comment.Text', '');
+                    if (Arr::has($data, $validate)) {
+                        $check_in = Arr::get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.Start');
+                        $check_out = Arr::get($data, 'RoomStays.RoomStay.TimeSpan.@attributes.End');
+                        $comment = Arr::get($data, 'Services.Service.ServiceDetails.Comments.Comment.Text', '');
                         $room_no = 0;
-                        $locations = array_get($data, 'RoomStays.RoomStay.RoomRates.RoomRate', []);
+                        $locations = Arr::get($data, 'RoomStays.RoomStay.RoomRates.RoomRate', []);
 
-                        if (! array_has($locations, '0')) {
+                        if (! Arr::has($locations, '0')) {
                             $locations = [$locations];
                         }
 
                         if (count($locations) > 0) {
-                            $location = array_get($locations[0], '@attributes.RoomID', '');
+                            $location = Arr::get($locations[0], '@attributes.RoomID', '');
                             if (! empty($location)) {
                                 $room = $this->getRoom($this->hotel_id, $this->staff_id, $location);
                                 $room_no = $room['room_id'];
@@ -1135,7 +1136,7 @@ class InforController extends Controller
                         foreach ($guests as  $guest) {
                             $__update = '';
                             $reservation = GuestCheckinDetails::where('hotel_id', $this->hotel_id)
-                                ->where('reservation_number', array_get($data, 'UniqueID.@attributes.ID', ''))
+                                ->where('reservation_number', Arr::get($data, 'UniqueID.@attributes.ID', ''))
                                 ->where('guest_id', $guest->guest_id)
                                 ->where('status', 1)
                                 ->first();
@@ -1254,7 +1255,7 @@ class InforController extends Controller
                 'RoomStays.RoomStay.TimeSpan.@attributes.Start',
             ];
 
-            if (array_has($data, $validate)) {
+            if (Arr::has($data, $validate)) {
                 $reservations = GuestCheckinDetails::where('hotel_id', $this->hotel_id)->where('reservation_number', $reservation_number)->where('status', 1)->get();
                 if ($reservations) {
                     foreach ($reservations as $reservation) {
@@ -1263,12 +1264,12 @@ class InforController extends Controller
 
                             $reservation->check_in = date('Y-m-d H:i:s');
                             $room_no = 0;
-                            $locations = array_get($data, 'RoomStays.RoomStay.RoomRates.RoomRate', []);
-                            if (! array_has($locations, '0')) {
+                            $locations = Arr::get($data, 'RoomStays.RoomStay.RoomRates.RoomRate', []);
+                            if (! Arr::has($locations, '0')) {
                                 $locations = [$locations];
                             }
                             if (count($locations) > 0) {
-                                $location = array_get($locations[0], '@attributes.RoomID', '');
+                                $location = Arr::get($locations[0], '@attributes.RoomID', '');
                                 if (! empty($location)) {
                                     $room = $this->getRoom($this->hotel_id, $this->staff_id, $location);
                                     $room_no = $room['room_id'];
@@ -1324,7 +1325,7 @@ class InforController extends Controller
             $validate = [
                 'RoomStays.RoomStay.TimeSpan.@attributes.End',
             ];
-            if (array_has($data, $validate)) {
+            if (Arr::has($data, $validate)) {
                 $reservations = GuestCheckinDetails::where('hotel_id', $this->hotel_id)->where('reservation_number', $reservation_number)->where('status', 1)->get();
                 if ($reservations) {
                     foreach ($reservations as $reservation) {
@@ -1425,7 +1426,7 @@ class InforController extends Controller
             $reservations = GuestCheckinDetails::where('hotel_id', $this->hotel_id)->where('reservation_number', $this->UniqueID_ID)
                 ->where('status', 1)->orderBy('main_guest', 'ASC')->get();
 
-            $new_room = $this->getRoom($this->hotel_id, $this->staff_id, array_get($NewRoom, '@attributes.RoomID'));
+            $new_room = $this->getRoom($this->hotel_id, $this->staff_id, Arr::get($NewRoom, '@attributes.RoomID'));
             $main_guest = 0;
             $__update = '';
             $new_check_in = date('Y-m-d H:i:s');
@@ -1487,7 +1488,7 @@ class InforController extends Controller
                 $reservation->save();
                 $rooms = [];
                 $rooms[] = [
-                    'status' => array_get($NewRoom, 'HKStatus'),
+                    'status' => Arr::get($NewRoom, 'HKStatus'),
                     'location' => $new_room['room'],
                 ];
 

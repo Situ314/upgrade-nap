@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Support\Arr;
 use Spatie\ArrayToXml\ArrayToXml;
 
 class Oracle
@@ -25,41 +26,41 @@ class Oracle
         // \Log::info($str_json);
 
         $json = json_decode($str_json, true);
-        $Username = array_get($json, 'Header.Security.UsernameToken.Username');
-        $Password = array_get($json, 'Header.Security.UsernameToken.Password');
+        $Username = Arr::get($json, 'Header.Security.UsernameToken.Username');
+        $Password = Arr::get($json, 'Header.Security.UsernameToken.Password');
         // JESUS SANCHE - 2021-09-05
         // El attr MEssageID se agrega para darle seguimiento a los mensajes de HSK,
         // se agrega un nuevo campo den la tabla Oracle_housekeeping
-        $MessageID = array_get($json, 'Header.MessageID');
+        $MessageID = Arr::get($json, 'Header.MessageID');
 
         $pms_hotel_id = '';
-        if (array_has($json, 'Body.NewProfileRequest.ResortId')) {
-            $pms_hotel_id = array_get($json, 'Body.NewProfileRequest.ResortId');
+        if (Arr::has($json, 'Body.NewProfileRequest.ResortId')) {
+            $pms_hotel_id = Arr::get($json, 'Body.NewProfileRequest.ResortId');
         }
 
-        if (array_has($json, 'Body.UpdateProfileRequest.ResortId')) {
-            $pms_hotel_id = array_get($json, 'Body.UpdateProfileRequest.ResortId');
+        if (Arr::has($json, 'Body.UpdateProfileRequest.ResortId')) {
+            $pms_hotel_id = Arr::get($json, 'Body.UpdateProfileRequest.ResortId');
         }
 
-        $keys = array_keys(array_get($json, 'Body', []));
-        if (array_has($json, 'Body.'.$keys[0].'.GuestStatus.ResortId')) {
-            $pms_hotel_id = array_get($json, 'Body.'.$keys[0].'.GuestStatus.ResortId');
+        $keys = array_keys(Arr::get($json, 'Body', []));
+        if (Arr::has($json, 'Body.'.$keys[0].'.GuestStatus.ResortId')) {
+            $pms_hotel_id = Arr::get($json, 'Body.'.$keys[0].'.GuestStatus.ResortId');
         }
 
-        if (array_has($json, 'Body.GuestStatusNotificationExtRequest.GuestStatus.resortId')) {
-            $pms_hotel_id = array_get($json, 'Body.GuestStatusNotificationExtRequest.GuestStatus.resortId');
+        if (Arr::has($json, 'Body.GuestStatusNotificationExtRequest.GuestStatus.resortId')) {
+            $pms_hotel_id = Arr::get($json, 'Body.GuestStatusNotificationExtRequest.GuestStatus.resortId');
         }
 
-        if (array_has($json, 'Body.RoomStatusUpdateBERequest.ResortId')) {
-            $pms_hotel_id = array_get($json, 'Body.RoomStatusUpdateBERequest.ResortId');
+        if (Arr::has($json, 'Body.RoomStatusUpdateBERequest.ResortId')) {
+            $pms_hotel_id = Arr::get($json, 'Body.RoomStatusUpdateBERequest.ResortId');
         }
 
-        if (array_has($json, 'Body.GuestStatusNotificationRequest.GuestStatus.resortId')) {
-            $pms_hotel_id = array_get($json, 'Body.GuestStatusNotificationRequest.GuestStatus.resortId');
+        if (Arr::has($json, 'Body.GuestStatusNotificationRequest.GuestStatus.resortId')) {
+            $pms_hotel_id = Arr::get($json, 'Body.GuestStatusNotificationRequest.GuestStatus.resortId');
         }
 
-        if (array_has($json, 'Body.QueueRoomBERequest.ResortId')) {
-            $pms_hotel_id = array_get($json, 'Body.QueueRoomBERequest.ResortId');
+        if (Arr::has($json, 'Body.QueueRoomBERequest.ResortId')) {
+            $pms_hotel_id = Arr::get($json, 'Body.QueueRoomBERequest.ResortId');
         }
 
         try {

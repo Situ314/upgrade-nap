@@ -17,6 +17,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 use Validator;
 
 class SmsMiller implements ShouldQueue
@@ -632,9 +633,9 @@ class SmsMiller implements ShouldQueue
             foreach ($this->data as $value) {
                 $room = $value['location'] == '' ? 0 : $this->getRoom($value['location']);
                 if ($room != 0) {
-                    $is_rush = array_get($this->ExtraStatus, $value['status'], false);
+                    $is_rush = Arr::get($this->ExtraStatus, $value['status'], false);
                     if ($is_rush === false) {
-                        $hk_status = array_get($this->HotelHousekeepingConfig, $value['status'], -1);
+                        $hk_status = Arr::get($this->HotelHousekeepingConfig, $value['status'], -1);
                         $ooo = $hk_status['description'] == 'OUT_OF_ORDER' ? true : false;
                         $oos = $hk_status['description'] == 'OUT_OF_SERVICE' ? true : false;
                         if ($hk_status !== -1) {
@@ -647,7 +648,7 @@ class SmsMiller implements ShouldQueue
                                 $this->FrontdeskStatus($room['room_id'], 2, true);
                             }
                             $_d['room_id'] = $room['room_id'];
-                            $_d['hk_status'] = array_get($hk_status, 'codes.0.hk_status');
+                            $_d['hk_status'] = Arr::get($hk_status, 'codes.0.hk_status');
                             $HousekeepingData['rooms'][] = $_d;
                             // $this->createQueue($room['room_id'], 'CLEANING_DELETED', 1, 0);
                         }
@@ -695,7 +696,7 @@ class SmsMiller implements ShouldQueue
 
     public function FrontdeskStatus($room_id, $status, $sw = false)
     {
-        if (! array_has($this->config, 'hk_reasons_id')) {
+        if (! Arr::has($this->config, 'hk_reasons_id')) {
             return null;
         }
         // DB::beginTransaction();
@@ -776,8 +777,8 @@ class SmsMiller implements ShouldQueue
     public function getIfSuite($room_no, $SuitesRooms)
     {
         $rooms = null;
-        if (array_has($SuitesRooms, $room_no)) {
-            $rooms = array_get($SuitesRooms, $room_no);
+        if (Arr::has($SuitesRooms, $room_no)) {
+            $rooms = Arr::get($SuitesRooms, $room_no);
         }
 
         return $rooms;
