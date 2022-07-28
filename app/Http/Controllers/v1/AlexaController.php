@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1;
 
+use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\AlexaDevice;
 use App\Models\DeptTag;
@@ -2381,7 +2382,7 @@ class AlexaController extends Controller
         $this->configTimeZone($data['hotel_id']);
         $this->now = date('Y-m-d H:i:s');
         if ($hk_cleaning && $hsk_staff) {
-            if (array_has($data, 'hk_status')) {
+            if (Arr::has($data, 'hk_status')) {
                 switch ($data['hk_status']) {
                     case 1:
                         $hk_cleaning->started_on = null;
@@ -2444,7 +2445,7 @@ class AlexaController extends Controller
                         ], 400);
                         break;
                 }
-            } elseif (array_has($data, 'is_paused')) {
+            } elseif (Arr::has($data, 'is_paused')) {
                 switch ($data['is_paused']) {
                     case 1:
                         $hk_cleaning->cleaning_duration = $this->calcular_duration($hk_cleaning);

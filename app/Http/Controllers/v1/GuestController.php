@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1;
 
+use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\GuestCheckinDetails;
 use App\Models\GuestRegistration;
@@ -145,16 +146,16 @@ class GuestController extends Controller
                 ], 400);
             }
 
-            $email_address = array_get($gReg, 'email_address', '');
+            $email_address = Arr::get($gReg, 'email_address', '');
             $email_address = filter_var($email_address, FILTER_VALIDATE_EMAIL) ? $email_address : '';
 
             $guest_registration = [
                 'hotel_id' => $hotel_id,
                 'email_address' => $email_address,
-                'firstname' => stripslashes(array_get($gReg, 'firstname', '')),
-                'lastname' => stripslashes(array_get($gReg, 'lastname', '')),
-                'phone_no' => stripslashes(array_get($gReg, 'phone_no', '')),
-                'language' => stripslashes(array_get($gReg, 'language', '')),
+                'firstname' => stripslashes(Arr::get($gReg, 'firstname', '')),
+                'lastname' => stripslashes(Arr::get($gReg, 'lastname', '')),
+                'phone_no' => stripslashes(Arr::get($gReg, 'phone_no', '')),
+                'language' => stripslashes(Arr::get($gReg, 'language', '')),
                 'angel_status' => $this->validateAngelStatus($hotel_id),
                 'created_on' => date('Y-m-d H:i:s'),
                 'created_by' => $staff_id,

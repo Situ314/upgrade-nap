@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Support\Arr;
 use Closure;
 use Spatie\ArrayToXml\ArrayToXml;
 
@@ -24,9 +25,9 @@ class Miller
         $str_json = json_encode($xml);
         // \Log::info($str_json);
         $json = json_decode($str_json, true);
-        $Username = array_get($json, 'Header.Security.UsernameToken.Username');
-        $Password = array_get($json, 'Header.Security.UsernameToken.Password');
-        $pms_hotel_id = array_get($json, 'Header.From.Address');
+        $Username = Arr::get($json, 'Header.Security.UsernameToken.Username');
+        $Password = Arr::get($json, 'Header.Security.UsernameToken.Password');
+        $pms_hotel_id = Arr::get($json, 'Header.From.Address');
         $pos = strpos($pms_hotel_id, ':');
         if ($pos !== false) {
             $pms_hotel_id = substr($pms_hotel_id, $pos + 1);

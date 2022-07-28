@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Illuminate\Support\Arr;
 use App\Models\GuestCheckinDetails;
 use App\Models\GuestRegistration;
 use App\Models\HotelRoom;
@@ -48,11 +49,11 @@ class StaynTouch implements ShouldQueue
 
     public function handle()
     {
-        if (array_get($this->data, 'reservation_number', '') != '' && array_get($this->data, 'guest_number', '') != '') {
+        if (Arr::get($this->data, 'reservation_number', '') != '' && Arr::get($this->data, 'guest_number', '') != '') {
             $this->reservation();
-        } elseif (array_get($this->data, 'guest_number', '') != '') {
+        } elseif (Arr::get($this->data, 'guest_number', '') != '') {
             $this->guest();
-        } elseif (array_get($this->data, '0.location', '') != '' && array_get($this->data, '0.status', '') != '') {
+        } elseif (Arr::get($this->data, '0.location', '') != '' && Arr::get($this->data, '0.status', '') != '') {
             $this->housekeeping();
         } else {
             return null;
@@ -70,7 +71,7 @@ class StaynTouch implements ShouldQueue
             foreach ($this->data as $value) {
                 $room = $value['location'] == '' ? 0 : $this->getRoom($value['location']);
                 if ($room != 0) {
-                    $hk_status = array_get($this->HotelHousekeepingConfig, strtoupper($value['status']), -1);
+                    $hk_status = Arr::get($this->HotelHousekeepingConfig, strtoupper($value['status']), -1);
                     $ooo = $hk_status['description'] == 'OUT_OF_ORDER' ? true : false;
                     $oos = $hk_status['description'] == 'OUT_OF_SERVICE' ? true : false;
                     if ($hk_status !== -1) {
@@ -83,7 +84,7 @@ class StaynTouch implements ShouldQueue
                             $this->FrontdeskStatus($room['room_id'], 2, true);
                         }
                         $_d['room_id'] = $room['room_id'];
-                        $_d['hk_status'] = array_get($hk_status, 'codes.0.hk_status');
+                        $_d['hk_status'] = Arr::get($hk_status, 'codes.0.hk_status');
                         $HousekeepingData['rooms'][] = $_d;
                         // $this->createQueue($room['room_id'], 'CLEANING_DELETED', 1, 0);
                     }
@@ -129,7 +130,7 @@ class StaynTouch implements ShouldQueue
 
     public function FrontdeskStatus($room_id, $status, $sw = false)
     {
-        if (! array_has($this->config, 'hk_reasons_id')) {
+        if (! Arr::has($this->config, 'hk_reasons_id')) {
             return null;
         }
         DB::beginTransaction();

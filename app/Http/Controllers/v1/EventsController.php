@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v1;
 
+use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\GuestCheckinDetails;
@@ -190,9 +191,9 @@ class EventsController extends Controller
             if ($last_event) {
                 $count_by_hotel_id = $last_event->count_by_hotel_id + 1;
             }
-            $room_id = array_get($event, 'room_id', '');
-            $location = array_get($event, 'location', '');
-            $guest_id = array_get($event, 'guest_id', '');
+            $room_id = Arr::get($event, 'room_id', '');
+            $location = Arr::get($event, 'location', '');
+            $guest_id = Arr::get($event, 'guest_id', '');
 
             if (empty($room_id)) {
                 $room = $this->getRoom($hotel_id, $staff_id, $location);
@@ -257,7 +258,7 @@ class EventsController extends Controller
                 'prim_id' => $event_id,
                 'staff_id' => $request->user()->staff_id,
                 'date_time' => $now,
-                'comments' => array_get($event, 'issue', ''),
+                'comments' => Arr::get($event, 'issue', ''),
                 'hotel_id' => $hotel_id,
                 'type' => 'API',
             ]);

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Support\Arr;
 use App\Models\GuestCheckinDetails;
 use App\Models\GuestRegistration;
 use App\Models\Hotel;
@@ -59,7 +60,7 @@ class CancelReservation extends Command
 
             foreach ($this->integrations as $value) {
                 $this->integration = $value;
-                if (array_has($this->integration->config, 'url')) {
+                if (Arr::has($this->integration->config, 'url')) {
                     $this->url = $this->integration->config['url'];
                     $this->hotel_id = $this->integration->hotel_id;
                     $hotel = Hotel::findOrFail($this->hotel_id);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v2;
 
+use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\IntegrationsActive;
 use App\Models\IntegrationsRoomStayntouch;
@@ -85,8 +86,8 @@ class StayNTouchController extends Controller
     public function formatHousekeeping($data)
     {
         $__data = [
-            'status' => array_get($data, 'status', ''),
-            'location' => array_get($data, 'room.number', ''),
+            'status' => Arr::get($data, 'status', ''),
+            'location' => Arr::get($data, 'room.number', ''),
         ];
 
         return $__data;
@@ -210,24 +211,24 @@ class StayNTouchController extends Controller
     public function formatReservation($data)
     {
         $__data = [
-            'reservation_number' => array_get($data, 'id', ''),
-            'check_in' => array_get($data, 'arrival_date').' '.array_get($data, 'arrival_time'),
-            'check_out' => array_get($data, 'departure_date').' '.array_get($data, 'departure_time'),
+            'reservation_number' => Arr::get($data, 'id', ''),
+            'check_in' => Arr::get($data, 'arrival_date').' '.Arr::get($data, 'arrival_time'),
+            'check_out' => Arr::get($data, 'departure_date').' '.Arr::get($data, 'departure_time'),
             'status' => 1,
             'reservation_status' => 0,
-            'location' => array_get($data, 'room.number', ''),
+            'location' => Arr::get($data, 'room.number', ''),
         ];
 
         switch ($data['status']) {
             case 'CHECKEDIN':
                 $__data['status'] = 1;
                 $__data['reservation_status'] = 1;
-                $__data['check_in'] = array_get($data, 'arrival_date').' '.date('H:i:s');
+                $__data['check_in'] = Arr::get($data, 'arrival_date').' '.date('H:i:s');
                 break;
             case 'CHECKEDOUT':
                 $__data['status'] = 0;
                 $__data['reservation_status'] = 3;
-                $__data['check_out'] = array_get($data, 'departure_date').' '.date('H:i:s');
+                $__data['check_out'] = Arr::get($data, 'departure_date').' '.date('H:i:s');
                 break;
             case 'NOSHOW':
                 $__data['status'] = 0;
@@ -239,14 +240,14 @@ class StayNTouchController extends Controller
                 break;
         }
 
-        foreach (array_get($data, 'guests') as $value) {
+        foreach (Arr::get($data, 'guests') as $value) {
             if ($value['is_primary'] == true) {
                 $__data['guest_number'] = $value['id'];
-                $__data['firstname'] = array_get($value, 'first_name', '');
-                $__data['lastname'] = array_get($value, 'last_name', '');
-                $__data['email_address'] = array_get($value, 'email', '');
-                $__data['dob'] = array_get($value, 'birthday', '');
-                $phone_no = array_get($value, 'mobile_phone', '');
+                $__data['firstname'] = Arr::get($value, 'first_name', '');
+                $__data['lastname'] = Arr::get($value, 'last_name', '');
+                $__data['email_address'] = Arr::get($value, 'email', '');
+                $__data['dob'] = Arr::get($value, 'birthday', '');
+                $phone_no = Arr::get($value, 'mobile_phone', '');
                 $phone_format = '';
                 if ($phone_no != '') {
                     $phone_no = utf8_decode(preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $phone_no));
@@ -270,11 +271,11 @@ class StayNTouchController extends Controller
                     }
                 }
                 $__data['phone_no'] = $phone_format;
-                $__data['language'] = array_get($value, 'language', '');
-                $__data['state'] = array_get($value, 'address.state', '');
-                $__data['city'] = array_get($value, 'address.city', '');
-                $__data['zipcode'] = array_get($value, 'address.postal_code', '');
-                $__data['address'] = array_get($value, 'address.address_line1', '').','.array_get($value, 'address.address_line2', '');
+                $__data['language'] = Arr::get($value, 'language', '');
+                $__data['state'] = Arr::get($value, 'address.state', '');
+                $__data['city'] = Arr::get($value, 'address.city', '');
+                $__data['zipcode'] = Arr::get($value, 'address.postal_code', '');
+                $__data['address'] = Arr::get($value, 'address.address_line1', '').','.Arr::get($value, 'address.address_line2', '');
                 break;
             }
         }
@@ -286,11 +287,11 @@ class StayNTouchController extends Controller
     {
         $__data = [];
         $__data['guest_number'] = $data['id'];
-        $__data['firstname'] = array_get($data, 'first_name', '');
-        $__data['lastname'] = array_get($data, 'last_name', '');
-        $__data['email_address'] = array_get($data, 'email', '');
-        $__data['dob'] = array_get($data, 'birthday', '');
-        $phone_no = array_get($data, 'mobile_phone', '');
+        $__data['firstname'] = Arr::get($data, 'first_name', '');
+        $__data['lastname'] = Arr::get($data, 'last_name', '');
+        $__data['email_address'] = Arr::get($data, 'email', '');
+        $__data['dob'] = Arr::get($data, 'birthday', '');
+        $phone_no = Arr::get($data, 'mobile_phone', '');
         $phone_format = '';
         if ($phone_no != '') {
             $phone_no = utf8_decode(preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $phone_no));
@@ -314,11 +315,11 @@ class StayNTouchController extends Controller
             }
         }
         $__data['phone_no'] = $phone_format;
-        $__data['language'] = array_get($data, 'language', '');
-        $__data['state'] = array_get($data, 'address.state', '');
-        $__data['city'] = array_get($data, 'address.city', '');
-        $__data['zipcode'] = array_get($data, 'address.postal_code', '');
-        $__data['address'] = array_get($data, 'address.address_line1', '').','.array_get($data, 'address.address_line2', '');
+        $__data['language'] = Arr::get($data, 'language', '');
+        $__data['state'] = Arr::get($data, 'address.state', '');
+        $__data['city'] = Arr::get($data, 'address.city', '');
+        $__data['zipcode'] = Arr::get($data, 'address.postal_code', '');
+        $__data['address'] = Arr::get($data, 'address.address_line1', '').','.Arr::get($data, 'address.address_line2', '');
 
         return $__data;
     }
@@ -383,7 +384,7 @@ class StayNTouchController extends Controller
                 return null;
             }
             // \Log::info($response);
-            return array_get(json_decode($response, true), 'results', []);
+            return Arr::get(json_decode($response, true), 'results', []);
         } catch (\Exception $e) {
             \Log::error('Error in StayNTouchController getRooms');
             \Log::error($e->getMessage());

@@ -4,6 +4,7 @@
 
 namespace App\Jobs;
 
+use Illuminate\Support\Arr;
 use App\Models\GuestCheckinDetails;
 use App\Models\GuestRegistration;
 use App\Models\Hotel;
@@ -92,9 +93,9 @@ class OperaReservation implements ShouldQueue
     {
         date_default_timezone_set('UTC');
 
-        $resortId = array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.resortId', '');
-        $ReservationID = array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.ReservationID', '');
-        $UniqueID = array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
+        $resortId = Arr::get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.resortId', '');
+        $ReservationID = Arr::get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.ReservationID', '');
+        $UniqueID = Arr::get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
         $Profile = null;
         $Profile = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $UniqueID)->first();
         $state = 0;
@@ -115,13 +116,13 @@ class OperaReservation implements ShouldQueue
         $reservation = [
             'resortId' => $resortId,
             'ReservationID' => $ReservationID,
-            'reservationStatus' => array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.@attributes.reservationStatus', ''),
-            'roomNumber' => array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.roomNumber', ''),
+            'reservationStatus' => Arr::get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.@attributes.reservationStatus', ''),
+            'roomNumber' => Arr::get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.roomNumber', ''),
             'UniqueID' => $UniqueID,
-            'checkInDate' => array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.checkInDate', ''),
-            'checkOutDate' => array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.checkOutDate', ''),
-            'ageQualifyingCode' => array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.GuestCounts.GuestCount.@attributes.ageQualifyingCode', ''),
-            'GuestCount' => array_get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.GuestCounts.GuestCount.@attributes.count', ''),
+            'checkInDate' => Arr::get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.checkInDate', ''),
+            'checkOutDate' => Arr::get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.checkOutDate', ''),
+            'ageQualifyingCode' => Arr::get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.GuestCounts.GuestCount.@attributes.ageQualifyingCode', ''),
+            'GuestCount' => Arr::get($this->data, 'Body.GuestStatusNotificationRequest.GuestStatus.GuestCounts.GuestCount.@attributes.count', ''),
             'state' => $state,
             'created_at' => date('Y-m-d H:i:s'),
         ];
@@ -174,9 +175,9 @@ class OperaReservation implements ShouldQueue
     {
         date_default_timezone_set('UTC');
 
-        $resortId = array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.resortId', '');
-        $ReservationID = array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.ReservationID', '');
-        $UniqueID = array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.ProfileIDs.UniqueID', '');
+        $resortId = Arr::get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.resortId', '');
+        $ReservationID = Arr::get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.ReservationID', '');
+        $UniqueID = Arr::get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.ProfileIDs.UniqueID', '');
 
         $Profile = null;
         $Profile = IntegrationsGuestInformation::where('hotel_id', $this->hotel_id)->where('guest_number', $UniqueID)->first();
@@ -204,13 +205,13 @@ class OperaReservation implements ShouldQueue
         $reservation = [
             'resortId' => $resortId,
             'ReservationID' => $ReservationID,
-            'reservationStatus' => array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.@attributes.reservationStatus', ''),
-            'roomNumber' => array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.roomNumber', ''),
+            'reservationStatus' => Arr::get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.@attributes.reservationStatus', ''),
+            'roomNumber' => Arr::get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.roomNumber', ''),
             'UniqueID' => $UniqueID,
-            'checkInDate' => array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.checkInDate', ''),
-            'checkOutDate' => array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.checkOutDate', ''),
-            'ageQualifyingCode' => array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.GuestCounts.GuestCount.@attributes.ageQualifyingCode', ''),
-            'GuestCount' => array_get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.GuestCounts.GuestCount.@attributes.count', ''),
+            'checkInDate' => Arr::get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.checkInDate', ''),
+            'checkOutDate' => Arr::get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.checkOutDate', ''),
+            'ageQualifyingCode' => Arr::get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.GuestCounts.GuestCount.@attributes.ageQualifyingCode', ''),
+            'GuestCount' => Arr::get($this->data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.GuestCounts.GuestCount.@attributes.count', ''),
             'state' => $state,
             'created_at' => date('Y-m-d H:i:s'),
         ];
@@ -260,20 +261,20 @@ class OperaReservation implements ShouldQueue
 
     public function QueueRoomStatus()
     {
-        $resortId = array_get($this->data, 'resortId', '');
-        $action = array_get($this->data, '@attributes.Action', '');
-        $data_element = array_get($this->data, 'DataElements.DataElement', []);
+        $resortId = Arr::get($this->data, 'resortId', '');
+        $action = Arr::get($this->data, '@attributes.Action', '');
+        $data_element = Arr::get($this->data, 'DataElements.DataElement', []);
         switch ($action) {
             case 'NEW':
                 $location = '';
                 foreach ($data_element as $key => $value) {
-                    if (array_get($value, '@attributes.name', '') == 'RoomNumber') {
-                        $location = array_get($value, '@attributes.newData', '');
+                    if (Arr::get($value, '@attributes.name', '') == 'RoomNumber') {
+                        $location = Arr::get($value, '@attributes.newData', '');
                     }
                 }
                 if ($location != '') {
                     $room_id = $this->getRoom($location);
-                    if (array_has($room_id, 'room_id')) {
+                    if (Arr::has($room_id, 'room_id')) {
                         $this->createQueue($room_id['room_id']);
                     }
                 }
@@ -281,21 +282,21 @@ class OperaReservation implements ShouldQueue
             case 'UPDATE':
                 $location = '';
                 foreach ($data_element as $key => $value) {
-                    if (array_get($value, '@attributes.name', '') == 'RoomNumber') {
-                        $location = array_get($value, '@attributes.newData', '');
+                    if (Arr::get($value, '@attributes.name', '') == 'RoomNumber') {
+                        $location = Arr::get($value, '@attributes.newData', '');
                     }
                 }
                 if ($location != '') {
                     $room_id = $this->getRoom($location, 'CLEANING_UPDATED', 1, 1);
-                    if (array_has($room_id, 'room_id')) {
+                    if (Arr::has($room_id, 'room_id')) {
                         $this->createQueue($room_id['room_id']);
                     }
                 }
                 break;
             case 'DELETE':
                 foreach ($data_element as $key => $value) {
-                    if (array_get($value, '@attributes.name', '') == 'GuestNameId') {
-                        $guest_id = array_get($value, '@attributes.newData', array_get($value, '@attributes.oldData', ''));
+                    if (Arr::get($value, '@attributes.name', '') == 'GuestNameId') {
+                        $guest_id = Arr::get($value, '@attributes.newData', Arr::get($value, '@attributes.oldData', ''));
                     }
                 }
                 if ($guest_id != '') {
@@ -600,13 +601,13 @@ class OperaReservation implements ShouldQueue
             $sw = false;
             $profile_log_data = null;
             if (! $dataLog) {
-                $unique_id = array_get($this->data, 'Profile.IDs.UniqueID');
-                if (array_has(! $this->data, 'Profile')) {
+                $unique_id = Arr::get($this->data, 'Profile.IDs.UniqueID');
+                if (Arr::has(! $this->data, 'Profile')) {
                     return false;
                 }
-                $resort_id = array_get($this->data, 'ResortId');
+                $resort_id = Arr::get($this->data, 'ResortId');
                 $addressString = '';
-                $addressData = array_get($this->data, 'Profile.Addresses.NameAddress.AddressLine', '');
+                $addressData = Arr::get($this->data, 'Profile.Addresses.NameAddress.AddressLine', '');
                 if (! is_array($addressData)) {
                     $addressData = [$addressData];
                 }
@@ -616,28 +617,28 @@ class OperaReservation implements ShouldQueue
                 $dataLog = [
                     'resortId' => $resort_id,
                     'UniqueID' => $unique_id,
-                    'FirstName' => array_get($this->data, 'Profile.Customer.PersonName.FirstName', ''),
-                    'LastName' => array_get($this->data, 'Profile.Customer.PersonName.LastName', ''),
+                    'FirstName' => Arr::get($this->data, 'Profile.Customer.PersonName.FirstName', ''),
+                    'LastName' => Arr::get($this->data, 'Profile.Customer.PersonName.LastName', ''),
                     'EMAIL' => '',
                     'MOBILE' => '',
                     'AddressLine' => $addressString,
-                    'CityName' => array_get($this->data, 'Profile.Addresses.NameAddress.CityName', ''),
-                    'PostalCode' => array_get($this->data, 'Profile.Addresses.NameAddress.PostalCode', ''),
-                    'CountryCode' => array_get($this->data, 'Profile.Addresses.NameAddress.CountryCode', ''),
-                    'birthDate' => array_get($this->data, 'Profile.Customer.@attributes.birthDate', ''),
+                    'CityName' => Arr::get($this->data, 'Profile.Addresses.NameAddress.CityName', ''),
+                    'PostalCode' => Arr::get($this->data, 'Profile.Addresses.NameAddress.PostalCode', ''),
+                    'CountryCode' => Arr::get($this->data, 'Profile.Addresses.NameAddress.CountryCode', ''),
+                    'birthDate' => Arr::get($this->data, 'Profile.Customer.@attributes.birthDate', ''),
                     'created_at' => date('Y-m-d H:i:s'),
                 ];
-                $phonesData = array_get($this->data, 'Profile.Phones.NamePhone', []);
-                if (array_has($phonesData, '@attributes.phoneType')) {
+                $phonesData = Arr::get($this->data, 'Profile.Phones.NamePhone', []);
+                if (Arr::has($phonesData, '@attributes.phoneType')) {
                     $phonesData = [$phonesData];
                 }
 
                 foreach ($phonesData as $value) {
-                    if (array_get($value, '@attributes.phoneRole') == 'PHONE' && $dataLog['MOBILE'] == '') {
-                        $dataLog['MOBILE'] = array_get($value, 'PhoneNumber', '');
+                    if (Arr::get($value, '@attributes.phoneRole') == 'PHONE' && $dataLog['MOBILE'] == '') {
+                        $dataLog['MOBILE'] = Arr::get($value, 'PhoneNumber', '');
                     }
-                    if (array_get($value, '@attributes.phoneRole') == 'EMAIL' && $dataLog['EMAIL'] == '') {
-                        $dataLog['EMAIL'] = array_get($value, 'PhoneNumber', '');
+                    if (Arr::get($value, '@attributes.phoneRole') == 'EMAIL' && $dataLog['EMAIL'] == '') {
+                        $dataLog['EMAIL'] = Arr::get($value, 'PhoneNumber', '');
                     }
                 }
                 $profile_log_data = new \App\Models\Log\OracleProfile($dataLog);
@@ -652,8 +653,8 @@ class OperaReservation implements ShouldQueue
                 $this->sendMonitoringApp($dataLog, 'LogOpera_Profile');
             } else {
                 $sw = true;
-                $unique_id = array_get($dataLog, 'UniqueID');
-                $resort_id = array_get($this->data, 'resortId');
+                $unique_id = Arr::get($dataLog, 'UniqueID');
+                $resort_id = Arr::get($this->data, 'resortId');
                 $profile_log_data = new \App\Models\Log\OracleProfile($dataLog);
                 $this->NewGuest($dataLog, $sw);
                 try {
@@ -705,17 +706,17 @@ class OperaReservation implements ShouldQueue
             $this->configTimeZone($this->hotel_id);
 
             if ($sw) {
-                $unique_id = array_get($arrayData, 'UniqueID');
+                $unique_id = Arr::get($arrayData, 'UniqueID');
                 $guest_zip_code = '';
-                if (! is_array(array_get($arrayData, 'PostalCode', ''))) {
-                    $guest_zip_code = array_get($arrayData, 'PostalCode', '');
+                if (! is_array(Arr::get($arrayData, 'PostalCode', ''))) {
+                    $guest_zip_code = Arr::get($arrayData, 'PostalCode', '');
                 }
                 $guest_data = [
-                    'firstname' => array_get($arrayData, 'FirstName', ''),
-                    'lastname' => array_get($arrayData, 'LastName', ''),
-                    'address' => array_get($arrayData, 'AddressLine', ''),
-                    'city' => array_get($arrayData, 'CityName', ''),
-                    'state' => array_get($arrayData, 'StateProv', ''),
+                    'firstname' => Arr::get($arrayData, 'FirstName', ''),
+                    'lastname' => Arr::get($arrayData, 'LastName', ''),
+                    'address' => Arr::get($arrayData, 'AddressLine', ''),
+                    'city' => Arr::get($arrayData, 'CityName', ''),
+                    'state' => Arr::get($arrayData, 'StateProv', ''),
                     'zipcode' => $guest_zip_code,
                     'email_address' => '',
                     'phone_no' => '',
@@ -725,24 +726,24 @@ class OperaReservation implements ShouldQueue
                 ];
             } else {
                 $addressString = '';
-                $addressData = array_get($arrayData, 'Profile.Addresses.NameAddress.AddressLine', '');
+                $addressData = Arr::get($arrayData, 'Profile.Addresses.NameAddress.AddressLine', '');
                 if (! is_array($addressData)) {
                     $addressData = [$addressData];
                 }
                 foreach ($addressData as  $address) {
                     $addressString .= $address != '' ? $address.';' : '';
                 }
-                $unique_id = array_get($arrayData, 'Profile.IDs.UniqueID');
+                $unique_id = Arr::get($arrayData, 'Profile.IDs.UniqueID');
                 $guest_zip_code = '';
-                if (! is_array(array_get($arrayData, 'PostalCode', ''))) {
-                    $guest_zip_code = array_get($arrayData, 'Profile.Addresses.NameAddress.PostalCode', '');
+                if (! is_array(Arr::get($arrayData, 'PostalCode', ''))) {
+                    $guest_zip_code = Arr::get($arrayData, 'Profile.Addresses.NameAddress.PostalCode', '');
                 }
                 $guest_data = [
-                    'firstname' => array_get($arrayData, 'Profile.Customer.PersonName.FirstName', ''),
-                    'lastname' => array_get($arrayData, 'Profile.Customer.PersonName.LastName', ''),
+                    'firstname' => Arr::get($arrayData, 'Profile.Customer.PersonName.FirstName', ''),
+                    'lastname' => Arr::get($arrayData, 'Profile.Customer.PersonName.LastName', ''),
                     'address' => $addressString,
-                    'city' => array_get($arrayData, 'Profile.Addresses.NameAddress.CityName', ''),
-                    'state' => array_get($arrayData, 'Profile.Addresses.NameAddress.StateProv', ''),
+                    'city' => Arr::get($arrayData, 'Profile.Addresses.NameAddress.CityName', ''),
+                    'state' => Arr::get($arrayData, 'Profile.Addresses.NameAddress.StateProv', ''),
                     'zipcode' => $guest_zip_code,
                     'email_address' => '',
                     'phone_no' => '',
@@ -752,16 +753,16 @@ class OperaReservation implements ShouldQueue
                     'created_on' => date('Y-m-d H:i:s'),
                     'created_by' => $this->staff_id,
                 ];
-                $phonesData = array_get($arrayData, 'Profile.Phones.NamePhone', []);
-                if (array_has($phonesData, '@attributes.phoneType')) {
+                $phonesData = Arr::get($arrayData, 'Profile.Phones.NamePhone', []);
+                if (Arr::has($phonesData, '@attributes.phoneType')) {
                     $phonesData = [$phonesData];
                 }
                 foreach ($phonesData as $value) {
-                    if (array_get($value, '@attributes.phoneRole') == 'PHONE' && $guest_data['phone_no'] == '') {
-                        $guest_data['phone_no'] = array_get($value, 'PhoneNumber', '');
+                    if (Arr::get($value, '@attributes.phoneRole') == 'PHONE' && $guest_data['phone_no'] == '') {
+                        $guest_data['phone_no'] = Arr::get($value, 'PhoneNumber', '');
                     }
-                    if (array_get($value, '@attributes.phoneRole') == 'EMAIL' && $guest_data['email_address'] == '') {
-                        $guest_data['email_address'] = array_get($value, 'PhoneNumber', '');
+                    if (Arr::get($value, '@attributes.phoneRole') == 'EMAIL' && $guest_data['email_address'] == '') {
+                        $guest_data['email_address'] = Arr::get($value, 'PhoneNumber', '');
                     }
                 }
             }
@@ -1005,24 +1006,24 @@ class OperaReservation implements ShouldQueue
 
     public function RoomStatusUpdateBERequest()
     {
-        $data_elements = array_get($this->data, 'DataElements.DataElement', null);
+        $data_elements = Arr::get($this->data, 'DataElements.DataElement', null);
         if (! is_null($data_elements)) {
             $hskLog = [
                 'RoomNumber' => '',
                 'RoomStatus' => '',
                 'RoomType' => '',
-                'resortId' => array_get($this->data, 'ResortId', ''),
+                'resortId' => Arr::get($this->data, 'ResortId', ''),
                 'created_at' => date('Y-m-d H:i:s'),
             ];
             if (! is_array($data_elements)) {
                 $data_elements = [$data_elements];
             }
             foreach ($data_elements as  $data_element) {
-                if (array_get($data_element, '@attributes.name', '') == 'RoomNumber') {
-                    $hskLog['RoomNumber'] = array_get($data_element, '@attributes.newData');
+                if (Arr::get($data_element, '@attributes.name', '') == 'RoomNumber') {
+                    $hskLog['RoomNumber'] = Arr::get($data_element, '@attributes.newData');
                 }
-                if (array_get($data_element, '@attributes.name', '') == 'RoomStatus') {
-                    $hskLog['RoomStatus'] = array_get($data_element, '@attributes.newData');
+                if (Arr::get($data_element, '@attributes.name', '') == 'RoomStatus') {
+                    $hskLog['RoomStatus'] = Arr::get($data_element, '@attributes.newData');
                 }
             }
 
@@ -1063,7 +1064,7 @@ class OperaReservation implements ShouldQueue
                         break;
                     }
                     if ($hk_status == 4) {
-                        if (array_has($room_data, 'reservation_data')) {
+                        if (Arr::has($room_data, 'reservation_data')) {
                             $GuestCheckinDetails = $room_data['reservation_data'];
 
                             if (! empty($GuestCheckinDetails) && $this->hotel_id != 238) {
@@ -1119,7 +1120,7 @@ class OperaReservation implements ShouldQueue
         foreach ($rooms['rooms'] as $value) {
             if (! empty($value['reservation_data'])) {
                 $addressString = '';
-                $addressData = array_get($value, 'reservation_data.AddressLine');
+                $addressData = Arr::get($value, 'reservation_data.AddressLine');
                 if (! is_array($addressData)) {
                     $addressData = [$addressData];
                 }
@@ -1127,16 +1128,16 @@ class OperaReservation implements ShouldQueue
                     $addressString .= $address != '' ? $address.';' : '';
                 }
                 $profile = [
-                    'resortId' => array_get($value, 'reservation_data.ResortId', ''),
-                    'FirstName' => array_get($value, 'reservation_data.FirstName', ''),
-                    'LastName' => array_get($value, 'reservation_data.LastName', ''),
+                    'resortId' => Arr::get($value, 'reservation_data.ResortId', ''),
+                    'FirstName' => Arr::get($value, 'reservation_data.FirstName', ''),
+                    'LastName' => Arr::get($value, 'reservation_data.LastName', ''),
                     'EMAIL' => '',
                     'MOBILE' => '',
                     'AddressLine' => $addressString,
-                    'CityName' => array_get($value, 'reservation_data.CityName', ''),
-                    'PostalCode' => array_get($value, 'reservation_data.PostalCode', ''),
-                    'CountryCode' => array_get($value, 'reservation_data.CountryCode', ''),
-                    'UniqueID' => array_get($value, 'reservation_data.ProfileID'),
+                    'CityName' => Arr::get($value, 'reservation_data.CityName', ''),
+                    'PostalCode' => Arr::get($value, 'reservation_data.PostalCode', ''),
+                    'CountryCode' => Arr::get($value, 'reservation_data.CountryCode', ''),
+                    'UniqueID' => Arr::get($value, 'reservation_data.ProfileID'),
                     'birthDate' => '',
                     'created_at' => date('Y-m-d H:i:s'),
                     'created_by' => 1,
@@ -1145,13 +1146,13 @@ class OperaReservation implements ShouldQueue
                 $this->ProfileRegistration($profile);
 
                 $reservation = [
-                    'resortId' => array_get($value, 'reservation_data.ResortId'),
-                    'ReservationID' => array_get($value, 'reservation_data.ReservationID'),
-                    'reservationStatus' => array_get($value, 'reservation_data.reservationStatus'),
-                    'roomNumber' => array_get($value, 'RoomNumber'),
-                    'UniqueID' => array_get($value, 'reservation_data.ProfileID'),
-                    'checkInDate' => array_get($value, 'reservation_data.Start'),
-                    'checkOutDate' => array_get($value, 'reservation_data.End'),
+                    'resortId' => Arr::get($value, 'reservation_data.ResortId'),
+                    'ReservationID' => Arr::get($value, 'reservation_data.ReservationID'),
+                    'reservationStatus' => Arr::get($value, 'reservation_data.reservationStatus'),
+                    'roomNumber' => Arr::get($value, 'RoomNumber'),
+                    'UniqueID' => Arr::get($value, 'reservation_data.ProfileID'),
+                    'checkInDate' => Arr::get($value, 'reservation_data.Start'),
+                    'checkOutDate' => Arr::get($value, 'reservation_data.End'),
                     'ageQualifyingCode' => '',
                     'GuestCount' => '',
                     'state' => '1',
@@ -1187,7 +1188,7 @@ class OperaReservation implements ShouldQueue
             } else {
                 $this->configTimeZone($this->hotel_id);
                 $date = date('Y-m-d H:i:s');
-                $room = $this->getRoom(array_get($value, 'RoomNumber'));
+                $room = $this->getRoom(Arr::get($value, 'RoomNumber'));
                 if (! is_null($room)) {
                     $reservations = GuestCheckinDetails::where('hotel_id', $this->hotel_id)
                         ->where('room_no', $room['room_id'])
@@ -1331,7 +1332,7 @@ class OperaReservation implements ShouldQueue
             \Log::info('-> OPRRA DATA RESERVATION');
             \Log::info($str_json);
             $json = json_decode($str_json, true);
-            $fetch_room = array_get($json, 'Body.FetchRoomStatusResponse');
+            $fetch_room = Arr::get($json, 'Body.FetchRoomStatusResponse');
 
             return $fetch_room;
         }
@@ -1427,7 +1428,7 @@ class OperaReservation implements ShouldQueue
 
             \Log::info('--> getReservationRoom: '.$str_json);
 
-            $resp = array_get($json, 'Body.ReservationLookupResponse.ReservationLookups.ReservationLookup');
+            $resp = Arr::get($json, 'Body.ReservationLookupResponse.ReservationLookups.ReservationLookup');
             try {
                 $resp[0];
             } catch (\Exception $e) {
@@ -1451,7 +1452,7 @@ class OperaReservation implements ShouldQueue
                 'staff_id' => $this->staff_id,
                 'rooms' => [],
             ];
-            $fetch_room = array_get($data, 'FetchRoomStatus', []);
+            $fetch_room = Arr::get($data, 'FetchRoomStatus', []);
             try {
                 $fetch_room[0];
             } catch (\Exception $e) {
@@ -1461,7 +1462,7 @@ class OperaReservation implements ShouldQueue
             //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($fetch_room));
             foreach ($fetch_room as $room) {
                 //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($room));
-                $room_no = array_get($room, 'RoomNumber');
+                $room_no = Arr::get($room, 'RoomNumber');
 
                 if (! $room_no) {
                     $room_no = $this->room_id ? $this->room_id : null;
@@ -1481,11 +1482,11 @@ class OperaReservation implements ShouldQueue
                 }
                 if ($add) {
                     //$this->customWriteLog("sync_opera_reservation",$this->hotel_id, $room_no);
-                    $room_status = array_get($room, 'RoomStatus');
+                    $room_status = Arr::get($room, 'RoomStatus');
                     $reservation_data = [];
 
                     // && $this->hotel_id != 289
-                    if (array_get($room, 'HouseKeepingStatus') == 'OCC') {
+                    if (Arr::get($room, 'HouseKeepingStatus') == 'OCC') {
                         // $room_status = 'Clean';
 
                         $reservation = $this->getReservationRoom($room_no, $this->config, $this->pms_hotel_id);
@@ -1493,19 +1494,19 @@ class OperaReservation implements ShouldQueue
                         //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, 'reservation sync' . json_encode($reservation));
 
                         $reservation_data = [
-                            'ReservationID' => array_get($reservation, 'ReservationID', ''),
-                            'ProfileID' => array_get($reservation, 'ProfileID', ''),
-                            'Start' => array_get($reservation, 'DateRange.Start', ''),
-                            'End' => array_get($reservation, 'DateRange.End', ''),
-                            'FirstName' => array_get($reservation, 'ProfileInfo.FirstName', ''),
-                            'LastName' => array_get($reservation, 'ProfileInfo.LastName', ''),
-                            'AddressLine' => array_get($reservation, 'ReservationAddress.AddressLine', ''),
-                            'CityName' => array_get($reservation, 'ReservationAddress.CityName', ''),
-                            'StateProv' => array_get($reservation, 'ReservationAddress.StateProv', ''),
-                            'CountryCode' => array_get($reservation, 'ReservationAddress.CountryCode', ''),
-                            'PostalCode' => array_get($reservation, 'ReservationAddress.PostalCode', ''),
-                            'ResortId' => array_get($reservation, 'ResortId', ''),
-                            'reservationStatus' => array_get($reservation, '@attributes.reservationStatus'),
+                            'ReservationID' => Arr::get($reservation, 'ReservationID', ''),
+                            'ProfileID' => Arr::get($reservation, 'ProfileID', ''),
+                            'Start' => Arr::get($reservation, 'DateRange.Start', ''),
+                            'End' => Arr::get($reservation, 'DateRange.End', ''),
+                            'FirstName' => Arr::get($reservation, 'ProfileInfo.FirstName', ''),
+                            'LastName' => Arr::get($reservation, 'ProfileInfo.LastName', ''),
+                            'AddressLine' => Arr::get($reservation, 'ReservationAddress.AddressLine', ''),
+                            'CityName' => Arr::get($reservation, 'ReservationAddress.CityName', ''),
+                            'StateProv' => Arr::get($reservation, 'ReservationAddress.StateProv', ''),
+                            'CountryCode' => Arr::get($reservation, 'ReservationAddress.CountryCode', ''),
+                            'PostalCode' => Arr::get($reservation, 'ReservationAddress.PostalCode', ''),
+                            'ResortId' => Arr::get($reservation, 'ResortId', ''),
+                            'reservationStatus' => Arr::get($reservation, '@attributes.reservationStatus'),
                         ];
                         //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, 'RESERVATION DATA:');
                         //$this->customWriteLog("sync_opera_reservation", $this->hotel_id, json_encode($reservation_data));
@@ -1596,7 +1597,7 @@ class OperaReservation implements ShouldQueue
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body.FetchProfileResponse');
+            return Arr::get($json, 'Body.FetchProfileResponse');
         }
     }
 
@@ -1621,7 +1622,7 @@ class OperaReservation implements ShouldQueue
 
     public function FrontdeskStatus($room_id, $status, $sw = false)
     {
-        if (! array_has($this->config, 'hk_reasons_id')) {
+        if (! Arr::has($this->config, 'hk_reasons_id')) {
             return null;
         }
         // DB::beginTransaction();

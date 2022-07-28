@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use Illuminate\Support\Arr;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -65,24 +66,24 @@ class SmsMillerLogs implements ShouldQueue
         $reservation = $this->data;
         foreach ($reservation as  $r) {
             $data = [
-                'guestnum' => array_get($r, 'guestresults.@attributes.guestnum', ''),
-                'phone' => array_get($r, 'guestresults.phone', ''),
-                'phone2' => array_get($r, 'guestresults.phone2', ''),
-                'fax' => array_get($r, 'guestresults.fax', ''),
-                'email' => array_get($r, 'guestresults.email', ''),
-                'city' => array_get($r, 'guestresults.city', ''),
-                'state' => array_get($r, 'guestresults.state', ''),
-                'zip' => array_get($r, 'guestresults.zip', ''),
-                'last' => array_get($r, 'guestresults.last', ''),
-                'first' => array_get($r, 'guestresults.first', ''),
-                'unum' => array_get($r, 'reservationresults.unum', ''),
-                'resno' => array_get($r, '@attributes.resno', ''),
-                'arrival' => array_get($r, 'reservationresults.arrival', ''),
-                'depart' => array_get($r, 'reservationresults.depart', ''),
-                'level' => array_get($r, 'reservationresults.level', ''),
-                'primaryshare' => array_get($r, 'reservationresults.primaryshare', ''),
-                'group' => array_get($r, 'reservationresults.group', ''),
-                'utyp' => array_get($r, 'reservationresults.utyp', ''),
+                'guestnum' => Arr::get($r, 'guestresults.@attributes.guestnum', ''),
+                'phone' => Arr::get($r, 'guestresults.phone', ''),
+                'phone2' => Arr::get($r, 'guestresults.phone2', ''),
+                'fax' => Arr::get($r, 'guestresults.fax', ''),
+                'email' => Arr::get($r, 'guestresults.email', ''),
+                'city' => Arr::get($r, 'guestresults.city', ''),
+                'state' => Arr::get($r, 'guestresults.state', ''),
+                'zip' => Arr::get($r, 'guestresults.zip', ''),
+                'last' => Arr::get($r, 'guestresults.last', ''),
+                'first' => Arr::get($r, 'guestresults.first', ''),
+                'unum' => Arr::get($r, 'reservationresults.unum', ''),
+                'resno' => Arr::get($r, '@attributes.resno', ''),
+                'arrival' => Arr::get($r, 'reservationresults.arrival', ''),
+                'depart' => Arr::get($r, 'reservationresults.depart', ''),
+                'level' => Arr::get($r, 'reservationresults.level', ''),
+                'primaryshare' => Arr::get($r, 'reservationresults.primaryshare', ''),
+                'group' => Arr::get($r, 'reservationresults.group', ''),
+                'utyp' => Arr::get($r, 'reservationresults.utyp', ''),
                 'hotel_id' => $this->hotel_id,
                 'type' => $this->title,
                 'created_at' => date('Y-m-d H:i:s'),
@@ -99,8 +100,8 @@ class SmsMillerLogs implements ShouldQueue
         $r = $this->data;
 
         $data = [
-            'guestnum' => array_get($r, 'guestnum', ''),
-            'resno' => array_get($r, '@attributes.resno'),
+            'guestnum' => Arr::get($r, 'guestnum', ''),
+            'resno' => Arr::get($r, '@attributes.resno'),
             'hotel_id' => $this->hotel_id,
             'type' => $this->title,
             'created_at' => date('Y-m-d H:i:s'),
@@ -117,8 +118,8 @@ class SmsMillerLogs implements ShouldQueue
 
         foreach ($h as $r) {
             $data = [
-                'location' => array_get($r, '@attributes.unum'),
-                'status' => array_get($r, 'Code'),
+                'location' => Arr::get($r, '@attributes.unum'),
+                'status' => Arr::get($r, 'Code'),
                 'hotel_id' => $this->hotel_id,
                 'type' => $this->title,
                 'created_at' => date('Y-m-d H:i:s'),

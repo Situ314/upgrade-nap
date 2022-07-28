@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v2;
 
+use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\GuestCheckinDetails;
 use App\Models\GuestRegistration;
@@ -334,7 +335,7 @@ class OperaController extends Controller
         $staff_id = $request->staff_id;
         $data = $request->data;
         $type = 'ProfileRegistration';
-        $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, array_get($data, 'Body.NewProfileRequest')));
+        $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, Arr::get($data, 'Body.NewProfileRequest')));
 
         return 'true';
         // $this->SwitchNameRequest($this->FormatXML($request));

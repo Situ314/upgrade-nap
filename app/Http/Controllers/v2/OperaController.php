@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\v2;
 
+use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\GuestCheckinDetails;
 use App\Models\HousekeepingCleanings;
@@ -23,7 +24,7 @@ class OperaController extends Controller
         }
 
         $data = $request->data;
-        $keys = array_keys(array_get($data, 'Body', []));
+        $keys = array_keys(Arr::get($data, 'Body', []));
         $reps = null;
 
         switch ($keys[0]) {
@@ -58,9 +59,9 @@ class OperaController extends Controller
 
         $config = $request->config;
         $type = 'ProfileRegistration';
-        $keys = array_keys(array_get($data, 'Body', []));
-        $unique_id = array_get($data, 'Body.'.$keys[0].'.Profile.IDs.UniqueID', '');
-        $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, array_get($data, 'Body.'.$keys[0]), $config));
+        $keys = array_keys(Arr::get($data, 'Body', []));
+        $unique_id = Arr::get($data, 'Body.'.$keys[0].'.Profile.IDs.UniqueID', '');
+        $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, Arr::get($data, 'Body.'.$keys[0]), $config));
         $action = str_replace('Request', 'Response', $keys[0]);
         $resp = $this->BuildXMLProfileResponse($action, $unique_id);
 
@@ -75,8 +76,8 @@ class OperaController extends Controller
         $staff_id = $request->staff_id;
 
         $type = 'QueueRoomStatus';
-        $keys = array_keys(array_get($data, 'Body', []));
-        $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, array_get($data, 'Body.'.$keys[0]), $config));
+        $keys = array_keys(Arr::get($data, 'Body', []));
+        $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, Arr::get($data, 'Body.'.$keys[0]), $config));
         $action = str_replace('Request', 'Response', $keys[0]);
 
         return $this->BuildXMLQueueResponse($action);
@@ -95,17 +96,17 @@ class OperaController extends Controller
 
         $config = $request->config;
         $unique_id = '';
-        $keys = array_keys(array_get($data, 'Body', []));
+        $keys = array_keys(Arr::get($data, 'Body', []));
         $resp = '';
 
         switch ($keys[0]) {
             case 'GuestStatusNotificationRequest':
                 $type = 'GuestStatusNotificationRequest';
                 $action = str_replace('Request', 'Response', $keys[0]);
-                $message_id = array_get($data, 'Header.MessageID');
-                $created = array_get($data, 'Header.Security.Timestamp.Created');
-                $expired = array_get($data, 'Header.Security.Timestamp.Expires');
-                $unique_id = array_get($data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
+                $message_id = Arr::get($data, 'Header.MessageID');
+                $created = Arr::get($data, 'Header.Security.Timestamp.Created');
+                $expired = Arr::get($data, 'Header.Security.Timestamp.Expires');
+                $unique_id = Arr::get($data, 'Body.GuestStatusNotificationRequest.GuestStatus.ProfileIDs.UniqueID', '');
                 $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, $data, $config));
 
                 $resp = $this->BuildXMLResponse($action, $unique_id, $created, $expired, $message_id);
@@ -114,10 +115,10 @@ class OperaController extends Controller
             case 'GuestStatusNotificationExtRequest':
                 $type = 'GuestStatusNotificationExtRequest';
                 $action = str_replace('Request', 'Response', $keys[0]);
-                $message_id = array_get($data, 'Header.MessageID');
-                $created = array_get($data, 'Header.Security.Timestamp.Created');
-                $expired = array_get($data, 'Header.Security.Timestamp.Expires');
-                $unique_id = array_get($data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.ProfileIDs.UniqueID', '');
+                $message_id = Arr::get($data, 'Header.MessageID');
+                $created = Arr::get($data, 'Header.Security.Timestamp.Created');
+                $expired = Arr::get($data, 'Header.Security.Timestamp.Expires');
+                $unique_id = Arr::get($data, 'Body.GuestStatusNotificationExtRequest.GuestStatus.ProfileIDs.UniqueID', '');
 
                 $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, $data, $config));
 
@@ -128,7 +129,7 @@ class OperaController extends Controller
             case 'RoomStatusUpdateBERequest':
                 $type = 'RoomStatusUpdateBERequest';
                 $action = str_replace('Request', 'Response', $keys[0]);
-                $data = array_get($data, 'Body.RoomStatusUpdateBERequest');
+                $data = Arr::get($data, 'Body.RoomStatusUpdateBERequest');
                 $resp = $this->BuildXMLRoomResponse($action);
 
                 $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, $data, $config));
@@ -380,7 +381,7 @@ class OperaController extends Controller
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body.FetchRoomStatusResponse');
+            return Arr::get($json, 'Body.FetchRoomStatusResponse');
         }
     }
 
@@ -453,7 +454,7 @@ class OperaController extends Controller
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body.ReservationLookupResponse.ReservationLookups.ReservationLookup');
+            return Arr::get($json, 'Body.ReservationLookupResponse.ReservationLookups.ReservationLookup');
         }
     }
 
@@ -602,10 +603,10 @@ class OperaController extends Controller
             // return response()->json($rooms_fetch);
             foreach ($HotelRoom as  $room) {
                 $location = (strlen($room->location) > 3 && ($hotel_id == 296 || $hotel_id == 238 || $hotel_id == 289 || $hotel_id == 314)) ? $room->location : "0$room->location";
-                if (! $this->validateHskCleanning($hotel_id, array_get($rooms_fetch, $location, 0), $room->room_id)) {
-                    // dd($hotel_id,array_get($rooms_fetch,$location,0),$room->room_id, $location);
+                if (! $this->validateHskCleanning($hotel_id, Arr::get($rooms_fetch, $location, 0), $room->room_id)) {
+                    // dd($hotel_id,Arr::get($rooms_fetch,$location,0),$room->room_id, $location);
                     // $this->dispatch((new \App\Jobs\Opera($hotel_id, $IntegrationsActive->created_by, 'SyncOracleHSK', [], $IntegrationsActive->config, $location)));
-                    $data[$room->location] = [array_get($rooms_fetch, $location, 0), $room->room_id];
+                    $data[$room->location] = [Arr::get($rooms_fetch, $location, 0), $room->room_id];
                 }
                 if ($location > 8000 and $hotel_id == 238) {
                     break;
@@ -706,7 +707,7 @@ class OperaController extends Controller
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body.FetchRoomStatusResponse');
+            return Arr::get($json, 'Body.FetchRoomStatusResponse');
         }
     }
 
@@ -806,27 +807,27 @@ class OperaController extends Controller
             $str_json = json_encode($xml);
             $json = json_decode($str_json, true);
 
-            return array_get($json, 'Body');
+            return Arr::get($json, 'Body');
         }
     }
 
     public function formatFetchRoomStatus($hotel_id)
     {
         $data = $this->fetch($hotel_id);
-        $data = array_get($data, 'FetchRoomStatus', []);
+        $data = Arr::get($data, 'FetchRoomStatus', []);
         $rooms = [];
         foreach ($data as $key => $value) {
-            if ((array_get($value, 'RoomNumber') >= 4000 && $hotel_id != 238) || (array_get($value, 'RoomNumber') >= 8000 && $hotel_id == 238)) {
+            if ((Arr::get($value, 'RoomNumber') >= 4000 && $hotel_id != 238) || (Arr::get($value, 'RoomNumber') >= 8000 && $hotel_id == 238)) {
                 break;
             } else {
                 if (
-                    array_get($value, 'RoomStatus') != 'OutOfOrder' &&
-                    array_get($value, 'RoomStatus') != 'Out of Order' &&
-                    array_get($value, 'RoomStatus') != 'Out of Service' &&
-                    array_get($value, 'RoomStatus') != 'OutOfService'
+                    Arr::get($value, 'RoomStatus') != 'OutOfOrder' &&
+                    Arr::get($value, 'RoomStatus') != 'Out of Order' &&
+                    Arr::get($value, 'RoomStatus') != 'Out of Service' &&
+                    Arr::get($value, 'RoomStatus') != 'OutOfService'
                 ) {
-                    $rooms[array_get($value, 'RoomNumber')] = (array_get($value, 'HouseKeepingStatus') == 'OCC' && array_get($value, 'RoomStatus') == 'Inspected') ? 'Clean' : array_get($value, 'RoomStatus');
-                    $rooms[array_get($value, 'RoomNumber')] = $this->hsk_config[$rooms[array_get($value, 'RoomNumber')]]['codes'][0]['hk_status'];
+                    $rooms[Arr::get($value, 'RoomNumber')] = (Arr::get($value, 'HouseKeepingStatus') == 'OCC' && Arr::get($value, 'RoomStatus') == 'Inspected') ? 'Clean' : Arr::get($value, 'RoomStatus');
+                    $rooms[Arr::get($value, 'RoomNumber')] = $this->hsk_config[$rooms[Arr::get($value, 'RoomNumber')]]['codes'][0]['hk_status'];
                 }
             }
         }
