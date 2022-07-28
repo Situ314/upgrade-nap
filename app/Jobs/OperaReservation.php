@@ -4,7 +4,6 @@
 
 namespace App\Jobs;
 
-use Illuminate\Support\Arr;
 use App\Models\GuestCheckinDetails;
 use App\Models\GuestRegistration;
 use App\Models\Hotel;
@@ -22,6 +21,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 
 ini_set('max_execution_time', 260);
 

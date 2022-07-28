@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\v1;
 
-use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\GuestCheckinDetails;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Validator;
 

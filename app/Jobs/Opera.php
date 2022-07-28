@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use Illuminate\Support\Arr;
 use App\Models\GuestCheckinDetails;
 use App\Models\GuestRegistration;
 use App\Models\Hotel;
@@ -11,14 +10,15 @@ use App\Models\HotelRoomsOut;
 use App\Models\HousekeepingCleanings;
 use App\Models\HousekeepingTimeline;
 use App\Models\IntegrationsActive;
-// use App\Models\IntegrationsGuestInformation;
 use App\Models\IntegrationSuitesRoom;
+// use App\Models\IntegrationsGuestInformation;
 use DB;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 
 ini_set('max_execution_time', 260);
 

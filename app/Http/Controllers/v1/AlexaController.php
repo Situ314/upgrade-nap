@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\v1;
 
-use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\AlexaDevice;
 use App\Models\DeptTag;
@@ -21,6 +20,7 @@ use App\User;
 use DateTime;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Validation\Rule;
 

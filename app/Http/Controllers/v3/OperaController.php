@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\v3;
 
-use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\GuestCheckinDetails;
 use App\Models\HousekeepingCleanings;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Spatie\ArrayToXml\ArrayToXml;
 
 class OperaController extends Controller

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\v2;
 
-use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\GuestCheckinDetails;
 use App\Models\GuestRegistration;
@@ -10,6 +9,7 @@ use App\Models\IntegrationsActive;
 use App\Models\IntegrationsGuestInformation;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Spatie\ArrayToXml\ArrayToXml;
 
 class OperaController extends Controller

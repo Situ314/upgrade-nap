@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\v2;
 
-use Illuminate\Support\Arr;
 use App\Http\Controllers\Controller;
 use App\Models\IntegrationsActive;
 use App\Models\IntegrationsRoomStayntouch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class StayNTouchController extends Controller
 {

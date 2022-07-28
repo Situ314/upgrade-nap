@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Support\Arr;
 use App\Models\GuestCheckinDetails;
 use App\Models\GuestRegistration;
 use App\Models\Hotel;
 use App\Models\IntegrationsActive;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Spatie\ArrayToXml\ArrayToXml;
 
 class CancelReservation extends Command
