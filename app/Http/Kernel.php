@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
         'InforAuth' => \App\Http\Middleware\InforAuth::class,
         'miller' => \App\Http\Middleware\Miller::class,
     ];
+
     /**
      * The priority-sorted list of middleware.
      *
