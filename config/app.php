@@ -176,7 +176,7 @@ return [
         /**
          * GraphQL
          */
-        Folklore\GraphQL\ServiceProvider::class,
+        //Folklore\GraphQL\ServiceProvider::class,
 
         /*
          * Application Service Providers...
