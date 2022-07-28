@@ -50,11 +50,11 @@ return [
 
         'sqs' => [
             'driver' => 'sqs',
-            'key' => 'your-public-key',
-            'secret' => 'your-secret-key',
-            'prefix' => 'https://sqs.us-east-1.amazonaws.com/your-account-id',
-            'queue' => 'your-queue-name',
-            'region' => 'us-east-1',
+            'key' => env('SQS_KEY', 'your-public-key'),
+            'secret' => env('SQS_SECRET', 'your-secret-key'),
+            'prefix' => env('SQS_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
+            'queue' => env('SQS_QUEUE', 'your-queue-name'),
+            'region' => env('SQS_REGION', 'us-east-1'),
         ],
 
         'redis' => [
@@ -63,31 +63,6 @@ return [
             'queue' => 'default',
             'retry_after' => 90,
         ],
-
-        'sqs-fifo' => [
-            'driver' => 'sqs-fifo',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'prefix' => env('SQS_PREFIX'),
-            'suffix' => env('SQS_SUFFIX'),
-            'queue' => env('SQS_QUEUE'),    // ex: queuename.fifo
-            'region' => env('AWS_REGION'), // ex: us-east-2
-            'group' => 'default',
-            'deduplicator' => 'unique',
-            'allow_delay' => env('SQS_ALLOW_DELAY'),
-	    ],
-        'sqs-fifo_maestro' => [
-            'driver' => 'sqs-fifo',
-            'key' => env('AWS_ACCESS_KEY_ID'),
-            'secret' => env('AWS_SECRET_ACCESS_KEY'),
-            'prefix' => env('SQS_PREFIX'),
-            'suffix' => env('SQS_SUFFIX'),
-            'queue' => env('SQS_QUEUE_MAESTRO'),    // ex: queuename.fifo
-            'region' => env('AWS_REGION'), // ex: us-east-2
-            'group' => 'default',
-            'deduplicator' => 'unique',
-            'allow_delay' => env('SQS_ALLOW_DELAY'),
-	    ],
 
     ],
 
@@ -103,7 +78,7 @@ return [
     */
 
     'failed' => [
-        'database' => 'integrationsLogs',
+        'database' => env('DB_CONNECTION', 'mysql'),
         'table' => 'failed_jobs',
     ],
 

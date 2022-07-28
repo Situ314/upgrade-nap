@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class LogTracker extends Model
 {
     public $timestamps = false;
+
     protected $table = 'log_tracker';
+
     protected $primaryKey = 'track_id';
+
     protected $fillable = [
         'module_id',
         'action',
@@ -17,7 +20,8 @@ class LogTracker extends Model
         'date_time',
         'comments',
         'hotel_id',
-        'type'
+        'type',
     ];
+
     protected $hidden = [];
 }

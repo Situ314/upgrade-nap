@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class WakeUpCall extends Model
 {
     public $timestamps = false;
+
     protected $table = 'wake_up_calls';
+
     protected $primaryKey = 'wup_id';
+
     protected $fillable = [
         'guest_id',
         'phone',
@@ -23,7 +26,8 @@ class WakeUpCall extends Model
         'updated_by',
         'updated_on',
         'active',
-        'target'
+        'target',
     ];
+
     protected $hidden = [];
 }

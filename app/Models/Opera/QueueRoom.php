@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class QueueRoom extends Model
 {
-    protected $connection= 'opera';
+    protected $connection = 'opera';
+
     public $timestamps = false;
+
     protected $table = 'QueueRoom';
+
     protected $primaryKey = 'ID';
+
     protected $fillable = [
         'ResortID',
         'Action',
@@ -19,7 +23,8 @@ class QueueRoom extends Model
         'QueueTime',
         'ReservationStatus',
         'RoomType',
-        'RoomNumber'
+        'RoomNumber',
     ];
+
     protected $hidden = [];
 }

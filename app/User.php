@@ -2,18 +2,22 @@
 
 namespace App;
 
-use Laravel\Passport\HasApiTokens;
-use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
     public $timestamps = false;
+
     public $remember_token = false;
+
     protected $table = 'staff';
+
     protected $primaryKey = 'staff_id';
+
     //protected $appends = ['housekeeper_id'];
     protected $fillable = [
         'username',
@@ -44,9 +48,10 @@ class User extends Authenticatable
         'is_temporal',
         'tutorial',
         'badge_notifications_ids',
-        'is_on_off',      
+        'is_on_off',
         'is_api',
     ];
+
     protected $hidden = [
         'api_key',
         'api_id',
@@ -76,29 +81,30 @@ class User extends Authenticatable
         'phone_number',
         'is_on_off',
         'badge_notifications_ids',
-        'is_api'
+        'is_api',
     ];
-    
-    
+
     // public function getHousekeeperIdAttribute(){
     //     return $this->attributes["staff_id"];
     // }
 
-    public function findForPassport($identifier) {
-        return $this->orWhere('email', $identifier)->orWhere('username', $identifier)->where('is_active', [1,3,4])->first();
+    public function findForPassport($identifier)
+    {
+        return $this->orWhere('email', $identifier)->orWhere('username', $identifier)->where('is_active', [1, 3, 4])->first();
     }
 
-    public function setPasswordAttribute($password) {
+    public function setPasswordAttribute($password)
+    {
         $this->attributes['password'] = md5($password);
     }
 
     public function staffHotels()
     {
-        return $this->hasMany('App\Models\StaffHotel','staff_id');
+        return $this->hasMany(\App\Models\StaffHotel::class, 'staff_id');
     }
 
     public function Housekeeper()
     {
-        return $this->hasOne('App\Models\HousekeepingStaff','staff_id','staff_id');
+        return $this->hasOne(\App\Models\HousekeepingStaff::class, 'staff_id', 'staff_id');
     }
 }

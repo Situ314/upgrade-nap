@@ -16,6 +16,7 @@ class MailMaestroPMSLog extends Mailable
      * @return void
      */
     public $mailPMS;
+
     public function __construct($mailPMS)
     {
         $this->mailPMS = $mailPMS;
@@ -26,7 +27,7 @@ class MailMaestroPMSLog extends Mailable
      *
      * @return $this
      */
-    public function build() 
+    public function build()
     {
         return $this->to($this->mailPMS->emailAddress)
             ->from('integrations@api.mynuvola.net', 'Nuvola integrations')

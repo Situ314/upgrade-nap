@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class HousekeepingCleanings extends Model
 {
     public $timestamps = false;
+
     protected $table = 'housekeeping_cleanings';
+
     protected $primaryKey = 'cleaning_id';
 
     protected $fillable = [
@@ -36,8 +38,9 @@ class HousekeepingCleanings extends Model
         'updated_by',
         'updated_on',
         'deleted_by',
-        'deleted_on'
+        'deleted_on',
     ];
+
     protected $hidden = [
         'room_id',
         'created_by',
@@ -45,11 +48,11 @@ class HousekeepingCleanings extends Model
         'updated_by',
         'updated_on',
         'deleted_by',
-        'deleted_on'
+        'deleted_on',
     ];
 
     public function Room()
     {
-        return $this->hasOne('App\Models\HotelRoom','room_id','room_id');
+        return $this->hasOne(\App\Models\HotelRoom::class, 'room_id', 'room_id');
     }
 }

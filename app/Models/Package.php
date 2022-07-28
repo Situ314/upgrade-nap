@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Package extends Model
 {
     public $timestamps = false;
+
     protected $table = 'packages';
+
     protected $primaryKey = 'pkg_no';
+
     protected $fillable = [
         'hotel_id',
         'created_on',
@@ -31,8 +34,9 @@ class Package extends Model
         'consecutive',
         'delivered_name',
         'filename',
-        'courier'
+        'courier',
     ];
+
     protected $hidden = [
         'hotel_id',
         'created_on',
@@ -50,6 +54,6 @@ class Package extends Model
         'consecutive',
         'delivered_name',
         'filename',
-        'courier'
+        'courier',
     ];
 }

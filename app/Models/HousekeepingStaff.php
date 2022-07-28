@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class HousekeepingStaff extends Model
 {
     public $timestamps = false;
+
     protected $table = 'housekeeping_staff';
+
     protected $primaryKey = 'hk_staff_id';
-    
+
     protected $fillable = [
         'hotel_id',
         'staff_id',
@@ -20,7 +22,7 @@ class HousekeepingStaff extends Model
         'updated_by',
         'updated_on',
         'deleted_by',
-        'deleted_on'
+        'deleted_on',
     ];
 
     protected $hidden = [
@@ -29,6 +31,6 @@ class HousekeepingStaff extends Model
         'updated_by',
         'updated_on',
         'deleted_by',
-        'deleted_on'
+        'deleted_on',
     ];
 }

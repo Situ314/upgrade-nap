@@ -39,47 +39,11 @@ return [
             'prefix' => '',
         ],
 
-        'opera' => [
-            'driver' => 'sqlite',
-            'database' => '\\\\186.83.194.138\App_Data\MainDb.sqlite',
-            'prefix' => '',
-        ],
-
         'mysql' => [
-            'driver'        => 'mysql',
-            'host'          => env('DB_HOST', '127.0.0.1'),
-            'port'          => env('DB_PORT', '3306'),
-            'database'      => env('DB_DATABASE', 'forge'),
-            'username'      => env('DB_USERNAME', 'forge'),
-            'password'      => env('DB_PASSWORD', ''),
-            'unix_socket'   => env('DB_SOCKET', ''),
-            'charset'       => 'utf8mb4',
-            'collation'     => 'utf8mb4_unicode_ci',
-            'prefix'        => '',
-            'strict'        => true,
-            'engine'        => null,
-        ],
-
-        'integrationsLogs' => [
-            'driver'        => 'mysql',
-            'host'          => env("NUVOLA_DEV") ? env('DB_INTEGRATIONS_LOG_DEV_HOST', '')       : env('DB_INTEGRATIONS_LOG_HOST', ''),
-            'port'          => env("NUVOLA_DEV") ? env('DB_INTEGRATIONS_LOG_DEV_PORT', '')       : env('DB_INTEGRATIONS_LOG_PORT', ''),
-            'database'      => env("NUVOLA_DEV") ? env('DB_INTEGRATIONS_LOG_DEV_DATABASE', '')   : env('DB_INTEGRATIONS_LOG_DATABASE', ''),
-            'username'      => env("NUVOLA_DEV") ? env('DB_INTEGRATIONS_LOG_DEV_USERNAME', '')   : env('DB_INTEGRATIONS_LOG_USERNAME', ''),
-            'password'      => env("NUVOLA_DEV") ? env('DB_INTEGRATIONS_LOG_DEV_PASSWORD', '')   : env('DB_INTEGRATIONS_LOG_PASSWORD', ''),
-            'unix_socket'   => '',
-            'charset'       => 'utf8mb4',
-            'collation'     => 'utf8mb4_unicode_ci',
-            'prefix'        => '',
-            'strict'        => false,
-            'engine'        => null,
-        ],
-
-        'developer_db_connection' => [
             'driver' => 'mysql',
             'host' => env('DB_HOST', '127.0.0.1'),
             'port' => env('DB_PORT', '3306'),
-            'database' => 'hotelmynuvola_developer',
+            'database' => env('DB_DATABASE', 'forge'),
             'username' => env('DB_USERNAME', 'forge'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),

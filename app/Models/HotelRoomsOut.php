@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class HotelRoomsOut extends Model
 {
     public $timestamps = false;
+
     protected $table = 'hotel_rooms_out';
+
     protected $primaryKey = 'room_out_id';
-    
+
     protected $fillable = [
         'room_id',
         'hotel_id',
@@ -29,6 +31,6 @@ class HotelRoomsOut extends Model
         'created_by',
         'created_on',
         'updated_by',
-        'updated_on'
+        'updated_on',
     ];
 }

@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class MaintenanceItems extends Model
 {
     public $timestamps = false;
+
     protected $table = 'maintenance_items';
+
     protected $primaryKey = 'item_id';
+
     protected $fillable = [
         'hotel_id',
         'item_room_id',
@@ -30,14 +33,15 @@ class MaintenanceItems extends Model
         'updated_on',
         'updated_by',
         'deleted_on',
-        'deleted_by'
+        'deleted_by',
     ];
+
     protected $hidden = [
         'created_on',
         'created_by',
         'updated_on',
         'updated_by',
         'deleted_on',
-        'deleted_by'
+        'deleted_by',
     ];
 }

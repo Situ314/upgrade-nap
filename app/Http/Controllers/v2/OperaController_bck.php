@@ -2,21 +2,17 @@
 
 namespace App\Http\Controllers\v2;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-
-use \App\Models\GuestRegistration;
-use \App\Models\GuestCheckinDetails;
-use \App\Models\IntegrationsGuestInformation;
-use \App\Models\IntegrationsActive;
-use Spatie\ArrayToXml\ArrayToXml;
-use App\Models\Log\ReservationOracle;
-use App\Models\Log\ProfileOracle;
+use App\Models\GuestCheckinDetails;
+use App\Models\GuestRegistration;
+use App\Models\IntegrationsActive;
+use App\Models\IntegrationsGuestInformation;
 use DB;
+use Illuminate\Http\Request;
+use Spatie\ArrayToXml\ArrayToXml;
 
 class OperaController extends Controller
 {
-
     // public function index(Request $request)
     // {
     //     $message = "Integration not found";
@@ -324,7 +320,6 @@ class OperaController extends Controller
     //     return $ia;
     // }
 
-
     public function activityService(Request $request)
     {
         //\Log::info("Opera: activityService");
@@ -335,20 +330,21 @@ class OperaController extends Controller
 
     public function nameService(Request $request)
     {
-        $hotel_id   = $request->hotel_id;
-        $staff_id   = $request->staff_id;
-        $data       = $request->data;
+        $hotel_id = $request->hotel_id;
+        $staff_id = $request->staff_id;
+        $data = $request->data;
         $type = 'ProfileRegistration';
-        $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, array_get($data,'Body.NewProfileRequest')));
-        return "true";
+        $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, array_get($data, 'Body.NewProfileRequest')));
+
+        return 'true';
         // $this->SwitchNameRequest($this->FormatXML($request));
     }
 
     public function reservationService(Request $request)
     {
-        $hotel_id   = $request->hotel_id;
-        $staff_id   = $request->staff_id;
-        $data       = $request->data;
+        $hotel_id = $request->hotel_id;
+        $staff_id = $request->staff_id;
+        $data = $request->data;
         $type = 'GuestStatusNotificationExtRequest';
 
         $this->dispatch(new \App\Jobs\Opera($hotel_id, $staff_id, $type, $data));
@@ -358,51 +354,53 @@ class OperaController extends Controller
 
     public function FormatXML(Request $request)
     {
-        $response   = $request->getContent();
-        $xmlString  = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
-        $xmlString  = preg_replace('/([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)/', '$1$2', $xmlString);
-        $xml        = simplexml_load_string($xmlString);
+        $response = $request->getContent();
+        $xmlString = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
+        $xmlString = preg_replace('/([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)/', '$1$2', $xmlString);
+        $xml = simplexml_load_string($xmlString);
         // Pasar de XML String a Array
-        $str_json   = json_encode($xml);
-        $arrayData  = json_decode($str_json, true);
+        $str_json = json_encode($xml);
+        $arrayData = json_decode($str_json, true);
+
         return $arrayData;
     }
 
     public function BuildXMLResponse($action, $unique_id, $source)
     {
         $success = [
-            "_attributes" => [
-                "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                "xmlns:xsd" => "http://www.w3.org/2001/XMLSchema",
-                "xmlns:soap" => "http://schemas.xmlsoap.org/soap/envelope/"
+            '_attributes' => [
+                'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                'xmlns:xsd' => 'http://www.w3.org/2001/XMLSchema',
+                'xmlns:soap' => 'http://schemas.xmlsoap.org/soap/envelope/',
             ],
-            "soap:Heade",
-            "soap:Body" => [
+            'soap:Heade',
+            'soap:Body' => [
                 $action => [
-                    "_attributes" => [
-                        "xmlns" => "http://htng.org/PWS/2008B/SingleGuestItinerary/Name/Types"
+                    '_attributes' => [
+                        'xmlns' => 'http://htng.org/PWS/2008B/SingleGuestItinerary/Name/Types',
                     ],
-                    "Result" => [
-                        "_attributes" => [
-                            "resultStatusFlag" => "SUCCESS",
-                            "code" => "OPERA"
+                    'Result' => [
+                        '_attributes' => [
+                            'resultStatusFlag' => 'SUCCESS',
+                            'code' => 'OPERA',
                         ],
-                        "IDs" => [
-                            "_attributes" => [
-                                "xmlns" => "http://htng.org/PWS/2008B/SingleGuestItinerary/Common/Types"
+                        'IDs' => [
+                            '_attributes' => [
+                                'xmlns' => 'http://htng.org/PWS/2008B/SingleGuestItinerary/Common/Types',
                             ],
-                            "UniqueID" => [
-                                "_attributes" => [
-                                    "source" => "OPERA"
+                            'UniqueID' => [
+                                '_attributes' => [
+                                    'source' => 'OPERA',
                                 ],
-                                "_value" => $unique_id
+                                '_value' => $unique_id,
 
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ];
+
         return ArrayToXml::convert($success, 'soap:Envelope');
     }
 }

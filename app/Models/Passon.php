@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Passon extends Model
 {
     public $timestamps = false;
+
     protected $table = 'passon';
+
     protected $primaryKey = 'pid';
+
     protected $fillable = [
         'departures',
         'arrivals',
@@ -26,8 +29,9 @@ class Passon extends Model
         'created_by',
         'created_on',
         'history',      // 0
-        'is_cleane'     // 0
+        'is_cleane',     // 0
     ];
+
     protected $hidden = [
     ];
 }

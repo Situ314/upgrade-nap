@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Hotel;
+use App\Models\Log\Monitoring;
 use Illuminate\Console\Command;
-use League\Flysystem\Exception;
 use Illuminate\Support\Facades\Mail;
-use \App\Models\Log\Monitoring;
-use \App\Models\Hotel;
+use League\Flysystem\Exception;
 
 class MonitoringSendmailMaestro extends Command
 {
@@ -45,41 +45,40 @@ class MonitoringSendmailMaestro extends Command
         $this->SearchLogsControl();
     }
 
-
     private function SearchLogsControl($__time)
     {
         try {
             date_default_timezone_set('UTC');
-        
-            $date   = date('Y-m-d');
-            $time   = date('H:i:s');
 
-                $time2  = date('H:i:s', strtotime("-$__time hours", strtotime($time)));
+            $date = date('Y-m-d');
+            $time = date('H:i:s');
 
-                $Monitoring = Monitoring::whereDate('date', $date)
+            $time2 = date('H:i:s', strtotime("-$__time hours", strtotime($time)));
+
+            $Monitoring = Monitoring::whereDate('date', $date)
                     ->whereTime('time', '<=', $time)
                     ->whereTime('time', '>=', $time2)
                     ->get();
 
-                $Hotels_monitoring = $Monitoring->groupBy('Hotel_id')->map(function ($row) {
-                    return $row->sum('total');
-                });
+            $Hotels_monitoring = $Monitoring->groupBy('Hotel_id')->map(function ($row) {
+                return $row->sum('total');
+            });
 
-                $hotels = [];
-                $is_send = false;
-                foreach ($Hotels_monitoring as $key => $value) {
-                    if ($value == 0) {
-                        $hotel = Hotel::find($key);
-                        $hotels[] = $hotel;
-                        $is_send = true;
-                    }
+            $hotels = [];
+            $is_send = false;
+            foreach ($Hotels_monitoring as $key => $value) {
+                if ($value == 0) {
+                    $hotel = Hotel::find($key);
+                    $hotels[] = $hotel;
+                    $is_send = true;
                 }
+            }
 
-                if ($is_send) {
-                    $time   = date('H:i:s', strtotime('-4 hours', strtotime($time)));
-                    $time2  = date('H:i:s', strtotime('-4 hours', strtotime($time2)));
-                    $this->SendEmail($time, $time2, $hotels);
-                }
+            if ($is_send) {
+                $time = date('H:i:s', strtotime('-4 hours', strtotime($time)));
+                $time2 = date('H:i:s', strtotime('-4 hours', strtotime($time2)));
+                $this->SendEmail($time, $time2, $hotels);
+            }
         } catch (\Exception $e) {
             \Log::error($e);
         }
@@ -89,16 +88,16 @@ class MonitoringSendmailMaestro extends Command
     {
         try {
             $emails = [
-                'jacevedo@mynuvola.co', 
-                'jsanchez@mynuvola.co',                
+                'jacevedo@mynuvola.co',
+                'jsanchez@mynuvola.co',
                 'csanchez@mynuvola.com',
                 'cdelaossa@mynuvola.com',
-                'customersuccess@mynuvola.com'                
+                'customersuccess@mynuvola.com',
             ];
             Mail::send('emails.EmailMaestroPMSLog', [
                 'hotels' => $hotels,
                 'time1' => $time,
-                'time2' => $time2
+                'time2' => $time2,
             ], function ($m) use ($emails) {
                 $m->from('integrations@api.mynuvola.net', 'Nuvola integrations');
                 $m->to($emails);

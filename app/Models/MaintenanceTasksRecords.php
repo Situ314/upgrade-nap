@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class MaintenanceTasksRecords extends Model
 {
     public $timestamps = false;
+
     protected $table = 'maintenance_tasks_records';
+
     protected $primaryKey = 'maintenance_record_item_id';
+
     protected $fillable = [
         'task_id',
         'description',
@@ -27,8 +30,9 @@ class MaintenanceTasksRecords extends Model
         'deleted_on',
         'deleted_by',
         'completed_by',
-        'completed_on'
+        'completed_on',
     ];
+
     protected $hidden = [
         'created_on',
         'created_by',

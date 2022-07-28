@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class StaffHotel extends Model
 {
     public $timestamps = false;
+
     protected $table = 'staff_hotels';
+
     protected $primaryKey = 'sno';
+
     protected $fillable = [
         'staff_id',
         'hotel_id',
@@ -40,13 +43,14 @@ class StaffHotel extends Model
         'passon_reports',
         'pending_report_sms',
         'completed_report_sms',
-        'closed_report_sms'
+        'closed_report_sms',
     ];
+
     protected $hidden = [
-   
+
         'staff_id',
         'hotel_id',
-        'role_id',        
+        'role_id',
         'tag_id',
         'shift_id',
         'is_active',
@@ -73,11 +77,11 @@ class StaffHotel extends Model
         'passon_reports',
         'pending_report_sms',
         'completed_report_sms',
-        'closed_report_sms'
+        'closed_report_sms',
     ];
 
     public function role()
     {
-        return $this->hasOne('App\Models\Role','role_id','role_id');
+        return $this->hasOne(\App\Models\Role::class, 'role_id', 'role_id');
     }
 }

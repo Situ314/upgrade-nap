@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\v1;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 
 class DeptTagController extends Controller
 {
@@ -19,7 +19,7 @@ class DeptTagController extends Controller
         $staff_id = $request->user()->staff_id;
         $hotel_id = $request->hotel_id;
 
-        if (!$this->validateHotelId($hotel_id, $request->user()->staff_id)) {
+        if (! $this->validateHotelId($hotel_id, $request->user()->staff_id)) {
             return response()->json([], 400);
         }
 

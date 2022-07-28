@@ -32,12 +32,12 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
-     	if ($this->shouldReport($exception) && app()->bound('sentry')) {
+        if ($this->shouldReport($exception) && app()->bound('sentry')) {
             app('sentry')->captureException($exception);
         }
-	return parent::report($exception);
+
+        return parent::report($exception);
     }
- 
 
     /**
      * Render an exception into an HTTP response.
@@ -48,13 +48,12 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
-        if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException){
+        if ($e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
             \Log::info('HTTPNotFound');
             \Log::info('IP: '.$request->ip());
             \Log::info('URL: '.$request->url());
             \Log::info('Method '.$request->method());
             \Log::info($request->getContent());
-            
         }
         if ($e instanceof \Symfony\Component\Debug\Exception\FatalErrorException) {
             \Log::info('FatalErrorException');
@@ -64,19 +63,20 @@ class Handler extends ExceptionHandler
         }
         if ($this->isHttpException($e)) {
             $url = $request->url();
-            
-            if(strpos($url, "doc") !== false) {
-                
+
+            if (strpos($url, 'doc') !== false) {
                 $newUrl = '';
-                if( strpos($url, "doc/v1") !== false ) {
+                if (strpos($url, 'doc/v1') !== false) {
                     $newUrl = '/doc/v1';
-                } else if( strpos($url, "doc/v2") !== false ) {
+                } elseif (strpos($url, 'doc/v2') !== false) {
                     $newUrl = '/doc/v2';
                 } else {
                     $newUrl = '/';
                 }
 
-                if ($e->getStatusCode() == 404 || $e->getStatusCode() == 500) return redirect()->guest("$newUrl");
+                if ($e->getStatusCode() == 404 || $e->getStatusCode() == 500) {
+                    return redirect()->guest("$newUrl");
+                }
             }
         }
 

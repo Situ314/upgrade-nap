@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class AlexaIntentActiveInhotel extends Model
 {
     public $timestamps = false;
+
     protected $table = 'alexa_intents_active_in_hotels';
+
     protected $fillable = [
         'alexa_intents_id',
         'is_active',
@@ -15,7 +17,8 @@ class AlexaIntentActiveInhotel extends Model
         'tag_id',
         'hotel_id',
         'uses_dept_tag',
-        'status'
+        'status',
     ];
+
     protected $hidden = [];
 }

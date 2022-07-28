@@ -15,13 +15,13 @@ class OperaHelper
                 ->first();
 
             if ($integrationsActive) {
-                $config     = $integrationsActive->config;
-                $username   = $config['username_send'];
-                $password   = $config['password_send'];
-                $from       = $config['from_send'];
-                $url        = $config['url_sync'];
-                $date1      = date('Y-m-d\TH:i:s\Z');
-                $date2      = date('Y-m-d\TH:i:s\Z', strtotime($date1 . ' +5 minutes'));
+                $config = $integrationsActive->config;
+                $username = $config['username_send'];
+                $password = $config['password_send'];
+                $from = $config['from_send'];
+                $url = $config['url_sync'];
+                $date1 = date('Y-m-d\TH:i:s\Z');
+                $date2 = date('Y-m-d\TH:i:s\Z', strtotime($date1.' +5 minutes'));
 
                 $xml = "<soap:Envelope xmlns:soap='http://schemas.xmlsoap.org/soap/envelope/' xmlns:wsa='http://schemas.xmlsoap.org/ws/2004/08/addressing' xmlns:wsse='http://docs.oasisopen.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' xmlns:wsu='http://docs.oasisopen.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' xmlns:xsd='http://www.w3.org/2001/XMLSchema' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' >
                     <soap:Header>
@@ -55,66 +55,69 @@ class OperaHelper
                 </soap:Envelope>
                 ";
 
-                \Log::info("OperaHelper::getProfileData xml");
+                \Log::info('OperaHelper::getProfileData xml');
                 \Log::info($xml);
 
                 $header = [
-                    "Content-Type: text/xml;charset=UTF-8",
-                    "SOAPAction: http://htng.org/PWS/2008B/SingleGuestItinerary#FetchProfile"
+                    'Content-Type: text/xml;charset=UTF-8',
+                    'SOAPAction: http://htng.org/PWS/2008B/SingleGuestItinerary#FetchProfile',
                 ];
 
                 $curl = curl_init();
-                curl_setopt_array($curl, array(
+                curl_setopt_array($curl, [
                     CURLOPT_URL => $url,
-                    CURLOPT_RETURNTRANSFER  => true,
-                    CURLOPT_ENCODING        => "",
-                    CURLOPT_MAXREDIRS       => 10,
-                    CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
-                    CURLOPT_CUSTOMREQUEST   => "POST",
-                    CURLOPT_POSTFIELDS      => $xml,
-                    CURLOPT_SSL_VERIFYPEER  => 0,
-                    CURLOPT_SSL_VERIFYHOST  => 0,
-                    CURLOPT_HTTPHEADER      => $header,
-                ));
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_POSTFIELDS => $xml,
+                    CURLOPT_SSL_VERIFYPEER => 0,
+                    CURLOPT_SSL_VERIFYHOST => 0,
+                    CURLOPT_HTTPHEADER => $header,
+                ]);
                 $response = curl_exec($curl);
                 $err = curl_error($curl);
                 curl_close($curl);
-                if ($err) return null;
+                if ($err) {
+                    return null;
+                }
+
                 return $response;
             } else {
-                \Log::error("OperaHelper::getProfileData no integrationsActive");
-                \Log::error("From hotel: ".$resort_id);
-                \Log::error("For unique_id: ".$unique_id);
+                \Log::error('OperaHelper::getProfileData no integrationsActive');
+                \Log::error('From hotel: '.$resort_id);
+                \Log::error('For unique_id: '.$unique_id);
             }
 
             return null;
         } catch (\Exception $e) {
-            \Log::error("Error in OperaHelper::getProfileData");
+            \Log::error('Error in OperaHelper::getProfileData');
             \Log::error($e);
+
             return null;
         }
     }
 
     public static function sendXmlToAws($xml, $resort_id)
-    {   
-
+    {
         $integrationsActive = \App\Models\IntegrationsActive::where('pms_hotel_id', $resort_id)
                 ->where('int_id', 5)
                 ->where('state', 1)
                 ->first();
 
-        $config     = $integrationsActive->config;
-        $username   = $config['username'];
-        $password   = $config['password'];
+        $config = $integrationsActive->config;
+        $username = $config['username'];
+        $password = $config['password'];
 
         try {
             //$url = 'https://zelg0qq99e.execute-api.us-east-1.amazonaws.com/Prod/profile?resort_id='.$resort_id.'&username='.$username.'&password='.$password;
             $url = 'https://lht4g5xmvc.execute-api.us-east-1.amazonaws.com/Prod/profile?resort_id='.$resort_id.'&username='.$username.'&password='.$password;
             $options = [
                 'headers' => ['Content-Type' => 'application/xml'],
-                'body' => $xml
+                'body' => $xml,
             ];
-	    \Log::error('Sending from OperaHelper: '.$resort_id);
+            \Log::error('Sending from OperaHelper: '.$resort_id);
             $client = new Client();
             $promise = $client->postAsync($url, $options)->then(function ($response) {
             });

@@ -2,10 +2,9 @@
 
 namespace App\Providers;
 
-use Laravel\Passport\Passport;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Carbon\Carbon;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -32,7 +31,7 @@ class AuthServiceProvider extends ServiceProvider
         Passport::refreshTokensExpireIn(Carbon::now()->addDays(1));
         // Passport::personalAccessTokensExpireIn(Carbon::now()->addYears(5));
         //Passport::tokensCan([ 'alexaNuvola' => 'Alexa nuvola' ]);
-        
+
         //Passport::enableImplicitGrant();
     }
 }

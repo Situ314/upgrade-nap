@@ -2,24 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Foundation\Bus\DispatchesJobs;
-use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use DB;
-use \App\Models\HotelRoom;
-use \App\Models\Hotel;
+use App\Models\Hotel;
+use App\Models\HotelRoom;
 use App\Models\IntegrationsActive;
-use \App\Models\StaffHotel;
-use \App\Models\LogTracker;
+use App\Models\LogTracker;
+use App\Models\StaffHotel;
+use DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Bus\DispatchesJobs;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
 use Storage;
 
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-    
-    public function writeLog( $folder_name, $hotel_id, $text ) {
 
+    public function writeLog($folder_name, $hotel_id, $text)
+    {
         $activate_log_for_this = [
             //198, // Seaside Resort
             //208, // Avista Resort
@@ -33,116 +33,117 @@ class Controller extends BaseController
         ];
         $activate_log_for_this = [];
 
-        if( count($activate_log_for_this) == 0 || in_array( $hotel_id, $activate_log_for_this ) )
-        {
+        if (count($activate_log_for_this) == 0 || in_array($hotel_id, $activate_log_for_this)) {
             $hotel_name = '';
             $path = "/logs/$folder_name";
 
-            if( $hotel_id ) 
-            {
+            if ($hotel_id) {
                 $this->configTimeZone($hotel_id);
-                $hotel_name = Hotel::find($hotel_id)->hotel_name;        
-                $hotel_name = str_replace([" "],"_",$hotel_name);
-                $hotel_name = str_replace(["."],"_",$hotel_name);
-                $hotel_name = str_replace(["&"],"",$hotel_name);
+                $hotel_name = Hotel::find($hotel_id)->hotel_name;
+                $hotel_name = str_replace([' '], '_', $hotel_name);
+                $hotel_name = str_replace(['.'], '_', $hotel_name);
+                $hotel_name = str_replace(['&'], '', $hotel_name);
                 $hotel_name = strtolower($hotel_name);
                 $path .= "/$hotel_id"."__$hotel_name";
-            }        
-            
-            if(!Storage::has($path)) 
-            {
+            }
+
+            if (! Storage::has($path)) {
                 Storage::makeDirectory($path, 0775, true);
             }
-            
+
             $day = date('Y_m_d');
             $file = "$path/$day.log";
             $hour = date('H:i:s');
-            $text = "[$hour]: $text";        
+            $text = "[$hour]: $text";
 
-            Storage::append($file,$text);
+            Storage::append($file, $text);
         }
-
-
     }
 
-    public function customWriteLog( $folder_name, $hotel_id, $text ) {
+    public function customWriteLog($folder_name, $hotel_id, $text)
+    {
+        $path = "/logs/$folder_name";
 
-        $path = "/logs/$folder_name";       
-        
-        if(!Storage::has($path)) 
-        {
+        if (! Storage::has($path)) {
             Storage::makeDirectory($path, 0775, true);
         }
 
-        if(!Storage::has($path."/".$hotel_id)) 
-        {
-            Storage::makeDirectory($path."/".$hotel_id, 0775, true);
+        if (! Storage::has($path.'/'.$hotel_id)) {
+            Storage::makeDirectory($path.'/'.$hotel_id, 0775, true);
         }
-        
+
         $day = date('Y_m_d');
         $file = "$path/$hotel_id/$day.log";
         $hour = date('H:i:s');
-        $text = "[$hour]: $text";        
+        $text = "[$hour]: $text";
 
-        Storage::append($file,$text);
-        
+        Storage::append($file, $text);
+
         return true;
     }
 
-    public function validateHotelId($hotel_id,$staff_id) {
+    public function validateHotelId($hotel_id, $staff_id)
+    {
         $itsYourHotel = false;
-        $staff_hotel = StaffHotel::where('hotel_id',$hotel_id)->where('staff_id', $staff_id)->first();
-        if($staff_hotel) {
+        $staff_hotel = StaffHotel::where('hotel_id', $hotel_id)->where('staff_id', $staff_id)->first();
+        if ($staff_hotel) {
             $itsYourHotel = true;
         }
+
         return $itsYourHotel;
     }
 
-    public function saveLogTracker($__log_tracker) {
+    public function saveLogTracker($__log_tracker)
+    {
         $track_id = LogTracker::create($__log_tracker)->track_id;
+
         return $track_id;
     }
 
-    public function configTimeZone($hotel_id) {
+    public function configTimeZone($hotel_id)
+    {
         $timezone = Hotel::find($hotel_id)->time_zone;
         date_default_timezone_set($timezone);
     }
 
-    public function proccessString($string, $replace_data = null) {
-        if($replace_data)
-        {
-            return (isset($string) && is_string($string)) ? 
-            str_replace($replace_data["replace"], $replace_data["by"], addslashes($string)) : '';
-        } 
+    public function proccessString($string, $replace_data = null)
+    {
+        if ($replace_data) {
+            return (isset($string) && is_string($string)) ?
+            str_replace($replace_data['replace'], $replace_data['by'], addslashes($string)) : '';
+        }
 
-        return ( isset($string) &&  is_string($string) ) ? addslashes($string) : '';
+        return (isset($string) && is_string($string)) ? addslashes($string) : '';
     }
 
-
-    public function validateAngelStatus( $hotel_id ) {
-        $query = 
+    public function validateAngelStatus($hotel_id)
+    {
+        $query =
             "SELECT rp.view from role_permission rp 
             INNER JOIN menus m ON m.menu_id = 22
             INNER JOIN roles r ON r.hotel_id = $hotel_id AND r.role_name = 'Hotel Admin'
             WHERE rp.role_id = r.role_id AND rp.menu_id = m.menu_id
             LIMIT 1";
-            
-            $result = DB::select($query);
-            if( $result && count($result) > 0 ){
-                return $result[0]->view;
-            }
-            return 0;
+
+        $result = DB::select($query);
+        if ($result && count($result) > 0) {
+            return $result[0]->view;
+        }
+
+        return 0;
     }
 
-    public function sendAngelInvitation($email, $hotel_id, $phone = '') {
-        $blocked_hotels_angel = [ 243, 220, 241, 240, 149, 219, 313 ];
-        if (!$this->isIntegration($hotel_id)) {
+    public function sendAngelInvitation($email, $hotel_id, $phone = '')
+    {
+        $blocked_hotels_angel = [243, 220, 241, 240, 149, 219, 313];
+        if (! $this->isIntegration($hotel_id)) {
             \Log::info("$hotel_id $phone");
+
             return 'angel is blocked';
         }
-        if(!in_array($hotel_id, $blocked_hotels_angel)) {        
+        if (! in_array($hotel_id, $blocked_hotels_angel)) {
             try {
-                $query = 
+                $query =
                 "SELECT rp.view from role_permission rp 
                 INNER JOIN menus m ON m.menu_id = 22
                 INNER JOIN roles r ON r.hotel_id = $hotel_id AND r.role_name = 'Hotel Admin'
@@ -151,138 +152,138 @@ class Controller extends BaseController
 
                 $result = DB::select($query);
 
-                if(count($result) > 0) {
-                    if($result[0]->view == 1) {
-
+                if (count($result) > 0) {
+                    if ($result[0]->view == 1) {
                         $client = new \GuzzleHttp\Client();
-                        
+
                         // if(strpos(url('/'), "https://api.") !== false) {
-                        //     $url_app = 'https://hotel.mynuvola.com/index.php/send_invitations';                        
+                        //     $url_app = 'https://hotel.mynuvola.com/index.php/send_invitations';
                         // } else {
                         //     $url_app = 'https://integrations.mynuvola.com/index.php/send_invitations';
-                        // }                    
-                        
+                        // }
+
                         $url_app = 'https://hotel.mynuvola.com/index.php/send_invitations';
                         //$url_app = 'https://integrations.mynuvola.com/index.php/send_invitations';
 
                         $response = $client->request('POST', $url_app, [
                             'form_params' => [
-                                'email'     => $email,
-                                'hotel_id'  => $hotel_id,
-                                'phone'     => $phone,
-                                "type"      => 'angel',
-                                'guest_id'  => '',
-                                'staff_id'  => ''
-                            ]
+                                'email' => $email,
+                                'hotel_id' => $hotel_id,
+                                'phone' => $phone,
+                                'type' => 'angel',
+                                'guest_id' => '',
+                                'staff_id' => '',
+                            ],
                         ]);
 
                         $response = $response->getBody()->getContents();
 
                         $response1 = $client->request('POST', $url_app, [
                             'form_params' => [
-                                'email'     => $email,
-                                'hotel_id'  => $hotel_id,
-                                'phone'     => $phone,
-                                "type"      => 'welcome',
-                                'guest_id'  => '',
-                                'staff_id'  => ''
-                            ]
+                                'email' => $email,
+                                'hotel_id' => $hotel_id,
+                                'phone' => $phone,
+                                'type' => 'welcome',
+                                'guest_id' => '',
+                                'staff_id' => '',
+                            ],
                         ]);
 
                         $response1 = $response1->getBody()->getContents();
+
                         return [
-                            "angel" => $response,
-                            "welcome" => $response1
+                            'angel' => $response,
+                            'welcome' => $response1,
                         ];
                     } else {
                         return 'Module incative';
-                    }            
-                }else{
+                    }
+                } else {
                     return 'Record not found';
                 }
-            } catch (\Exception $e)  {
-                return "Error: ".$e;
+            } catch (\Exception $e) {
+                return 'Error: '.$e;
             }
-
         } else {
             return 'no access';
         }
     }
 
-    public function getRoom($hotel_id, $staff_id, $location){
+    public function getRoom($hotel_id, $staff_id, $location)
+    {
         $room = HotelRoom::where('hotel_id', $hotel_id)
-        ->where(function($query) use ($location) {
+        ->where(function ($query) use ($location) {
             return $query
             ->where('location', $location)
             ->orWhere('room_id', $location);
         })->first();
 
-        if($room) {
+        if ($room) {
             return [
-                "room_id"   => $room->room_id,
-                "room"      => $room->location
+                'room_id' => $room->room_id,
+                'room' => $room->location,
             ];
         } else {
             $room = HotelRoom::create([
-                'hotel_id'      => $hotel_id,
-                'location'      => $location,
-                'created_by'    => $staff_id,
-                'created_on'    => date('Y-m-d H:i:s'),
-                'updated_by'    => null,                
-                'updated_on'    => null,
-                'active'        => 1,
-                'angel_view'    => 1,
-                'device_token'  => ''
+                'hotel_id' => $hotel_id,
+                'location' => $location,
+                'created_by' => $staff_id,
+                'created_on' => date('Y-m-d H:i:s'),
+                'updated_by' => null,
+                'updated_on' => null,
+                'active' => 1,
+                'angel_view' => 1,
+                'device_token' => '',
             ]);
 
             $this->saveLogTracker([
-                'hotel_id'  => $hotel_id,
-                'staff_id'  => $staff_id,
-                'prim_id'   => $room->room_id,
+                'hotel_id' => $hotel_id,
+                'staff_id' => $staff_id,
+                'prim_id' => $room->room_id,
                 'module_id' => 17,
-                'action'    => 'add',                
+                'action' => 'add',
                 'date_time' => date('Y-m-d H:i:s'),
-                'comments'  => '',                
-                'type'      => 'API'
+                'comments' => '',
+                'type' => 'API',
             ]);
 
             return [
-                "room_id" => $room->room_id,
-                "room" => $room->location
+                'room_id' => $room->room_id,
+                'room' => $room->location,
             ];
         }
-        
     }
 
-    public function getPermission($hotel_id, $staff_id, $menu_id, $action) {
-
-        $staff_hotels =  DB::table("staff_hotels as sh")
+    public function getPermission($hotel_id, $staff_id, $menu_id, $action)
+    {
+        $staff_hotels = DB::table('staff_hotels as sh')
         ->select("rp.$action as action")
-        ->join("roles as r", "r.role_id", "=", "sh.role_id")
-        ->join("role_permission as rp", "rp.role_id", "=", "r.role_id")    
-        ->where(function( $q ) use ( $hotel_id, $staff_id, $menu_id ){
+        ->join('roles as r', 'r.role_id', '=', 'sh.role_id')
+        ->join('role_permission as rp', 'rp.role_id', '=', 'r.role_id')
+        ->where(function ($q) use ($hotel_id, $staff_id, $menu_id) {
             $q
-                ->where("sh.hotel_id", $hotel_id)
-                ->where("sh.staff_id", $staff_id)
-                ->where("sh.is_active", 1)
-                ->where("rp.menu_id", $menu_id);
+                ->where('sh.hotel_id', $hotel_id)
+                ->where('sh.staff_id', $staff_id)
+                ->where('sh.is_active', 1)
+                ->where('rp.menu_id', $menu_id);
         })
         ->first();
-        if($staff_hotels) {
+        if ($staff_hotels) {
             return $staff_hotels->action == 1 ? true : false;
         }
+
         return null;
     }
 
     public function isIntegration($hotel_id)
     {
-        $int = IntegrationsActive::where('hotel_id', $hotel_id)->where('state',1)->first();
+        $int = IntegrationsActive::where('hotel_id', $hotel_id)->where('state', 1)->first();
         if ($int) {
-            return $int->sms_angel_active == 1 ?  true : false;
+            return $int->sms_angel_active == 1 ? true : false;
         }
+
         return true;
     }
-
 }
 
 /*

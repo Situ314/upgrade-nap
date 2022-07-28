@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class MaintenanceRecords extends Model
 {
     public $timestamps = false;
+
     protected $table = 'maintenance_records';
+
     protected $primaryKey = 'maintenance_records_id';
+
     protected $fillable = [
         'maintenance_type',             //null  -> 0: item, 1: location
         'val_acording',                 //null  -> no se utiliza, se guardaba el id de la habitacion
@@ -34,7 +37,7 @@ class MaintenanceRecords extends Model
         'pause_maintenance',            //null
         'duration_maintenance',         //0
         'start_status',                 //0
-        'created_on',                   //null    
+        'created_on',                   //null
         'created_by',                   //null
         'updated_on',                   //null
         'updated_by',                   //null
@@ -47,19 +50,21 @@ class MaintenanceRecords extends Model
         'notify_delayed_mail_sent',     //0
         'notify_delayed_sms_sent',      //0
         'notify_completed_sms_sent',    //0
-        'notify_completed_mail_sent'    //0
+        'notify_completed_mail_sent',    //0
     ];
+
     protected $hidden = [
-        'created_on',                   //null    
+        'created_on',                   //null
         'created_by',                   //null
         'updated_on',                   //null
         'updated_by',                   //null
         'deleted_on',                   //null
         'deleted_by',                   //null
     ];
+
     public function assets()
     {
         //dd($this->belongsToMany('\App\Models\MaintenanceItems','maintenance_records_items','maintenance_record_id', 'item_id')->toSql());
-        return $this->belongsToMany('\App\Models\MaintenanceItems','maintenance_records_items','maintenance_record_id', 'item_id'/*,'item_id','item_id'*/);
+        return $this->belongsToMany(\App\Models\MaintenanceItems::class, 'maintenance_records_items', 'maintenance_record_id', 'item_id'/*,'item_id','item_id'*/);
     }
 }

@@ -27,7 +27,7 @@ class BlockIp
         //     \Log::error("Unauthorized access, IP address was => " . request()->ip());
         //     return response()->json(['integration locked'], 400);
         // }
-        
+
         return $next($request);
     }
 }

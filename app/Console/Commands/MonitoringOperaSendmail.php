@@ -2,19 +2,19 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use League\Flysystem\Exception;
-use Illuminate\Support\Facades\Mail;
-use \App\Models\Log\Monitoring;
-use \App\Models\Hotel;
+use App\Models\Hotel;
 use App\Models\IntegrationsActive;
+use App\Models\Log\HousekeepingStatus;
+use App\Models\Log\Monitoring;
 use App\Models\Log\OracleHousekeeping;
 use App\Models\Log\OracleReservation;
+use App\Models\Log\ReservationList;
 use App\Models\Log\SMSHousekeeping;
 use App\Models\Log\SMSReservation;
-use App\Models\Log\HousekeepingStatus;
-use App\Models\Log\ReservationList;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use League\Flysystem\Exception;
 
 class MonitoringOperaSendmail extends Command
 {
@@ -25,7 +25,6 @@ class MonitoringOperaSendmail extends Command
      */
     protected $signature = 'monitoring:sendmail';
     // protected $signature = 'monitoring:sendmailopera {time}';
-
 
     /**
      * The console command description.
@@ -55,7 +54,6 @@ class MonitoringOperaSendmail extends Command
         $this->SearchLog();
     }
 
-
     // private function SearchLogsControl($__time)
     // {
     //     try {
@@ -67,11 +65,11 @@ class MonitoringOperaSendmail extends Command
     //             ->whereTime('time', '>=', $start_time)
     //             ->whereTime('time', '<=', $end_time)
     //             ->get();
-                
-    //         $Hotels_monitoring = $Monitoring->groupBy('Hotel_id')->map(function ($row) { 
-    //             return $row->sum('total'); 
+
+    //         $Hotels_monitoring = $Monitoring->groupBy('Hotel_id')->map(function ($row) {
+    //             return $row->sum('total');
     //         });
-            
+
     //         $hotels = [];
     //         $is_send = false;
     //         foreach ($Hotels_monitoring as $key => $value) {
@@ -94,10 +92,9 @@ class MonitoringOperaSendmail extends Command
     //     }
     // }
 
-
     public function searchLogOpera()
     {
-        $integrations = IntegrationsActive::select(['hotel_id','pms_hotel_id'])->where('int_id', 5)->get();
+        $integrations = IntegrationsActive::select(['hotel_id', 'pms_hotel_id'])->where('int_id', 5)->get();
         $oracle_housekeeping = OracleHousekeeping::select(\DB::raw('resortId,max(created_at) last_data'))->where('resortId', '!=', '')->groupBy('resortId')->get();
         $data = [];
         foreach ($oracle_housekeeping as $key => $value) {
@@ -109,7 +106,6 @@ class MonitoringOperaSendmail extends Command
             $data2[$value['resortId']] = $value['last_data'];
         }
 
-
         $last_data = [];
         foreach ($data2 as $key => $value) {
             $last_data[$key] = isset($data[$key]) ? (strtotime($value) > strtotime($data2[$key]) ? $value : $data2[$key]) : $value;
@@ -117,22 +113,22 @@ class MonitoringOperaSendmail extends Command
 
         $hotel_data = [];
         foreach ($integrations as $key => $value) {
-            if(isset($last_data[$value->pms_hotel_id])){
+            if (isset($last_data[$value->pms_hotel_id])) {
                 $hotel = Hotel::find($value->hotel_id);
                 $hotel_data[] = [
                     'hotel_id' => $hotel->hotel_id,
                     'name' => $hotel->hotel_name,
-                    'last_data' => date('Y-m-d H:i:s', strtotime("-5 hours", strtotime($last_data[$value->pms_hotel_id])))
+                    'last_data' => date('Y-m-d H:i:s', strtotime('-5 hours', strtotime($last_data[$value->pms_hotel_id]))),
                 ];
             }
         }
-        return $hotel_data;
 
+        return $hotel_data;
     }
 
     public function searchLogMiller()
     {
-        $integrations = IntegrationsActive::select(['hotel_id','pms_hotel_id'])->where('int_id', 15)->get();
+        $integrations = IntegrationsActive::select(['hotel_id', 'pms_hotel_id'])->where('int_id', 15)->get();
         $oracle_housekeeping = SMSHousekeeping::select(\DB::raw('hotel_id,max(created_at) last_data'))->where('hotel_id', '!=', '')->groupBy('hotel_id')->get();
         $data = [];
         foreach ($oracle_housekeeping as $key => $value) {
@@ -144,7 +140,6 @@ class MonitoringOperaSendmail extends Command
             $data2[$value['hotel_id']] = $value['last_data'];
         }
 
-
         $last_data = [];
         foreach ($data2 as $key => $value) {
             $last_data[$key] = isset($data[$key]) ? (strtotime($value) > strtotime($data2[$key]) ? $value : $data2[$key]) : $value;
@@ -152,75 +147,72 @@ class MonitoringOperaSendmail extends Command
 
         $hotel_data = [];
         foreach ($integrations as $key => $value) {
-            if(isset($last_data[$value->hotel_id])){
+            if (isset($last_data[$value->hotel_id])) {
                 $hotel = Hotel::find($value->hotel_id);
                 $hotel_data[] = [
                     'hotel_id' => $hotel->hotel_id,
                     'name' => $hotel->hotel_name,
-                    'last_data' => $last_data[$value->hotel_id]
+                    'last_data' => $last_data[$value->hotel_id],
                 ];
             }
         }
+
         return $hotel_data;
     }
 
-    public function searchLogMaestro(){
+    public function searchLogMaestro()
+    {
         try {
-            $integrations = IntegrationsActive::select(['hotel_id','pms_hotel_id'])->where('int_id', 1)->get();
+            $integrations = IntegrationsActive::select(['hotel_id', 'pms_hotel_id'])->where('int_id', 1)->get();
 
             $oracle_housekeeping = HousekeepingStatus::select(\DB::raw("HotelId,max(CONCAT(Created_on_Date,' ',Created_on_Time)) last_data"))->where('HotelId', '!=', '')->groupBy('HotelId')->get();
-            
+
             $data = [];
             foreach ($oracle_housekeeping as $key => $value) {
                 $data[$value['HotelId']] = $value['last_data'];
             }
-        
+
             $oracle_reservation = ReservationList::select(\DB::raw("HotelId,max(CONCAT(Created_on_Date,' ',Created_on_Time)) last_data"))->where('HotelId', '!=', '')->groupBy('HotelId')->get();
             $data2 = [];
             foreach ($oracle_reservation as $key => $value) {
                 $data2[$value['HotelId']] = $value['last_data'];
             }
-        
-        
+
             $last_data = [];
             foreach ($data2 as $key => $value) {
                 $last_data[$key] = isset($data[$key]) ? (strtotime($value) > strtotime($data2[$key]) ? $value : $data2[$key]) : $value;
             }
-        
+
             $hotel_data = [];
             foreach ($integrations as $key => $value) {
-                if(isset($last_data[$value->pms_hotel_id])){
+                if (isset($last_data[$value->pms_hotel_id])) {
                     $hotel = Hotel::find($value->hotel_id);
                     $hotel_data[] = [
                         'hotel_id' => $hotel->hotel_id,
                         'name' => $hotel->hotel_name,
-                        'last_data' => $last_data[$value->pms_hotel_id]
+                        'last_data' => $last_data[$value->pms_hotel_id],
                     ];
                 }
             }
-        
+
             return $hotel_data;
         } catch (Exception $e) {
-            Log::error('searchlog dentro de maestro: ' . $e);
+            Log::error('searchlog dentro de maestro: '.$e);
         }
-       
     }
 
     public function searchLog()
     {
         try {
-
-        $sms = $this->searchLogMiller();
-        $opera = $this->searchLogOpera();
-        $maestro = $this->searchLogMaestro();
-        $data = array_merge($sms, $opera, $maestro);
-        $this->SendEmail($data);
+            $sms = $this->searchLogMiller();
+            $opera = $this->searchLogOpera();
+            $maestro = $this->searchLogMaestro();
+            $data = array_merge($sms, $opera, $maestro);
+            $this->SendEmail($data);
         } catch (Exception $e) {
-            Log::error('searchlog: ' . $e);
+            Log::error('searchlog: '.$e);
         }
-
     }
-
 
     private function SendEmail($hotels)
     {
@@ -234,8 +226,8 @@ class MonitoringOperaSendmail extends Command
             ];
 
             $parameters = [
-                'data_hotel'    => $hotels,
-                'time1'      => 12131
+                'data_hotel' => $hotels,
+                'time1' => 12131,
             ];
 
             Mail::send('emails.EmailPMSLog', $parameters, function ($m) use ($emails) {
@@ -244,7 +236,7 @@ class MonitoringOperaSendmail extends Command
                 $m->subject('PMS Logs Reports - Request Inquiry Report');
             });
         } catch (Exception $e) {
-            Log::error('error al enviar correo command' . $e);
+            Log::error('error al enviar correo command'.$e);
         }
     }
 }

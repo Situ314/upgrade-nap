@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 class SyncSmsReservation extends Command
 {
     private $hotel_id;
+
     /**
      * The name and signature of the console command.
      *
@@ -40,7 +41,7 @@ class SyncSmsReservation extends Command
     {
         $this->hotel_id = (int) $this->argument('hotel_id');
 
-        $controller = app()->make('App\Http\Controllers\v2\SMSMillerController');
+        $controller = app()->make(\App\Http\Controllers\v2\SMSMillerController::class);
         app()->call([$controller, 'SyncReservation'], ['hotel_id' => $this->hotel_id]);
     }
 }
