@@ -841,7 +841,7 @@ class MaestroPmsController extends Controller {
             }
 
             $curl = curl_init();
-            curl_setopt_array($curl, array(
+            curl_setopt_array($curl, [
                 CURLOPT_URL => "https://concierge-dev1.mynuvola.com/index.php/housekeeping/pmsHKChange",
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
@@ -850,10 +850,10 @@ class MaestroPmsController extends Controller {
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => "POST",
                 CURLOPT_POSTFIELDS => json_encode($HousekeepingData),
-                CURLOPT_HTTPHEADER => array(
+                CURLOPT_HTTPHEADER => [
                     "cache-control: no-cache"
-                ),
-            ));            
+                ],
+            ]);            
             $response = curl_exec($curl);
             $err = curl_error($curl);
             curl_close($curl);
@@ -992,7 +992,7 @@ class MaestroPmsController extends Controller {
     private function sendHousekeepingCheckIn($hotel_id, $data)
     {
         $curl = curl_init();
-        curl_setopt_array($curl, array(
+        curl_setopt_array($curl, [
             CURLOPT_URL => "https://concierge-dev1.mynuvola.com/index.php/housekeeping/pmsGuestChange",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
@@ -1001,10 +1001,10 @@ class MaestroPmsController extends Controller {
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => json_encode($data),
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_HTTPHEADER => [
                 "cache-control: no-cache"
-            ),
-        ));            
+            ],
+        ]);            
         $response = curl_exec($curl);
         $err = curl_error($curl);
         curl_close($curl);
@@ -1017,7 +1017,7 @@ class MaestroPmsController extends Controller {
     private function sendHousekeepingCheckOut($hotel_id, $data)
     {
         $curl = curl_init();
-        curl_setopt_array($curl, array(
+        curl_setopt_array($curl, [
             CURLOPT_URL => "https://concierge-dev1.mynuvola.com/index.php/housekeeping/pmsCheckout",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
@@ -1026,10 +1026,10 @@ class MaestroPmsController extends Controller {
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => json_encode($data),
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_HTTPHEADER => [
                 "cache-control: no-cache"
-            ),
-        ));            
+            ],
+        ]);            
         $response = curl_exec($curl);
         $err = curl_error($curl);
         curl_close($curl);
