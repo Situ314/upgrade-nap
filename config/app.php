@@ -188,7 +188,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         //Sentry\Laravel\ServiceProvider::class,
-        Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
+        Sentry\Laravel\ServiceProvider::class,
+       // Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
         // Amazon SQS
         Aws\Laravel\AwsServiceProvider::class,
         // Amazon SQS FIFO

@@ -17,7 +17,7 @@
         "laravel/tinker": "~1.0",
         "lcobucci/jwt": "3.3.3",
         "orchestra/parser": "~3.0",
-        "sentry/sentry-laravel": "0.11.0",
+        "sentry/sentry-laravel": "2.13.0",
         "shiftonelabs/laravel-sqs-fifo-queue": "^2.0",
         "spatie/array-to-xml": "2.3.0",
         "symfony/psr-http-message-bridge": "^1.1",
@@ -60,7 +60,10 @@
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
-        "optimize-autoloader": true
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true
+        }
     },
     "extra": {
         "laravel": {
