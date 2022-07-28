@@ -21,15 +21,15 @@ Route::post('maestro-pms/v3', 'v3\MaestroPmsController@index');
 | DOCUMENTATION
 |--------------------------------------------------------------------------
 */
-Route::group(['prefix' => 'doc'], function () {
+Route::prefix('doc')->group(function () {
     Auth::routes();
     Route::get('/version', function () {
         return view('doc.version', ['url' => 'https://api-dev.mynuvola.net/api/v1']);
     })->name('doc.version');
 });
 
-Route::group(['prefix' => 'doc', 'middleware' => ['auth']], function () {
-    Route::group(['prefix' => 'v1'], function () {
+Route::prefix('doc')->middleware('auth')->group(function () {
+    Route::prefix('v1')->group(function () {
         $arr = ['url' => 'https://api-dev.mynuvola.net', 'version' => 'v1'];
         Route::get('/', function () use ($arr) {
             return view('doc.index', $arr);
@@ -68,7 +68,7 @@ Route::group(['prefix' => 'doc', 'middleware' => ['auth']], function () {
         });
     });
 
-    Route::group(['prefix' => 'v2'], function () {
+    Route::prefix('v2')->group(function () {
         $arr = ['url' => 'https://api-dev.mynuvola.net', 'version' => 'v2'];
         Route::get('/token', function () use ($arr) {
             return view('doc.items.token', $arr);

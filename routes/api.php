@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 */
 
 //V1
-Route::group(['middleware' => ['auth:api'], 'prefix' => 'api'], function () {
+Route::middleware('auth:api')->prefix('api')->group(function () {
     Route::get('/user', function (Request $request) {
         //get hotel_id
         $hotel_id = $request->hotel_id;
@@ -33,7 +33,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'api'], function () {
 
     Route::get('/hotels', 'HotelsController@index')->name('hotels');
 
-    Route::group(['prefix' => 'v1'], function () {
+    Route::prefix('v1')->group(function () {
 
         //HOTELS
         Route::get('/hotels', 'HotelsController@index')->name('hotels');
@@ -73,7 +73,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'api'], function () {
 });
 
 //V2
-Route::group(['middleware' => ['auth:api'], 'prefix' => 'v2'], function () {
+Route::middleware('auth:api')->prefix('v2')->group(function () {
 
     //pruebas cristian
     Route::get('eventTest', 'v2\EventsController@eventTest');
@@ -82,7 +82,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v2'], function () {
     Route::resource('hotel-room', 'v2\HotelRoomsController');
     Route::resource('role', 'v1\RoleController');
     Route::resource('staff', 'v1\StaffController');
-    Route::group(['prefix' => 'partner'], function () {
+    Route::prefix('partner')->group(function () {
         Route::get('guest/{guest_number}', 'v2\GuestController@show2');
     });
     //GUEST
@@ -99,7 +99,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v2'], function () {
     Route::get('event/guest/{guest_id}', 'v2\EventsController@indexByGuest');
     Route::resource('event', 'v2\EventsController');
     //COMTROL
-    Route::group(['prefix' => 'comtrol'], function () {
+    Route::prefix('comtrol')->group(function () {
         Route::post('check-in-guest', 'v2\ComtrolController@checkInGuest');
         Route::post('check-in-room', 'v2\ComtrolController@checkInRoom');
         Route::post('check-out-guest', 'v2\ComtrolController@checkOutGuest');
@@ -119,7 +119,7 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v2'], function () {
     Route::resource('maintenance', 'v2\MaintenanceController');
 });
 
-Route::group(['prefix' => 'v2'], function () {
+Route::prefix('v2')->group(function () {
     Route::get('opera/RoomStatus', function () {
         return 'Only the POST method enabled';
     });
@@ -131,7 +131,7 @@ Route::group(['prefix' => 'v2'], function () {
     });
 });
 
-Route::group(['middleware' => ['oracle'], 'prefix' => 'v2'], function () {
+Route::middleware('oracle')->prefix('v2')->group(function () {
     // Route::post('opera/Message ',    'v2\OperaController@index');
     Route::post('opera/RoomStatus', 'v3\OperaController@index');
     Route::post('opera/Profile', 'v3\OperaController@index');
@@ -139,13 +139,13 @@ Route::group(['middleware' => ['oracle'], 'prefix' => 'v2'], function () {
 });
 
 // integration with queues
-Route::group(['middleware' => ['oracle'], 'prefix' => 'v3'], function () {
+Route::middleware('oracle')->prefix('v3')->group(function () {
     Route::post('opera/RoomStatus', 'v3\OperaController@index');
     Route::post('opera/Profile', 'v3\OperaController@index');
     Route::post('opera/Message', 'v3\OperaController@index');
 });
 
-Route::group(['prefix' => 'v2'], function () {
+Route::prefix('v2')->group(function () {
     /*
     |--------------------------------------------------------------------------
     | TCA
@@ -165,8 +165,8 @@ Route::group(['prefix' => 'v2'], function () {
 | ALEXA
 |--------------------------------------------------------------------------
 */
-Route::group(['prefix' => 'api'], function () {
-    Route::group(['prefix' => 'v1'], function () {
+Route::prefix('api')->group(function () {
+    Route::prefix('v1')->group(function () {
         Route::post('alexa-room-service', 'v1\AlexaController@room_service');
         Route::post('alexa', 'v1\AlexaController@index');
         Route::post('alexa_validate', 'v1\AlexaController@alexa_validate');
@@ -184,8 +184,8 @@ Route::group(['prefix' => 'api'], function () {
     });
 });
 
-Route::group(['prefix' => 'api'], function () {
-    Route::group(['prefix' => 'v1'], function () {
+Route::prefix('api')->group(function () {
+    Route::prefix('v1')->group(function () {
         Route::get('alexa/oauth', 'v1\AlexaController@alexaAuth')->name('alexa_oauth');
         Route::post('alexa/login', 'v1\AlexaController@singIn')->name('alexa_login');
         Route::post('alexa/token', 'v1\AlexaController@generateToken')->name('alexa_token');
@@ -194,16 +194,16 @@ Route::group(['prefix' => 'api'], function () {
 /**
  * COMTROL
  */
-Route::group(['middleware' => ['basic'], 'prefix' => 'lodginglink/api'], function () {
+Route::middleware('basic')->prefix('lodginglink/api')->group(function () {
     Route::get('inbound', 'v2\ComtrolController@inbound');
     Route::post('outbound', 'v2\ComtrolController@outbound');
 
-    Route::group(['prefix' => 'v16.0'], function () {
+    Route::prefix('v16.0')->group(function () {
         Route::get('inbound', 'v2\ComtrolController@inbound');
         Route::post('outbound', 'v2\ComtrolController@outbound');
         Route::post('outbound-dev', 'v2\ComtrolController@outbound2');
 
-        Route::group(['prefix' => 'rest'], function () {
+        Route::prefix('rest')->group(function () {
             Route::get('inbound', 'v2\ComtrolController@inbound');
             Route::post('outbound', 'v2\ComtrolController@outbound');
             Route::post('outbound-dev', 'v2\ComtrolController@outbound2');
@@ -215,7 +215,7 @@ Route::group(['middleware' => ['basic'], 'prefix' => 'lodginglink/api'], functio
 Route::post('v2/infor/{hotel_id}', 'v2\InforController@index')->middleware('InforAuth');
 
 //StayNTouch
-Route::group(['prefix' => 'v2/stayntouch'], function () {
+Route::prefix('v2/stayntouch')->group(function () {
     Route::post('guest/{hotel_id}', 'v2\StayNTouchController@Guest');
     Route::post('reservation/{hotel_id}', 'v2\StayNTouchController@Reservation');
     Route::post('housekeeping/{hotel_id}', 'v2\StayNTouchController@Housekeeping');
@@ -236,7 +236,7 @@ Route::post('/syncProfileData/{hotel_id}', 'v2\OperaController@syncProfileData')
 // verify rooms
 Route::post('/operaverify/{hotel_id}/', 'v2\OperaController@verify');
 
-Route::group(['middleware' => ['auth:api']], function () {
+Route::middleware('auth:api')->group(function () {
     Route::get('/getIntegrations', 'IntegrationMonitoringController@getHotel');
     Route::get('/getStats', 'IntegrationMonitoringController@getStats');
     Route::get('/getTotal/{hotel_id}/{date?}', 'IntegrationMonitoringController@getTotal');
@@ -262,8 +262,8 @@ Route::get('phpinfo', function () {
 // V3
 // https://api.mynuvola.net/v3/pms/reservation
 
-Route::group(['middleware' => ['auth:api'], 'prefix' => 'v3'], function () {
-    Route::group(['prefix' => 'pms'], function () {
+Route::middleware('auth:api')->prefix('v3')->group(function () {
+    Route::prefix('pms')->group(function () {
         //
         Route::post('guest', "v3\GuestController@store");
         Route::put('guest', "v3\GuestController@update");
@@ -276,9 +276,9 @@ Route::group(['middleware' => ['auth:api'], 'prefix' => 'v3'], function () {
     });
 });
 
-Route::group(['prefix' => 'v3'], function () {
-    Route::group(['prefix' => 'pms'], function () {
-        Route::group(['prefix' => 'change-hsk-status'], function () {
+Route::prefix('v3')->group(function () {
+    Route::prefix('pms')->group(function () {
+        Route::prefix('change-hsk-status')->group(function () {
             // SYNERGEX
             Route::post('synergex', "v3\HousekeepingController@synergexSendHskChangeStatus");
         });
