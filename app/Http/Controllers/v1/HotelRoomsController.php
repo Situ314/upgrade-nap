@@ -58,7 +58,7 @@ class HotelRoomsController extends Controller
 
             $query = $query->leftJoin(
                 DB::raw("($query_left_join) as gr "), function ($join) {
-                $join->on('gr.hotel_id', '=', 'h.hotel_id')->on('h.room_id', '=', 'gr.room_no');
+                    $join->on('gr.hotel_id', '=', 'h.hotel_id')->on('h.room_id', '=', 'gr.room_no');
                 })
                 ->where('h.hotel_id', '=', $hotel_id)
                 ->where('h.active', '=', 1);
