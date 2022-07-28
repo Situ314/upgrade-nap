@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Hotel extends Model
 {
     public $timestamps = false;
+
     protected $table = 'hotels';
+
     protected $primaryKey = 'hotel_id';
+
     protected $fillable = [
         'account',
         'hotel_name',
@@ -43,5 +46,6 @@ class Hotel extends Model
         'number_hotel',
         'link_to_angel',
     ];
+
     protected $hidden = [];
 }

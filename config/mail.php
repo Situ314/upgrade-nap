@@ -1,4 +1,5 @@
 <?php
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -71,8 +72,8 @@ return [
     | connection. You may also set the "password" value below this one.
     |
     */
-    "username" => "c341194cb84645",
-    "password" => "d06dfa790532d0",
+    'username' => 'c341194cb84645',
+    'password' => 'd06dfa790532d0',
     /*
     |--------------------------------------------------------------------------
     | Sendmail System Path

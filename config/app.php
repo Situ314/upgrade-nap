@@ -171,27 +171,26 @@ return [
         /*
          * Passport
          */
-        
+
         Laravel\Passport\PassportServiceProvider::class,
 
         /**
          * GraphQL
          */
-
         Folklore\GraphQL\ServiceProvider::class,
 
         /*
          * Application Service Providers...
          */
-        
+
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-	//Sentry\Laravel\ServiceProvider::class,
-	Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
-       	// Amazon SQS
+        //Sentry\Laravel\ServiceProvider::class,
+        Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
+        // Amazon SQS
         Aws\Laravel\AwsServiceProvider::class,
         // Amazon SQS FIFO
         ShiftOneLabs\LaravelSqsFifoQueue\LaravelSqsFifoQueueServiceProvider::class,
@@ -245,6 +244,6 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         //'GraphQL' => Folklore\GraphQL\Support\Facades\GraphQL::class,
-	'Sentry' => Sentry\Laravel\Facade::class,
+        'Sentry' => Sentry\Laravel\Facade::class,
     ],
 ];

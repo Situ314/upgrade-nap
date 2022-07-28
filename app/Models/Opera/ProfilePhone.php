@@ -6,16 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProfilePhone extends Model
 {
-    protected $connection= 'opera';
+    protected $connection = 'opera';
+
     public $timestamps = false;
+
     protected $table = 'ProfilePhone';
+
     protected $primaryKey = 'ID';
+
     protected $fillable = [
         'ProfileID',
         'ProfileUniqueID',
         'PhoneType',
         'PhoneRole',
-        'PhoneNumber'
+        'PhoneNumber',
     ];
+
     protected $hidden = [];
 }

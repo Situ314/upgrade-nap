@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class GuestRegistration extends Model
 {
     public $timestamps = false;
+
     protected $table = 'guest_registration';
+
     protected $primaryKey = 'guest_id';
+
     protected $fillable = [
         'hotel_id',
         'firstname',
@@ -56,6 +59,7 @@ class GuestRegistration extends Model
         'category',         // default 0
         'pms_unique_id',    // default null
     ];
+
     protected $hidden = [
         'hotel_id',
         'state',
@@ -91,12 +95,12 @@ class GuestRegistration extends Model
 
     public function GuestCheckingDetail()
     {
-        return $this->hasMany('App\Models\GuestCheckinDetails','guest_id','guest_id');
+        return $this->hasMany('App\Models\GuestCheckinDetails', 'guest_id', 'guest_id');
     }
 
     public function Checking()
     {
-        return $this->hasMany('App\Models\GuestCheckinDetails','guest_id','guest_id');
+        return $this->hasMany('App\Models\GuestCheckinDetails', 'guest_id', 'guest_id');
     }
 
     /**
@@ -104,14 +108,15 @@ class GuestRegistration extends Model
      */
     public function GuestCheckinDetails()
     {
-        return $this->hasMany('App\Models\GuestCheckinDetails','guest_id','guest_id');
+        return $this->hasMany('App\Models\GuestCheckinDetails', 'guest_id', 'guest_id');
     }
 
     /**
      * public function staff() { return $this->hasOne('App\User', 'staff_id', 'staff_id'); }
      * public function departament() { return $this->hasOne('App\Models\Departament','dept_id','dept_id'); }
      */
-    public function IntegrationsGuestInformation() {
-        return $this->hasOne('App\Models\IntegrationsGuestInformation','guest_id', 'guest_id');
+    public function IntegrationsGuestInformation()
+    {
+        return $this->hasOne('App\Models\IntegrationsGuestInformation', 'guest_id', 'guest_id');
     }
 }

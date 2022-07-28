@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProfileAddress extends Model
 {
-    protected $connection= 'opera';
+    protected $connection = 'opera';
+
     public $timestamps = false;
+
     protected $table = 'ProfileAddress';
+
     protected $primaryKey = 'ID';
+
     protected $fillable = [
         'ProfileID',
         'ProfileUniqueID',
@@ -18,7 +22,8 @@ class ProfileAddress extends Model
         'CityName',
         'StateProv',
         'CountryCode',
-        'PostalCode'
+        'PostalCode',
     ];
+
     protected $hidden = [];
 }

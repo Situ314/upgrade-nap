@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 class SyncSmsReservation extends Command
 {
     private $hotel_id;
+
     /**
      * The name and signature of the console command.
      *

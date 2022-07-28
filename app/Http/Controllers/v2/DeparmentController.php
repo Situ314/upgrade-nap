@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\v2;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Departament;
+use Illuminate\Http\Request;
 
 class DeparmentController extends Controller
 {
@@ -15,25 +15,25 @@ class DeparmentController extends Controller
      */
     public function index(Request $request)
     {
-        $paginate   = isset($request->paginate) ? $request->paginate : 50;
-        $type       = isset($request->type) ? $request->type : "ALL";
-        $staff_id   = $request->user()->staff_id;
-        $hotel_id   = $request->hotel_id;
-        $get_tags   = isset($request->get_tags) ? $request->get_tags : "";
+        $paginate = isset($request->paginate) ? $request->paginate : 50;
+        $type = isset($request->type) ? $request->type : 'ALL';
+        $staff_id = $request->user()->staff_id;
+        $hotel_id = $request->hotel_id;
+        $get_tags = isset($request->get_tags) ? $request->get_tags : '';
 
-        if(!$this->validateHotelId($hotel_id, $staff_id)) {
-            return response()->json( [], 400 );
+        if (! $this->validateHotelId($hotel_id, $staff_id)) {
+            return response()->json([], 400);
         }
 
-        $Departament = Departament::select(["dept_id", "dept_name", "short_name"])->where('hotel_id',$hotel_id);
+        $Departament = Departament::select(['dept_id', 'dept_name', 'short_name'])->where('hotel_id', $hotel_id);
 
-        if(strtoupper($type) == "ANGEL" ) {
+        if (strtoupper($type) == 'ANGEL') {
             $Departament = $Departament->where('tag_type', 2);
-        } else if(strtoupper($type) == "DESKTOP" ) {
+        } elseif (strtoupper($type) == 'DESKTOP') {
             $Departament = $Departament->where('tag_type', 1);
         }
 
-        if(!empty($get_tags) && strtoupper($get_tags) == "TRUE" ) {
+        if (! empty($get_tags) && strtoupper($get_tags) == 'TRUE') {
             $Departament = $Departament->with('tags');
         }
 
@@ -71,11 +71,11 @@ class DeparmentController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $staff_id   = $request->user()->staff_id;
-        $hotel_id   = $request->hotel_id;
+        $staff_id = $request->user()->staff_id;
+        $hotel_id = $request->hotel_id;
 
-        if(!$this->validateHotelId($hotel_id, $staff_id)) {
-            return response()->json( [], 400 );
+        if (! $this->validateHotelId($hotel_id, $staff_id)) {
+            return response()->json([], 400);
         }
 
         $Departament = Departament::with('tags')->find($id);
@@ -92,7 +92,7 @@ class DeparmentController extends Controller
      */
     public function update(Request $request, $id)
     {
-        return "[method: PUT] this option is disabled, go to the documentation for more information";
+        return '[method: PUT] this option is disabled, go to the documentation for more information';
     }
 
     /**
@@ -103,6 +103,6 @@ class DeparmentController extends Controller
      */
     public function destroy($id)
     {
-        return "[method: DELETE] this option is disabled, go to the documentation for more information";
+        return '[method: DELETE] this option is disabled, go to the documentation for more information';
     }
 }

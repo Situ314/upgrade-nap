@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\v2;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Models\MaintenanceRecords;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 
 class MaintenanceController extends Controller
@@ -16,45 +15,53 @@ class MaintenanceController extends Controller
      */
     public function index(Request $request)
     {
-        
+
         /**
          * captura de parametros iniciales
          */
-        $page = (int)$request->page ?: 1;
+        $page = (int) $request->page ?: 1;
         $paginate = $request->paginate ?: 50;
         $paginate = $paginate > 500 ? 500 : $paginate;
         $staff_id = $request->user()->staff_id;
         /**
          * Validar hotel
-         * */        
-        if(!$request->exists('hotel_id')) return response()->json([ "error" => "Hotel id not provided" ], 400);
+         * */
+        if (! $request->exists('hotel_id')) {
+            return response()->json(['error' => 'Hotel id not provided'], 400);
+        }
         $hotel_id = $request->hotel_id;
         /**
          * Validar acceso al hotel x usuario
          */
-        if(!$this->validateHotelId($hotel_id, $staff_id)) return response()->json([ "error" => "User does not have access to the hotel" ], 400 );
+        if (! $this->validateHotelId($hotel_id, $staff_id)) {
+            return response()->json(['error' => 'User does not have access to the hotel'], 400);
+        }
         /**
          *  Validar que el usuario tenga permisos para realizar esta operacion
          */
         $permission = $this->getPermission($hotel_id, $staff_id, $menu_id = 33, $action = 'view');
-        if(!$permission) return response()->json(["error" => "User does not have permission to perform this action" ], 400 );
+        if (! $permission) {
+            return response()->json(['error' => 'User does not have permission to perform this action'], 400);
+        }
         /**
          * Configurar timezone y capturar fecha
          */
         $this->configTimeZone($hotel_id);
-        
+
         $paginate = $request->paginate ?: 50;
-        
+
         $now = date('Y-m-d H:i:s');
 
         $__page = $page - 1;
-        if($__page > 0) {
+        if ($__page > 0) {
             $__page = $__page * $paginate;
         }
 
-        $total_record_query = "SELECT count(maintenance_records_id) as total FROM maintenance_records AS m WHERE hotel_id = $hotel_id";        
+        $total_record_query = "SELECT count(maintenance_records_id) as total FROM maintenance_records AS m WHERE hotel_id = $hotel_id";
         $rsTotal = \DB::select($total_record_query);
-        if($rsTotal) { $rsTotal = $rsTotal[0]; }
+        if ($rsTotal) {
+            $rsTotal = $rsTotal[0];
+        }
         $total = $rsTotal->total;
 
         $query = "SELECT
@@ -66,18 +73,18 @@ class MaintenanceController extends Controller
             CASE WHEN priority = 1 THEN 'low' WHEN priority = 2 THEN 'medium' WHEN priority = 3 THEN 'high' ELSE 'no priority' END as priority 
         FROM maintenance_records AS m ";
 
-        if($request->exists('room_id') || $request->exists('location')) {
-            $query .= "INNER JOIN hotel_rooms AS h ON h.hotel_id = m.hotel_id AND h.room_id = m.room_id ";
+        if ($request->exists('room_id') || $request->exists('location')) {
+            $query .= 'INNER JOIN hotel_rooms AS h ON h.hotel_id = m.hotel_id AND h.room_id = m.room_id ';
         }
 
         $query .= "WHERE m.hotel_id = $hotel_id ";
 
-        if($request->exists('start_date') && $request->exists('end_date')){
-            $query .= "";
+        if ($request->exists('start_date') && $request->exists('end_date')) {
+            $query .= '';
         }
-        
-        if($request->exists('room_id') || $request->exists('location')) {
-            if($request->exists('room_id')) {
+
+        if ($request->exists('room_id') || $request->exists('location')) {
+            if ($request->exists('room_id')) {
                 $room_id = $request->room_id;
                 $w = "h.room_id = $room_id ";
             } else {
@@ -91,12 +98,12 @@ class MaintenanceController extends Controller
 
         $rows = \DB::select($query);
 
-        if(count($rows) > 0) {
-            $ids = "";
+        if (count($rows) > 0) {
+            $ids = '';
             foreach ($rows as $rowkey => $row) {
                 $ids .= "$row->id,";
             }
-            $ids = substr($ids, 0, -1);            
+            $ids = substr($ids, 0, -1);
 
             $items_query = "SELECT
                 ri.maintenance_record_id, i.item_id, i.name
@@ -125,43 +132,40 @@ class MaintenanceController extends Controller
             foreach ($rows as $rowkey => $row) {
                 $id = $row->id;
                 $__data = Arr::where($items_rows, function ($value, $key) use ($id) {
-                    return ($value->maintenance_record_id == $id);
+                    return $value->maintenance_record_id == $id;
                 });
                 $row->assets = array_values($__data);
 
                 $__data = Arr::where($room_rows, function ($value, $key) use ($id) {
-                    return ($value->maintenance_records_id == $id);
+                    return $value->maintenance_records_id == $id;
                 });
-                if( count($__data) > 0 ) {
+                if (count($__data) > 0) {
                     $r = array_values($__data)[0];
 
                     $row->room = [
-                        "room_id" => $r->room_id,
-                        "location" => $r->location,
+                        'room_id' => $r->room_id,
+                        'location' => $r->location,
                     ];
                 }
-                
             }
-
-            
         }
 
-        $last_page = ceil($total/$paginate);
+        $last_page = ceil($total / $paginate);
 
         $__page = [
-            "current_page"  => $page,
-            "data"          => $rows,
-            "from"          => $__page + 1,
-            "last_page"     => $last_page,
-            "next_page_url" => \Request::url()."?page=".($page + 1 == $last_page ? $last_page : $page + 1),
-            "path"          => \Request::url().($page == 1 ? "" : "?page=".$page),
-            "per_page"      => $paginate,
-            "prev_page_url" => $page == 1 ? null : \Request::url()."?page=".($page - 1),
-            "to"            => $paginate * $page,
-            "total"         => $total
+            'current_page' => $page,
+            'data' => $rows,
+            'from' => $__page + 1,
+            'last_page' => $last_page,
+            'next_page_url' => \Request::url().'?page='.($page + 1 == $last_page ? $last_page : $page + 1),
+            'path' => \Request::url().($page == 1 ? '' : '?page='.$page),
+            'per_page' => $paginate,
+            'prev_page_url' => $page == 1 ? null : \Request::url().'?page='.($page - 1),
+            'to' => $paginate * $page,
+            'total' => $total,
         ];
 
-        return response()->json( $__page, 200 );
+        return response()->json($__page, 200);
     }
 
     /**

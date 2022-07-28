@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Event extends Model
 {
     public $timestamps = false;
+
     protected $table = 'events';
+
     protected $primaryKey = 'event_id';
+
     protected $fillable = [
         'hotel_id',
         'guest_id',
@@ -51,8 +54,9 @@ class Event extends Model
         'count_by_hotel_id',
         'in_shift',
         'cancel_by_guest',
-        'requested_by'
+        'requested_by',
     ];
+
     protected $hidden = [
         'dept_tag_id',
         'room_id',
@@ -94,27 +98,26 @@ class Event extends Model
         'count_by_hotel_id',
         'in_shift',
         'cancel_by_guest',
-        'requested_by'
+        'requested_by',
     ];
 
     public function Guest()
     {
-        return $this->hasOne('App\Models\GuestRegistration','guest_id','guest_id');
+        return $this->hasOne('App\Models\GuestRegistration', 'guest_id', 'guest_id');
     }
 
     public function Room()
     {
-        return $this->hasOne('App\Models\HotelRoom','room_id','room_id');
+        return $this->hasOne('App\Models\HotelRoom', 'room_id', 'room_id');
     }
 
     public function DepTag()
     {
-        return $this->hasOne('App\Models\DeptTag','dept_tag_id','dept_tag_id');
-    }
-    
-    public function StaffCompleted()
-    {
-        return $this->hasOne('App\Models\Staff','staff_id','completed_by');
+        return $this->hasOne('App\Models\DeptTag', 'dept_tag_id', 'dept_tag_id');
     }
 
+    public function StaffCompleted()
+    {
+        return $this->hasOne('App\Models\Staff', 'staff_id', 'completed_by');
+    }
 }

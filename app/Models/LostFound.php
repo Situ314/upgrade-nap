@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class LostFound extends Model
 {
     public $timestamps = false;
+
     protected $table = 'lost_found';
+
     protected $primaryKey = 'lst_fnd_no';
+
     protected $fillable = [
         'hotel_id',
         'guest_id',
@@ -31,8 +34,9 @@ class LostFound extends Model
         'active',
         'consecutive',
         'delivered_name',
-        'filename'
+        'filename',
     ];
+
     protected $hidden = [
         'hotel_id',
         'status',
@@ -50,6 +54,6 @@ class LostFound extends Model
         'active',
         'consecutive',
         'delivered_name',
-        'filename'
+        'filename',
     ];
 }

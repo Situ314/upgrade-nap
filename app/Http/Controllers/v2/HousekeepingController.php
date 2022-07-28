@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\v2;
 
-use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
-use App\Models\HousekeepingCleanings;
-use App\Models\HousekeepingEvents;
 use App\Models\Event;
 use App\Models\HotelRoom;
+use App\Models\HousekeepingCleanings;
+use App\Models\HousekeepingEvents;
 use App\User;
-use Validator;
 use DB;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Validator;
 
 class HousekeepingController extends Controller
 {
@@ -21,16 +21,15 @@ class HousekeepingController extends Controller
         $staff_id = $request->user()->staff_id;
         $hotel_id = $request->hotel_id;
 
-        if ($this->validateHotelId($hotel_id, $staff_id)) #endregion
-        {
+        if ($this->validateHotelId($hotel_id, $staff_id)) { //endregion
             $hsk = null;
 
-            /*Se agrega valiacion para parametro all, 
+            /*Se agrega valiacion para parametro all,
             con el objetivo de mostrar todas las habitaciones cuando este llegue en true*/
             if (isset($request->all) && ($request->all == 'true' || $request->all == true)) {
 
                 //Se consultan todas las habitaciones con estado en caso de que lo tenga en formato lineal(habitacion-status)
-                
+
                 // $hsk = HotelRoom::select("cleaning_id", "count_by_hotel_id", "hk_status", "front_desk_status", "assigned_date", "hotel_rooms.location", "hotel_rooms.room_id")
                 //     ->leftJoin("housekeeping_cleanings", "housekeeping_cleanings.room_id", "=", "hotel_rooms.room_id")
                 //     ->where("hotel_rooms.hotel_id", $hotel_id)
@@ -39,8 +38,7 @@ class HousekeepingController extends Controller
                 //     ->orderBy("housekeeping_cleanings.cleaning_id", "DESC")
                 //     ->paginate($paginate);
 
-
-                $query="SELECT
+                $query = "SELECT
                             hc.cleaning_id,
                             hc.count_by_hotel_id,
                             hc.hk_status,
@@ -86,18 +84,18 @@ class HousekeepingController extends Controller
 
                     //Se crea el formato room
                     $room = [
-                        "location" => $shk_room->location, "room_id" => $shk_room->room_id
+                        'location' => $shk_room->location, 'room_id' => $shk_room->room_id,
                     ];
 
                     // Se agrega room al objeto actual
-                    $shk_room->room =  $room;
+                    $shk_room->room = $room;
                     // se parsea null a string
-                    $shk_room->cleaning_id          = $shk_room->cleaning_id        ? $shk_room->cleaning_id : "";
-                    $shk_room->count_by_hotel_id    = $shk_room->count_by_hotel_id  ? $shk_room->count_by_hotel_id : "";
-                    $shk_room->hk_status            = $shk_room->hk_status          ? $shk_room->hk_status : "";
-                    $shk_room->front_desk_status    = $shk_room->front_desk_status  ? $shk_room->front_desk_status : "";
-                    $shk_room->created_on           = $shk_room->created_on         ? $shk_room->created_on : "";
-                    $shk_room->assigned_date        = $shk_room->assigned_date      ? $shk_room->assigned_date : "";
+                    $shk_room->cleaning_id = $shk_room->cleaning_id ? $shk_room->cleaning_id : '';
+                    $shk_room->count_by_hotel_id = $shk_room->count_by_hotel_id ? $shk_room->count_by_hotel_id : '';
+                    $shk_room->hk_status = $shk_room->hk_status ? $shk_room->hk_status : '';
+                    $shk_room->front_desk_status = $shk_room->front_desk_status ? $shk_room->front_desk_status : '';
+                    $shk_room->created_on = $shk_room->created_on ? $shk_room->created_on : '';
+                    $shk_room->assigned_date = $shk_room->assigned_date ? $shk_room->assigned_date : '';
 
                     //Se eliminan los campos del objeto principal para evitar datos repetidos
                     unset($shk_room->location);
@@ -111,7 +109,7 @@ class HousekeepingController extends Controller
                     'hk_status',
                     'front_desk_status',
                     'created_on',
-                    'assigned_date'
+                    'assigned_date',
                 ])
                     ->where('hotel_id', $hotel_id)
                     ->where('is_active', 1);
@@ -121,7 +119,7 @@ class HousekeepingController extends Controller
                 }
 
                 if (isset($request->rooms)) {
-                    $rooms = \App\Models\HotelRoom::whereIn('location', explode(",", $request->rooms))
+                    $rooms = \App\Models\HotelRoom::whereIn('location', explode(',', $request->rooms))
                         ->where('hotel_id', $hotel_id)
                         ->where('active', 1)
                         ->get();
@@ -162,13 +160,19 @@ class HousekeepingController extends Controller
     {
         $staff_id = $request->user()->staff_id;
         // Validar hotel
-        if (!$request->exists('hotel_id')) return response()->json(["error" => "Hotel id not provided"], 400);
+        if (! $request->exists('hotel_id')) {
+            return response()->json(['error' => 'Hotel id not provided'], 400);
+        }
         $hotel_id = $request->hotel_id;
         // Validar acceso al hotel x usuario
-        if (!$this->validateHotelId($hotel_id, $staff_id)) return response()->json(["error" => "User does not have access to the hotel"], 400);
+        if (! $this->validateHotelId($hotel_id, $staff_id)) {
+            return response()->json(['error' => 'User does not have access to the hotel'], 400);
+        }
         //  Validar que el usuario tenga permisos para realizar esta operacion
         $permission = $this->getPermission($hotel_id, $staff_id, $menu_id = 36, $action = 'view');
-        if (!$permission) return response()->json(["error" => "User does not have permission to perform this action"], 400);
+        if (! $permission) {
+            return response()->json(['error' => 'User does not have permission to perform this action'], 400);
+        }
 
         $HousekeepingStaff = User::select(['staff_id as housekeeper_id', 'firstname', 'lastname', 'username', 'email'])
             ->whereHas('Housekeeper', function ($q) use ($hotel_id) {
@@ -177,22 +181,28 @@ class HousekeepingController extends Controller
                     ->where('is_housekeeper', true);
             })->get();
 
-        return response()->json(["housekepers" => $HousekeepingStaff], 200);
+        return response()->json(['housekepers' => $HousekeepingStaff], 200);
     }
 
     public function show(Request $request, $id)
     {
         $staff_id = $request->user()->staff_id;
         // Validar hotel
-        if (!$request->exists('hotel_id')) return response()->json(["error" => "Hotel id not provided"], 400);
+        if (! $request->exists('hotel_id')) {
+            return response()->json(['error' => 'Hotel id not provided'], 400);
+        }
         $hotel_id = $request->hotel_id;
 
         // Validar acceso al hotel x usuario
-        if (!$this->validateHotelId($hotel_id, $staff_id)) return response()->json(["error" => "User does not have access to the hotel"], 400);
+        if (! $this->validateHotelId($hotel_id, $staff_id)) {
+            return response()->json(['error' => 'User does not have access to the hotel'], 400);
+        }
 
         //  Validar que el usuario tenga permisos para realizar esta operacion
         $permission = $this->getPermission($hotel_id, $staff_id, $menu_id = 36, $action = 'view');
-        if (!$permission) return response()->json(["error" => "User does not have permission to perform this action"], 400);
+        if (! $permission) {
+            return response()->json(['error' => 'User does not have permission to perform this action'], 400);
+        }
 
         $hsk = HousekeepingCleanings::select(['cleaning_id', 'count_by_hotel_id', 'room_id', 'hk_status', 'front_desk_status', 'created_on'])
             ->where('hotel_id', $hotel_id)
@@ -206,27 +216,23 @@ class HousekeepingController extends Controller
         return response()->json($hsk, 200);
     }
 
-
     public function updateHsk(Request $request, $id)
     {
         DB::beginTransaction();
         try {
-            $hkc = \App\Models\HousekeepingCleanings::find($id);         
-            
-                
+            $hkc = \App\Models\HousekeepingCleanings::find($id);
+
             //dd($hkc);
             if ($hkc) {
                 /* Validate send object */
-                if (!isset($request->hsk)) {
+                if (! isset($request->hsk)) {
                     return response()->json([
                         'update' => false,
-                        "message" => "housekeeping_cleaning object, data not provided",
-                        "description" => []
+                        'message' => 'housekeeping_cleaning object, data not provided',
+                        'description' => [],
                     ], 400);
                 }
-                
-                
-                
+
                 /* configure timezone  by hotel */
                 $this->configTimeZone($hkc->hotel_id);
                 // $HousekeepingData = [
@@ -239,38 +245,39 @@ class HousekeepingController extends Controller
                 // ];
 
                 /* configure timezone  by hotel */
-                /* $this->configTimeZone($hkc->hotel_id);*/               
-               
+                /* $this->configTimeZone($hkc->hotel_id);*/
+
                 $HousekeepingData = [];
-                $HousekeepingData["hotel_id"] = $hkc->hotel_id;
-                $HousekeepingData["staff_id"] = $request->user()->staff_id;
-                $HousekeepingData["rooms"]    = [];
-                
-                $_d["room_id"] = $hkc->room_id;
-                $_d["hk_status"] = $request->hsk[0]['hk_status'];
-                
-                $HousekeepingData["rooms"][] = $_d;
+                $HousekeepingData['hotel_id'] = $hkc->hotel_id;
+                $HousekeepingData['staff_id'] = $request->user()->staff_id;
+                $HousekeepingData['rooms'] = [];
+
+                $_d['room_id'] = $hkc->room_id;
+                $_d['hk_status'] = $request->hsk[0]['hk_status'];
+
+                $HousekeepingData['rooms'][] = $_d;
 
                 $curl = curl_init();
-                curl_setopt_array($curl, array(
-                    CURLOPT_URL             => "https://hotel.mynuvola.com/index.php/housekeeping/pmsHKChange",
-                    CURLOPT_RETURNTRANSFER  => true,
-                    CURLOPT_ENCODING        => "",
-                    CURLOPT_MAXREDIRS       => 10,
-                    CURLOPT_TIMEOUT         => 2,
-                    CURLOPT_HTTP_VERSION    => CURL_HTTP_VERSION_1_1,
-                    CURLOPT_CUSTOMREQUEST   => "POST",
-                    CURLOPT_POSTFIELDS      => json_encode($HousekeepingData)
-                ));
+                curl_setopt_array($curl, [
+                    CURLOPT_URL => 'https://hotel.mynuvola.com/index.php/housekeeping/pmsHKChange',
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_ENCODING => '',
+                    CURLOPT_MAXREDIRS => 10,
+                    CURLOPT_TIMEOUT => 2,
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                    CURLOPT_CUSTOMREQUEST => 'POST',
+                    CURLOPT_POSTFIELDS => json_encode($HousekeepingData),
+                ]);
                 $response = curl_exec($curl);
+
                 return response()->json([
                     'update' => true,
                     'message' => 'updated',
-                    'description' =>  $response
+                    'description' => $response,
                 ], 200);
                 $err = curl_error($curl);
                 curl_close($curl);
-                //dd($response);
+            //dd($response);
                 /*return response()->json([
                     'update' => true,
                     'message' => 'updated',
@@ -280,7 +287,7 @@ class HousekeepingController extends Controller
                 return response()->json([
                     'update' => false,
                     'message' => 'Record not found',
-                    'description' =>  []
+                    'description' => [],
                 ], 400);
             }
         } catch (\Exception $e) {
@@ -294,40 +301,48 @@ class HousekeepingController extends Controller
         try {
             $staff_id = $request->user()->staff_id;
             //  Validar hotel
-            if (!$request->exists('hotel_id')) return response()->json(["error" => "Hotel id not provided"], 400);
+            if (! $request->exists('hotel_id')) {
+                return response()->json(['error' => 'Hotel id not provided'], 400);
+            }
             $hotel_id = $request->hotel_id;
             //  Validar acceso al hotel x usuario
-            if (!$this->validateHotelId($hotel_id, $staff_id)) return response()->json(["error" => "User does not have access to the hotel"], 400);
+            if (! $this->validateHotelId($hotel_id, $staff_id)) {
+                return response()->json(['error' => 'User does not have access to the hotel'], 400);
+            }
             //  Validar que el usuario tenga permisos para realizar esta operacion
             $permission = $this->getPermission($hotel_id, $staff_id, $menu_id = 36, $action = 'create');
-            if (!$permission) return response()->json(["error" => "User does not have permission to perform this action"], 400);
+            if (! $permission) {
+                return response()->json(['error' => 'User does not have permission to perform this action'], 400);
+            }
             //  Validar pickup_event
-            if (!$request->exists('pickup_event')) return response()->json(["error" => "Pickup Event not provided"], 400);
+            if (! $request->exists('pickup_event')) {
+                return response()->json(['error' => 'Pickup Event not provided'], 400);
+            }
             //Limpiado la informacion y solo trabajando con la que esta establecida en la documentacion
             $pickup_event = collect($request->pickup_event);
             $pickup_event = $pickup_event->only(['issue', 'room_no', 'room', 'dept_id', 'tag_id', 'date', 'time', 'priority']);
             $pickup_event = $pickup_event->all();
             //Realizando validacion
             $validation = Validator::make($pickup_event, [
-                'issue'     => 'string',
-                'room_no'   => 'required_without:room',
-                'room'      => 'required_without:room_no',
-                'dept_id'   => ['numeric', Rule::exists('departments')->where(function ($q) use ($hotel_id) {
+                'issue' => 'string',
+                'room_no' => 'required_without:room',
+                'room' => 'required_without:room_no',
+                'dept_id' => ['numeric', Rule::exists('departments')->where(function ($q) use ($hotel_id) {
                     $q->where('hotel_id', $hotel_id);
                 })],
-                'tag_id'    => ['numeric', Rule::exists('tags')->where(function ($q) use ($hotel_id) {
+                'tag_id' => ['numeric', Rule::exists('tags')->where(function ($q) use ($hotel_id) {
                     $q->where('hotel_id', $hotel_id);
                 })],
-                'date'      => 'date_format:Y-m-d',
-                'time'      => 'date_format:H:i:s',
-                'priority'  => 'numeric|in:1,2,3',
+                'date' => 'date_format:Y-m-d',
+                'time' => 'date_format:H:i:s',
+                'priority' => 'numeric|in:1,2,3',
             ]);
 
             if ($validation->fails()) {
                 return response()->json([
-                    'create'        => false,
-                    "message"       => "Pick up object failed",
-                    "description"   => $validation->errors()
+                    'create' => false,
+                    'message' => 'Pick up object failed',
+                    'description' => $validation->errors(),
                 ], 400);
             }
 
@@ -340,11 +355,11 @@ class HousekeepingController extends Controller
             }
 
             // Establecer la habitación
-            if (array_key_exists("room_id", $pickup_event)) {
-                $__room_id = $pickup_event["room_id"];
+            if (array_key_exists('room_id', $pickup_event)) {
+                $__room_id = $pickup_event['room_id'];
             } else {
-                $room = $this->findRoomId($hotel_id, $staff_id, $pickup_event["room"]);
-                $__room_id = (int)$room["room_id"];
+                $room = $this->findRoomId($hotel_id, $staff_id, $pickup_event['room']);
+                $__room_id = (int) $room['room_id'];
             }
 
             // Validar que la habitacion este VC or INS
@@ -353,11 +368,11 @@ class HousekeepingController extends Controller
                 ->where('assigned_date', date('Y-m-d'))
                 ->first();
 
-            if (!$__housekeeping_cleanings) {
+            if (! $__housekeeping_cleanings) {
                 return response()->json([
-                    'create'        => false,
-                    "message"       => "Room does not have a cleaning currently",
-                    "description"   => []
+                    'create' => false,
+                    'message' => 'Room does not have a cleaning currently',
+                    'description' => [],
                 ], 400);
             } else {
                 if (
@@ -372,92 +387,92 @@ class HousekeepingController extends Controller
 
                     //Capturar el huesped
                     $now = date('Y-m-d H:i:s');
-                    $__guest_checkin_details = \App\Models\GuestCheckinDetails::select(["room_no", "guest_id"])
+                    $__guest_checkin_details = \App\Models\GuestCheckinDetails::select(['room_no', 'guest_id'])
                         ->where('status', 1)
                         ->where('hotel_id', $hotel_id)
                         ->whereRaw(DB::raw("'$now' >= check_in and '$now' <= check_out"))
                         ->orderBy('sno', 'DESC')
                         ->first();
 
-                    if ($__guest_checkin_details) $pickup_event["guest_id"] = $__guest_checkin_details->guest_id;
+                    if ($__guest_checkin_details) {
+                        $pickup_event['guest_id'] = $__guest_checkin_details->guest_id;
+                    }
 
-                    $__date = !array_key_exists('date', $pickup_event) ? date('Y-m-d') : $pickup_event["date"];
-                    $pickup_event["date"] = $__date;
+                    $__date = ! array_key_exists('date', $pickup_event) ? date('Y-m-d') : $pickup_event['date'];
+                    $pickup_event['date'] = $__date;
 
-                    $__time = !array_key_exists('time', $pickup_event) ? date('H:i:s') : $pickup_event["time"];
-                    $pickup_event["time"] = $__time;
+                    $__time = ! array_key_exists('time', $pickup_event) ? date('H:i:s') : $pickup_event['time'];
+                    $pickup_event['time'] = $__time;
 
-                    if (strtotime($pickup_event["date"]) < strtotime(date('Y-m-d'))) {
+                    if (strtotime($pickup_event['date']) < strtotime(date('Y-m-d'))) {
                         return response()->json([
-                            'create'        => false,
-                            "message"       => "Invalid date",
-                            "description"   => []
+                            'create' => false,
+                            'message' => 'Invalid date',
+                            'description' => [],
                         ], 400);
                     }
 
-                    if (strtotime($pickup_event["date"]) == strtotime(date('Y-m-d'))) {
+                    if (strtotime($pickup_event['date']) == strtotime(date('Y-m-d'))) {
                         if (strtotime("$pickup_event[date] $pickup_event[time]") < date('Y-m-d H:i:s')) {
                             return response()->json([
-                                'create'        => false,
-                                "message"       => "Invalid time",
-                                "description"   => []
+                                'create' => false,
+                                'message' => 'Invalid time',
+                                'description' => [],
                             ], 400);
                         }
                     }
 
-                    $pickup_event["hotel_id"]           = $hotel_id;
-                    $pickup_event["room_id"]            = $__room_id;
-                    $pickup_event["count_by_hotel_id"]  = $count_by_hotel_id;
-                    $pickup_event["created_by"]         = $staff_id;
-                    $pickup_event["created_on"]         = $now;
-                    $pickup_event["closed_by"]          = 0;
+                    $pickup_event['hotel_id'] = $hotel_id;
+                    $pickup_event['room_id'] = $__room_id;
+                    $pickup_event['count_by_hotel_id'] = $count_by_hotel_id;
+                    $pickup_event['created_by'] = $staff_id;
+                    $pickup_event['created_on'] = $now;
+                    $pickup_event['closed_by'] = 0;
 
                     $event_id = Event::create($pickup_event)->event_id;
 
                     $__housekeeping_events = HousekeepingEvents::create([
-                        'hotel_id'      => $hotel_id,
-                        'cleaning_id'   => $__housekeeping_cleanings->cleaning_id,
-                        'event_id'      => $event_id,
-                        'is_pickup'     => 1,
-                        'is_active'     => 1
+                        'hotel_id' => $hotel_id,
+                        'cleaning_id' => $__housekeeping_cleanings->cleaning_id,
+                        'event_id' => $event_id,
+                        'is_pickup' => 1,
+                        'is_active' => 1,
                     ]);
 
                     $this->saveLogTracker([
                         'module_id' => 1,
-                        'action'    => 'add',
-                        'prim_id'   => $event_id,
-                        'staff_id'  => $staff_id,
+                        'action' => 'add',
+                        'prim_id' => $event_id,
+                        'staff_id' => $staff_id,
                         'date_time' => $now,
-                        'comments'  => $pickup_event["issue"],
-                        'hotel_id'  => $hotel_id,
-                        'type'      => 'API-v2'
+                        'comments' => $pickup_event['issue'],
+                        'hotel_id' => $hotel_id,
+                        'type' => 'API-v2',
                     ]);
                 } else {
                     return response()->json([
-                        'create'        => false,
-                        "message"       => "Room should be Vacant Clean or Inspected",
-                        "description"   => []
+                        'create' => false,
+                        'message' => 'Room should be Vacant Clean or Inspected',
+                        'description' => [],
                     ], 400);
                 }
             }
             DB::commit();
         } catch (\Exception $th) {
             DB::rollback();
+
             return response()->json([
-                'create'        => false,
-                'message'       => 'Something went wrong',
-                'description'   =>  []
+                'create' => false,
+                'message' => 'Something went wrong',
+                'description' => [],
             ], 400);
         }
     }
 
-
-
-
     // public function createHsk(Request $request)
     // {
     //     $staff_id = $request->user()->staff_id;
-    //     if(!$request->exists('hotel_id')) return response()->json([ "error" => "Hotel id not provided" ], 400);        
+    //     if(!$request->exists('hotel_id')) return response()->json([ "error" => "Hotel id not provided" ], 400);
     //     $hotel_id = $request->hotel_id;
     //     // Validar acceso al hotel x usuario
     //     if(!$this->validateHotelId($hotel_id, $staff_id)) return response()->json([ "error" => "User does not have access to the hotel" ], 400 );
@@ -475,10 +490,4 @@ class HousekeepingController extends Controller
     //     }
 
     // }
-
-
-
-
-
-
 }

@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class GuestCheckinDetails extends Model
 {
     public $timestamps = false;
+
     protected $table = 'guest_checkin_details';
+
     protected $primaryKey = 'sno';
 
     protected $fillable = [
@@ -20,8 +22,9 @@ class GuestCheckinDetails extends Model
         'status',
         'main_guest', //default 0
         'reservation_status', //default 0
-        'reservation_number' //default ''
+        'reservation_number', //default ''
     ];
+
     protected $hidden = [
         //'sno',
         //'guest_id', ==> no agregar se utiliza en Event
@@ -30,14 +33,16 @@ class GuestCheckinDetails extends Model
 
     public function Room()
     {
-        return $this->hasOne('App\Models\HotelRoom','room_id','room_no');
+        return $this->hasOne('App\Models\HotelRoom', 'room_id', 'room_no');
     }
 
-    public function Guest() {
-        return $this->hasOne('App\Models\GuestRegistration','guest_id','guest_id');
+    public function Guest()
+    {
+        return $this->hasOne('App\Models\GuestRegistration', 'guest_id', 'guest_id');
     }
 
-    public function GuestPms() {
+    public function GuestPms()
+    {
         return $this->hasOne('App\Models\IntegrationsGuestInformation', 'guest_id', 'guest_id');
     }
 }

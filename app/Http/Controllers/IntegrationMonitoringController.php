@@ -5,15 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Hotel;
 use App\Models\Integrations;
 use App\Models\IntegrationsActive;
-use App\Models\Log\CheckIn;
-use App\Models\Log\CheckOut;
-use App\Models\Log\HousekeepingStatus;
 use App\Models\Log\Monitoring;
-use App\Models\Log\Offmarket;
-use App\Models\Log\OracleHousekeeping;
-use App\Models\Log\OracleProfile;
-use App\Models\Log\OracleReservation;
-use App\Models\Log\ReservationList;
 use App\Models\Log\SMSHousekeeping;
 use App\Models\Log\SMSReservation;
 use Illuminate\Http\Request;
@@ -22,7 +14,7 @@ class IntegrationMonitoringController extends Controller
 {
     public function getHotel()
     {
-        $integrations = IntegrationsActive::selectRaw('hotel_name,integrations_active.hotel_id,integrations_active.state,integrations.title,int_id,pms_hotel_id,'. "'cdelaossa@mynuvola.com' email")
+        $integrations = IntegrationsActive::selectRaw('hotel_name,integrations_active.hotel_id,integrations_active.state,integrations.title,int_id,pms_hotel_id,'."'cdelaossa@mynuvola.com' email")
             ->join('hotels', 'hotels.hotel_id', '=', 'integrations_active.hotel_id')
             ->join('integrations', 'integrations.id', '=', 'integrations_active.int_id')
             ->where('integrations_active.state', 1)->whereIn('int_id', [1, 5])->get();
@@ -32,7 +24,7 @@ class IntegrationMonitoringController extends Controller
 
     public function getStats(Request $request)
     {
-        if (!$request->has('hotel_id')) {
+        if (! $request->has('hotel_id')) {
             return response()->json(['error' => 'hotel_id not provided'], 401);
         }
         $hotel_id = $request->hotel_id;
@@ -71,7 +63,7 @@ class IntegrationMonitoringController extends Controller
         }
         $register = Monitoring::where('hotel_id', $hotel_id)->whereDate('date', $date)->get();
 
-        $time  = '';
+        $time = '';
         $total = 0;
         $array = [];
         foreach ($register as  $value) {
@@ -83,11 +75,11 @@ class IntegrationMonitoringController extends Controller
                 'check_out' => $json['CheckOut'],
                 'off_market' => $json['OffMarket'],
                 'housekeeping' => $json['HousekeepingStatus'],
-                'total'       => $value->total
+                'total' => $value->total,
             ];
             $array[] = [
-                'data' =>    $array_data,
-                'time' =>    $time
+                'data' => $array_data,
+                'time' => $time,
             ];
             $total += $value->total;
         }
@@ -95,8 +87,9 @@ class IntegrationMonitoringController extends Controller
             'hotel_id' => $hotel_id,
             'date' => $date,
             'total' => $total,
-            'data' => $array
+            'data' => $array,
         ];
+
         return $response;
     }
 
@@ -107,7 +100,7 @@ class IntegrationMonitoringController extends Controller
         }
         $register = Monitoring::where('hotel_id', $hotel_id)->whereDate('date', $date)->get();
 
-        $time  = '';
+        $time = '';
         $total = 0;
         $array = [];
         foreach ($register as  $value) {
@@ -117,11 +110,11 @@ class IntegrationMonitoringController extends Controller
                 'reservation' => $json['Oracle_reservation'],
                 'profile' => $json['Oracle_profile'],
                 'housekeeping' => $json['Oracle_housekeeping'],
-                'total'       => $value->total
+                'total' => $value->total,
             ];
             $array[] = [
-                'data' =>    $array_data,
-                'time' =>    $time
+                'data' => $array_data,
+                'time' => $time,
             ];
             $total += $value->total;
         }
@@ -129,11 +122,11 @@ class IntegrationMonitoringController extends Controller
             'hotel_id' => $hotel_id,
             'date' => $date,
             'total' => $total,
-            'data' => $array
+            'data' => $array,
         ];
+
         return $response;
     }
-
 
     public function getTotal($hotel_id, $date = null)
     {
@@ -141,33 +134,32 @@ class IntegrationMonitoringController extends Controller
             $date = date('Y-m-d');
         }
         $register = Monitoring::where('Hotel_id', $hotel_id)->whereDate('date', $date)->get();
-    
+
         $is_data = false;
-        foreach($register as $r){
-            
+        foreach ($register as $r) {
             $is_data = $r ? true : false;
             break;
         }
-        if(!$is_data){
+        if (! $is_data) {
             return response()->json([
-                'reservation'  => 0,
-                'profile'      => 0,
+                'reservation' => 0,
+                'profile' => 0,
                 'housekeeping' => 0,
-                'total'        => 0
+                'total' => 0,
             ]);
-        }else{
+        } else {
             $first = $register[0];
             if ($first->int_id == 5) {
                 $array = [
-                    'reservation'  => 0,
-                    'profile'      => 0,
+                    'reservation' => 0,
+                    'profile' => 0,
                     'housekeeping' => 0,
-                    'total'        => 0
+                    'total' => 0,
                 ];
                 foreach ($register as  $value) {
                     $json = $value->detail_json;
                     $time = $value->time;
-    
+
                     $array['reservation'] += $json['Oracle_reservation'];
                     $array['profile'] += $json['Oracle_profile'];
                     $array['housekeeping'] += $json['Oracle_housekeeping'];
@@ -175,17 +167,17 @@ class IntegrationMonitoringController extends Controller
                 }
             } elseif ($first->int_id == 1) {
                 $array = [
-                    'reservation'  => 0,
-                    'check_in'      => 0,
+                    'reservation' => 0,
+                    'check_in' => 0,
                     'check_out' => 0,
                     'off_market' => 0,
                     'housekeeping' => 0,
-                    'total'        => 0
+                    'total' => 0,
                 ];
                 foreach ($register as  $value) {
                     $json = $value->detail_json;
                     $time = $value->time;
-    
+
                     $array['reservation'] += $json['ReservationList'];
                     $array['check_in'] += $json['CheckIn'];
                     $array['check_out'] += $json['CheckOut'];
@@ -194,16 +186,14 @@ class IntegrationMonitoringController extends Controller
                     $array['total'] += $value->total;
                 }
             }
-    
+
             return $array;
         }
-        
-        
     }
 
     public function test()
     {
-        $integrations = IntegrationsActive::select(['hotel_id','pms_hotel_id'])->where('int_id', 15)->get();
+        $integrations = IntegrationsActive::select(['hotel_id', 'pms_hotel_id'])->where('int_id', 15)->get();
         $oracle_housekeeping = SMSHousekeeping::select(\DB::raw('hotel_id,max(created_at) last_data'))->where('hotel_id', '!=', '')->groupBy('hotel_id')->get();
         $data = [];
         foreach ($oracle_housekeeping as $key => $value) {
@@ -215,7 +205,6 @@ class IntegrationMonitoringController extends Controller
             $data2[$value['hotel_id']] = $value['last_data'];
         }
 
-
         $last_data = [];
         foreach ($data2 as $key => $value) {
             $last_data[$key] = isset($data[$key]) ? (strtotime($value) > strtotime($data2[$key]) ? $value : $data2[$key]) : $value;
@@ -223,12 +212,12 @@ class IntegrationMonitoringController extends Controller
 
         $hotel_data = [];
         foreach ($integrations as $key => $value) {
-            if(isset($last_data[$value->hotel_id])){
+            if (isset($last_data[$value->hotel_id])) {
                 $hotel = Hotel::find($value->hotel_id);
                 $hotel_data[] = [
                     'hotel_id' => $hotel->hotel_id,
                     'name' => $hotel->hotel_name,
-                    'last_data' => $last_data[$value->hotel_id]
+                    'last_data' => $last_data[$value->hotel_id],
                 ];
             }
         }

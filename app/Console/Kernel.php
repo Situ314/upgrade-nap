@@ -41,7 +41,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command("monitoring:sendmailopera $time")->cron("*/$time * * * *")->timezone('UTC');
         // Reporte diario de las integraciones
         // $schedule->command('monitoring:sendreport')->dailyAt('23:50')->timezone('UTC');
-        
+
         // $schedule->command('cancel:reservation')->cron("0 0 */1 * *")->timezone('UTC');
         // $schedule->command('monitoring:operasendreport')->dailyAt('18:59')->timezone('America/New_york');
         //Resyncs  Opera/Maestro
@@ -61,17 +61,13 @@ class Kernel extends ConsoleKernel
         $schedule->command('full:resync 207')->dailyAt('07:00')->timezone('America/New_York');
         // $schedule->command('full:resync 275')->dailyAt('07:00')->timezone('America/New_York');
         // $schedule->command('full:resync 275')->cron('0 */1 * * *')->timezone('UTC');
-        $schedule->command("monitoring:sendmail")->dailyAt('08:00')->timezone('America/New_York');
-        $schedule->command("monitoring:sendmail")->dailyAt('12:00')->timezone('America/New_York');
-        $schedule->command("monitoring:sendmail")->dailyAt('18:00')->timezone('America/New_York');
+        $schedule->command('monitoring:sendmail')->dailyAt('08:00')->timezone('America/New_York');
+        $schedule->command('monitoring:sendmail')->dailyAt('12:00')->timezone('America/New_York');
+        $schedule->command('monitoring:sendmail')->dailyAt('18:00')->timezone('America/New_York');
 
         // $schedule->command("monitoring:sendmailmaestro $time")->dailyAt('08:00')->timezone('America/New_York');
         // $schedule->command("monitoring:sendmailmaestro $time")->dailyAt('12:00')->timezone('America/New_York');
         // $schedule->command("monitoring:sendmailmaestro $time")->dailyAt('19:35')->timezone('America/New_York');
-
-
-
-
     }
 
     /**

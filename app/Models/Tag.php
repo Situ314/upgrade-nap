@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Tag extends Model
 {
     public $timestamps = false;
+
     protected $table = 'tags';
+
     protected $primaryKey = 'tag_id';
+
     protected $fillable = [
         'hotel_id',
         'tag_name', //
@@ -21,8 +24,9 @@ class Tag extends Model
         'tag_status',
         'tag_type',
         'is_active',
-        'updated_on'
+        'updated_on',
     ];
+
     protected $hidden = [
         'hotel_id',
         'tag_default',
@@ -35,11 +39,11 @@ class Tag extends Model
         'tag_type',
         'is_active',
         'updated_on',
-        'pivot'
+        'pivot',
     ];
 
-    public function departments() {
-        return $this->belongsToMany('App\Models\Departament', 'dept_tag','tag_id','dept_id');
+    public function departments()
+    {
+        return $this->belongsToMany('App\Models\Departament', 'dept_tag', 'tag_id', 'dept_id');
     }
-
 }

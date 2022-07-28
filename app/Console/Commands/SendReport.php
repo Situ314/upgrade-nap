@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
-use \App\Models\Log\Monitoring;
+use App\Models\Hotel;
+use App\Models\IntegrationsActive;
+use App\Models\Log\Monitoring;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Mail;
-use \App\Models\Hotel;
-use \App\Models\IntegrationsActive;
 
 class SendReport extends Command
 {
@@ -65,8 +65,8 @@ class SendReport extends Command
                 // 'customersuccess@mynuvola.com'
             ];
             $parameters = [
-                'QuantityLogs'  => $logs,
-                "date"          => $date
+                'QuantityLogs' => $logs,
+                'date' => $date,
             ];
 
             Mail::send('emails.EmailMaestroPMSLog_DailyReport', $parameters, function ($m) use ($emails) {
@@ -75,7 +75,7 @@ class SendReport extends Command
                 $m->subject('Daily Reports | Maestro PMS Logs');
             });
         } catch (Exception $e) {
-            \Log::error("Error en SendEmail");
+            \Log::error('Error en SendEmail');
             \log::error("$e");
         }
     }
@@ -83,38 +83,37 @@ class SendReport extends Command
     public function SearchLogs($hotel_id, $date)
     {
         try {
-            $reservationlist    = 0;
-            $checkin            = 0;
-            $checkout           = 0;
-            $offmarket          = 0;
-            $housekeeping       = 0;
-            
+            $reservationlist = 0;
+            $checkin = 0;
+            $checkout = 0;
+            $offmarket = 0;
+            $housekeeping = 0;
+
             $hotel_monitoring = Monitoring::whereDate('date', $date)->where('Hotel_id', $hotel_id)->get();
 
             foreach ($hotel_monitoring as $value) {
-                $reservationlist    += $value->detail_json['ReservationList'];
-                $checkin            += $value->detail_json['CheckIn'];
-                $checkout           += $value->detail_json['CheckOut'];
-                $offmarket          += $value->detail_json['OffMarket'];
-                $housekeeping       += $value->detail_json['HousekeepingStatus'];
+                $reservationlist += $value->detail_json['ReservationList'];
+                $checkin += $value->detail_json['CheckIn'];
+                $checkout += $value->detail_json['CheckOut'];
+                $offmarket += $value->detail_json['OffMarket'];
+                $housekeeping += $value->detail_json['HousekeepingStatus'];
             }
 
             $data = [
-                'ReservationList'     => $reservationlist,
-                'CheckIn'             => $checkin,
-                'CheckOut'            => $checkout,
-                'OffMarket'           => $offmarket,
-                'HousekeepingStatus'  => $housekeeping,
-                'Total'               => $housekeeping + $reservationlist + $checkin + $checkout + $offmarket
+                'ReservationList' => $reservationlist,
+                'CheckIn' => $checkin,
+                'CheckOut' => $checkout,
+                'OffMarket' => $offmarket,
+                'HousekeepingStatus' => $housekeeping,
+                'Total' => $housekeeping + $reservationlist + $checkin + $checkout + $offmarket,
             ];
 
             return $data;
         } catch (Exception $e) {
-            \Log::error("Error en SearchLogs");
+            \Log::error('Error en SearchLogs');
             \Log::error("$e");
+
             return null;
         }
     }
-
-    
 }

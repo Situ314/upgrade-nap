@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Reservation extends Model
 {
-    protected $connection= 'opera';
+    protected $connection = 'opera';
+
     public $timestamps = false;
+
     protected $table = 'Reservation';
+
     protected $primaryKey = 'ID';
+
     protected $fillable = [
         'FirsName',
         'LastName',
@@ -28,11 +32,13 @@ class Reservation extends Model
         'MarketSegmentField',
         'SourceCodeField',
         'NoPostFlag',
-        'ReservationStatus'
+        'ReservationStatus',
     ];
+
     protected $hidden = [];
 
-    public function Profile() {
+    public function Profile()
+    {
         return $this->hasOne('App\Models\Opera\Profile', 'UniqueID', 'ProfileID');
     }
 }

@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReservationList extends Model
 {
-    protected $connection   = 'integrationsLogs';
-    protected $table        = 'ReservationList';
-    public $timestamps     = false;
-    protected $fillable     = [
+    protected $connection = 'integrationsLogs';
+
+    protected $table = 'ReservationList';
+
+    public $timestamps = false;
+
+    protected $fillable = [
         'HotelId',
         'ReservationNumber',
         'ReservationNumberKey',
@@ -78,6 +81,6 @@ class ReservationList extends Model
         'SharerReservationNumber',
         'Created_on_Date',
         'Created_on_Time',
-        'xml'
+        'xml',
     ];
 }

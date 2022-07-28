@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class RoomMove extends Model
 {
     public $timestamps = false;
+
     protected $table = 'room_moves';
+
     protected $primaryKey = 'rm_id';
+
     protected $fillable = [
         'guest_id',
         'phone',
@@ -22,7 +25,8 @@ class RoomMove extends Model
         'completed_on',
         'updated_on',
         'updated_by',
-        'active'
+        'active',
     ];
+
     protected $hidden = [];
 }

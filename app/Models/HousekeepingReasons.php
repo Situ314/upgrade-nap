@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class HousekeepingReasons extends Model
 {
     public $timestamps = false;
+
     protected $table = 'housekeeping_reasons';
+
     protected $primaryKey = 'reason_id';
-    
+
     protected $fillable = [
         'hotel_id',
         'reason_type',
@@ -17,15 +19,15 @@ class HousekeepingReasons extends Model
         'is_default',
         'is_active',
         'created_by',
-        'created_on',        
+        'created_on',
         'updated_by',
-        'updated_on'
+        'updated_on',
     ];
 
     protected $hidden = [
         'created_by',
-        'created_on',        
+        'created_on',
         'updated_by',
-        'updated_on'
+        'updated_on',
     ];
 }

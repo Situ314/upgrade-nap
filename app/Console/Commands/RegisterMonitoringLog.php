@@ -2,17 +2,17 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\Log\ReservationList;
-use App\Models\Log\HousekeepingStatus;
-use App\Models\Log\Offmarket;
+use App\Models\IntegrationsActive;
 use App\Models\Log\CheckIn;
-use \App\Models\Log\CheckOut;
-use \App\Models\Log\Monitoring;
-use \App\Models\IntegrationsActive;
+use App\Models\Log\CheckOut;
+use App\Models\Log\HousekeepingStatus;
+use App\Models\Log\Monitoring;
+use App\Models\Log\Offmarket;
 use App\Models\Log\OracleHousekeeping;
 use App\Models\Log\OracleProfile;
 use App\Models\Log\OracleReservation;
+use App\Models\Log\ReservationList;
+use Illuminate\Console\Command;
 
 class RegisterMonitoringLog extends Command
 {
@@ -22,7 +22,6 @@ class RegisterMonitoringLog extends Command
      * @var string
      */
     protected $signature = 'register:monitoring';
-
 
     /**
      * The console command description.
@@ -50,7 +49,6 @@ class RegisterMonitoringLog extends Command
     {
         $this->RegisterLogMaestro();
         $this->RegisterLogOpera();
-
     }
 
     public function RegisterLogOpera()
@@ -62,11 +60,11 @@ class RegisterMonitoringLog extends Command
 
             $count = 0;
             foreach ($Hotels as $value) {
-                $json   = array(
-                    'Oracle_reservation'    => $this->SearchLogsOpera('Oracle_reservation', $value->hotel_id, $value->pms_hotel_id),
-                    'Oracle_profile'        => $this->SearchLogsOpera('Oracle_profile', $value->hotel_id, $value->pms_hotel_id),
-                    'Oracle_housekeeping'   => $this->SearchLogsOpera('Oracle_housekeeping', $value->hotel_id, $value->pms_hotel_id)
-                );
+                $json = [
+                    'Oracle_reservation' => $this->SearchLogsOpera('Oracle_reservation', $value->hotel_id, $value->pms_hotel_id),
+                    'Oracle_profile' => $this->SearchLogsOpera('Oracle_profile', $value->hotel_id, $value->pms_hotel_id),
+                    'Oracle_housekeeping' => $this->SearchLogsOpera('Oracle_housekeeping', $value->hotel_id, $value->pms_hotel_id),
+                ];
 
                 $count =
                     $json['Oracle_reservation'] +
@@ -74,11 +72,11 @@ class RegisterMonitoringLog extends Command
                     $json['Oracle_housekeeping'];
 
                 $data = [
-                    'Hotel_id'      => $value->hotel_id,
-                    'date'          => date('Y-m-d'),
-                    'time'          => date('H:i:s'),
-                    'total'         => $count,
-                    'detail_json'   => $json
+                    'Hotel_id' => $value->hotel_id,
+                    'date' => date('Y-m-d'),
+                    'time' => date('H:i:s'),
+                    'total' => $count,
+                    'detail_json' => $json,
                 ];
 
                 Monitoring::create($data);
@@ -97,13 +95,13 @@ class RegisterMonitoringLog extends Command
 
             $count = 0;
             foreach ($Hotels as $value) {
-                $json = array(
-                    'ReservationList'    => $this->SearchLogsMaestro('ReservationList', $value->hotel_id, $value->pms_hotel_id),
-                    'CheckIn'            => $this->SearchLogsMaestro('CheckIn', $value->hotel_id, $value->pms_hotel_id),
-                    'CheckOut'           => $this->SearchLogsMaestro('CheckOut', $value->hotel_id, $value->pms_hotel_id),
-                    'OffMarket'          => $this->SearchLogsMaestro('Offmarket', $value->hotel_id, $value->pms_hotel_id),
+                $json = [
+                    'ReservationList' => $this->SearchLogsMaestro('ReservationList', $value->hotel_id, $value->pms_hotel_id),
+                    'CheckIn' => $this->SearchLogsMaestro('CheckIn', $value->hotel_id, $value->pms_hotel_id),
+                    'CheckOut' => $this->SearchLogsMaestro('CheckOut', $value->hotel_id, $value->pms_hotel_id),
+                    'OffMarket' => $this->SearchLogsMaestro('Offmarket', $value->hotel_id, $value->pms_hotel_id),
                     'HousekeepingStatus' => $this->SearchLogsMaestro('HousekeepingStatus', $value->hotel_id, $value->pms_hotel_id),
-                );
+                ];
 
                 $count =
                     $json['ReservationList'] +
@@ -113,11 +111,11 @@ class RegisterMonitoringLog extends Command
                     $json['HousekeepingStatus'];
 
                 $data = [
-                    'Hotel_id'      => $value->hotel_id,
-                    'date'          => date('Y-m-d'),
-                    'time'          => date('H:i:s'),
-                    'total'         => $count,
-                    'detail_json'   => $json
+                    'Hotel_id' => $value->hotel_id,
+                    'date' => date('Y-m-d'),
+                    'time' => date('H:i:s'),
+                    'total' => $count,
+                    'detail_json' => $json,
                 ];
 
                 Monitoring::create($data);
@@ -133,7 +131,6 @@ class RegisterMonitoringLog extends Command
         $date = date('Y-m-d');
 
         try {
-
             $count_monitoring = Monitoring::where('Hotel_id', $hotel_id)->count();
             $hotel_monitoring = Monitoring::whereDate('date', $date)
                 ->where('Hotel_id', $hotel_id)
@@ -162,7 +159,6 @@ class RegisterMonitoringLog extends Command
                             ->whereTime('Created_on_Time', '>=', $time_range);
                     }
 
-
                     $count_data = $count_data->count();
                     break;
                 case 'CheckIn':
@@ -180,7 +176,7 @@ class RegisterMonitoringLog extends Command
                     $count_data = $count_data->count();
                     break;
                 case 'CheckOut':
-                    $count_data = CheckOut::where('HotelId',  $pms_hotel_id);
+                    $count_data = CheckOut::where('HotelId', $pms_hotel_id);
                     if ($count_monitoring > 0) {
                         $count_data = $count_data
                             ->whereDate('created_on_Date', $date);
@@ -194,7 +190,7 @@ class RegisterMonitoringLog extends Command
                     $count_data = $count_data->count();
                     break;
                 case 'Offmarket':
-                    $count_data = Offmarket::where('HotelId',  $pms_hotel_id);
+                    $count_data = Offmarket::where('HotelId', $pms_hotel_id);
                     if ($count_monitoring > 0) {
                         $count_data = $count_data
                             ->whereDate('created_on_Date', $date);
@@ -208,7 +204,7 @@ class RegisterMonitoringLog extends Command
                     $count_data = $count_data->count();
                     break;
                 case 'HousekeepingStatus':
-                    $count_data = HousekeepingStatus::where('HotelId',  $pms_hotel_id);
+                    $count_data = HousekeepingStatus::where('HotelId', $pms_hotel_id);
                     if ($count_monitoring > 0) {
                         $count_data = $count_data
                             ->whereDate('created_on_Date', $date);
@@ -226,10 +222,10 @@ class RegisterMonitoringLog extends Command
             return $count_data;
         } catch (\Exception $e) {
             \Log::error($e);
+
             return null;
         }
     }
-
 
     public function SearchLogsOpera($switch, $hotel_id, $pms_hotel_id)
     {
@@ -237,7 +233,6 @@ class RegisterMonitoringLog extends Command
         $date = date('Y-m-d');
 
         try {
-
             $count_monitoring = Monitoring::where('Hotel_id', $hotel_id)->count();
             $hotel_monitoring = Monitoring::whereDate('date', $date)
                 ->where('Hotel_id', $hotel_id)
@@ -266,7 +261,6 @@ class RegisterMonitoringLog extends Command
                             ->whereTime('created_at', '>=', $time_range);
                     }
 
-
                     $count_data = $count_data->count();
                     break;
                 case 'Oracle_profile':
@@ -284,7 +278,7 @@ class RegisterMonitoringLog extends Command
                     $count_data = $count_data->count();
                     break;
                 case 'Oracle_housekeeping':
-                    $count_data = OracleHousekeeping::where('resortId',  $pms_hotel_id);
+                    $count_data = OracleHousekeeping::where('resortId', $pms_hotel_id);
                     if ($count_monitoring > 0) {
                         $count_data = $count_data
                             ->whereDate('created_at', $date);
@@ -301,6 +295,7 @@ class RegisterMonitoringLog extends Command
             return $count_data;
         } catch (\Exception $e) {
             \Log::error($e);
+
             return null;
         }
     }

@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Hotel;
+use App\Models\Log\Monitoring;
 use Illuminate\Console\Command;
-use League\Flysystem\Exception;
 use Illuminate\Support\Facades\Mail;
-use \App\Models\Log\Monitoring;
-use \App\Models\Hotel;
+use League\Flysystem\Exception;
 
 class MonitoringMaestroSendmail extends Command
 {
@@ -46,13 +46,12 @@ class MonitoringMaestroSendmail extends Command
         $this->SearchLogsControl($time);
     }
 
-
     private function SearchLogsControl($__time)
     {
         try {
-            $date   = date('Y-m-d');
-            $end_time   = date('H:i:s');
-            $start_time  = date('H:i:s', strtotime("-$__time minutes", strtotime($end_time)));
+            $date = date('Y-m-d');
+            $end_time = date('H:i:s');
+            $start_time = date('H:i:s', strtotime("-$__time minutes", strtotime($end_time)));
 
             $Monitoring = Monitoring::where('int_id', 1)->whereDate('date', $date)
                 ->whereTime('time', '>=', $start_time)
@@ -80,7 +79,7 @@ class MonitoringMaestroSendmail extends Command
                 $this->SendEmail($start_time, $end_time, $hotels);
             }
         } catch (\Exception $e) {
-            \Log::error("Error en SearchLogsControl");
+            \Log::error('Error en SearchLogsControl');
             \Log::error("$e");
         }
     }
@@ -98,9 +97,9 @@ class MonitoringMaestroSendmail extends Command
             ];
 
             $parameters = [
-                'hotels'    => $hotels,
-                'time1'     => $time,
-                'time2'     => $time2
+                'hotels' => $hotels,
+                'time1' => $time,
+                'time2' => $time2,
             ];
 
             Mail::send('emails.EmailMaestroPMSLog', $parameters, function ($m) use ($emails) {

@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class DeptTag extends Model
 {
     public $timestamps = false;
+
     protected $table = 'dept_tag';
+
     protected $primaryKey = 'dept_tag_id';
+
     protected $fillable = [
         'hotel_id',
         'dept_id',
@@ -39,8 +42,9 @@ class DeptTag extends Model
         'status',
         'code',
         'id_staff_autoassign',
-        'name_staff_autoassign'
+        'name_staff_autoassign',
     ];
+
     protected $hidden = [
         'hotel_id',
         'dept_id',
@@ -71,17 +75,16 @@ class DeptTag extends Model
         'status',
         'code',
         'id_staff_autoassign',
-        'name_staff_autoassign'
+        'name_staff_autoassign',
     ];
 
     public function departament()
     {
-        return $this->hasOne('App\Models\Departament','dept_id','dept_id');
+        return $this->hasOne('App\Models\Departament', 'dept_id', 'dept_id');
     }
 
-    public function tag(){
+    public function tag()
+    {
         return $this->hasOne('App\Models\Tag', 'tag_id', 'tag_id');
     }
-
-
 }

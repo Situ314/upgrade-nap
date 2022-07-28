@@ -4,11 +4,15 @@ namespace App\Models\Log;
 
 use Illuminate\Database\Eloquent\Model;
 
-class OracleProfile extends Model{
-    protected $connection   = 'integrationsLogs';
-    protected $table        = 'Oracle_profile';
-    public $timestamps      = false;
-    protected $fillable     = [
+class OracleProfile extends Model
+{
+    protected $connection = 'integrationsLogs';
+
+    protected $table = 'Oracle_profile';
+
+    public $timestamps = false;
+
+    protected $fillable = [
         'resortId',
         'FirstName',
         'LastName',
@@ -21,6 +25,6 @@ class OracleProfile extends Model{
         'state',
         'UniqueID',
         'birthDate',
-        'created_at'
+        'created_at',
     ];
 }

@@ -75,7 +75,7 @@ return [
             'group' => 'default',
             'deduplicator' => 'unique',
             'allow_delay' => env('SQS_ALLOW_DELAY'),
-	    ],
+        ],
         'sqs-fifo_maestro' => [
             'driver' => 'sqs-fifo',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -87,7 +87,7 @@ return [
             'group' => 'default',
             'deduplicator' => 'unique',
             'allow_delay' => env('SQS_ALLOW_DELAY'),
-	    ],
+        ],
 
     ],
 

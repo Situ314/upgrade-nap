@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class IntegrationsActive extends Model
 {
     public $timestamps = false;
+
     protected $table = 'integrations_active';
-    protected $casts = [ 'config' => 'json' ];
+
+    protected $casts = ['config' => 'json'];
+
     protected $fillable = [
         'int_id',
         'hotel_id',
@@ -23,16 +26,17 @@ class IntegrationsActive extends Model
         'pms_hotel_id',
         'sms_angel_active',
     ];
+
     protected $hidden = [
         'created_by',
         'created_on',
         'updated_by',
         'updated_on',
         'deleted_by',
-        'deleted_on' 
+        'deleted_on',
     ];
 
-    public function integration() 
+    public function integration()
     {
         return $this->hasOne('App\Models\Integrations', 'id', 'int_id');
     }

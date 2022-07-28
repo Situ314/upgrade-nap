@@ -16,17 +16,16 @@ class Miller
      */
     public function handle($request, Closure $next)
     {
-
-        $response   = $request->getContent();
-        $xmlString  = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
-        $xml        = simplexml_load_string($xmlString);
+        $response = $request->getContent();
+        $xmlString = preg_replace('/(<\/?)(\w+):([^>]*>)/', '$1$3', $response);
+        $xml = simplexml_load_string($xmlString);
         // \Log::info('MILLER XML');
         // \Log::info($xmlString);
-        $str_json   = json_encode($xml);
+        $str_json = json_encode($xml);
         // \Log::info($str_json);
-        $json       = json_decode($str_json, true);
-        $Username   = array_get($json, 'Header.Security.UsernameToken.Username');
-        $Password   = array_get($json, 'Header.Security.UsernameToken.Password');
+        $json = json_decode($str_json, true);
+        $Username = array_get($json, 'Header.Security.UsernameToken.Username');
+        $Password = array_get($json, 'Header.Security.UsernameToken.Password');
         $pms_hotel_id = array_get($json, 'Header.From.Address');
         $pos = strpos($pms_hotel_id, ':');
         if ($pos !== false) {
@@ -38,7 +37,7 @@ class Miller
             ->where('state', 1)
             ->first();
         if ($IntegrationsActive) {
-            $config     = $IntegrationsActive->config;
+            $config = $IntegrationsActive->config;
             $__username = $config['username'];
             $__password = $config['password'];
             if ($__username == $Username && $__password == $Password) {
@@ -47,18 +46,21 @@ class Miller
                     // \Log::info($response);
                 }
                 $request->merge([
-                    "staff_id"  => $IntegrationsActive->created_by,
-                    "hotel_id"  => $IntegrationsActive->hotel_id,
-                    "data"      => $json,
-                    "config"    => $config
+                    'staff_id' => $IntegrationsActive->created_by,
+                    'hotel_id' => $IntegrationsActive->hotel_id,
+                    'data' => $json,
+                    'config' => $config,
                 ]);
+
                 return $next($request);
             } else {
                 $xml_response = ArrayToXml::convert($this->BuildXML(), 'soap:envelope');
+
                 return response($xml_response, 200)->header('Content-Type', 'text/xml');
             }
         } else {
             $xml_response = ArrayToXml::convert($this->BuildXML(), 'soap:envelope');
+
             return response($xml_response, 200)->header('Content-Type', 'text/xml');
         }
     }
@@ -66,19 +68,20 @@ class Miller
     public function BuildXML()
     {
         $error = [
-            "_attributes" => [
-                "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                "xmlns:xsd" => "http://www.w3.org/2001/XMLSchema",
-                "xmlns:soap" => "http://schemas.xmlsoap.org/soap/envelope/"
+            '_attributes' => [
+                'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                'xmlns:xsd' => 'http://www.w3.org/2001/XMLSchema',
+                'xmlns:soap' => 'http://schemas.xmlsoap.org/soap/envelope/',
             ],
-            "soap:Body" => [
-                "soap:Fault" => [
-                    "faultcode" => 401,
-                    "faultstring" => "Authentication failed: missing, malformed, 
-                                or invalid credentials."
-                ]
-            ]
+            'soap:Body' => [
+                'soap:Fault' => [
+                    'faultcode' => 401,
+                    'faultstring' => 'Authentication failed: missing, malformed, 
+                                or invalid credentials.',
+                ],
+            ],
         ];
+
         return $error;
     }
 }

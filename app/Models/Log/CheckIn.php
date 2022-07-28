@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class CheckIn extends Model
 {
-    protected $connection   = 'integrationsLogs';
-    protected $table        = 'CheckIn';
-    public $timestamps      = false;
-    protected $fillable     = [
+    protected $connection = 'integrationsLogs';
+
+    protected $table = 'CheckIn';
+
+    public $timestamps = false;
+
+    protected $fillable = [
         'HotelId',
         'GuestName',
         'LastName',
@@ -64,6 +67,6 @@ class CheckIn extends Model
         'GroupName',
         'Created_on_Date',
         'Created_on_Time',
-        'xml'
+        'xml',
     ];
 }

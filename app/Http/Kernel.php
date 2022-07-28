@@ -38,12 +38,12 @@ class Kernel extends HttpKernel
 
         'api' => [
             'throttle:240,1',
-            'bindings'
+            'bindings',
         ],
 
         'basic' => [
-            \App\Http\Middleware\AuthBasic::class
-        ]
+            \App\Http\Middleware\AuthBasic::class,
+        ],
     ];
 
     /**
@@ -54,15 +54,15 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'auth'              => \Illuminate\Auth\Middleware\Authenticate::class,
-        'auth.basic'        => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
-        'bindings'          => \Illuminate\Routing\Middleware\SubstituteBindings::class,
-        'can'               => \Illuminate\Auth\Middleware\Authorize::class,
-        'guest'             => \App\Http\Middleware\RedirectIfAuthenticated::class,
-        'throttle'          => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'blockip'           => \App\Http\Middleware\BlockIp::class,
-        'oracle'            => \App\Http\Middleware\Oracle::class,
-        'InforAuth'            => \App\Http\Middleware\InforAuth::class,
-        'miller'            => \App\Http\Middleware\Miller::class,
+        'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+        'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        'can' => \Illuminate\Auth\Middleware\Authorize::class,
+        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'blockip' => \App\Http\Middleware\BlockIp::class,
+        'oracle' => \App\Http\Middleware\Oracle::class,
+        'InforAuth' => \App\Http\Middleware\InforAuth::class,
+        'miller' => \App\Http\Middleware\Miller::class,
     ];
 }

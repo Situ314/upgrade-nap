@@ -3,7 +3,6 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Auth;
 
 class AuthBasic
 {
@@ -20,29 +19,30 @@ class AuthBasic
         // \Log::info($request->ip());
         // \Log::info($request->getUser());
         // \Log::info($request->getPassword());
-        
+
         /*$user = \App\User::where([
             'username' => $request->getUser(),
             'password' => md5($request->getPassword())
         ])->first();*/
 
         $user = \App\User::where(['username' => $request->getUser()])->first();
-        if($user) {
+        if ($user) {
             // validate hash password
-            if($user->password != md5($request->getPassword())){
+            if ($user->password != md5($request->getPassword())) {
                 $user = null;
             }
         }
-        if($user) {
+        if ($user) {
             $user->staffHotels;
-            $request->merge([ 
-                "staff_id"  => $user->staff_id,
-                "hotel_id"  => $user->staffHotels[0]->hotel_id 
+            $request->merge([
+                'staff_id' => $user->staff_id,
+                'hotel_id' => $user->staffHotels[0]->hotel_id,
             ]);
 
             return $next($request);
         }
-	\Log::error('AUTH FAILS');
-        return response()->json([ 'message' => 'Auth failed' ], 401);        
+        \Log::error('AUTH FAILS');
+
+        return response()->json(['message' => 'Auth failed'], 401);
     }
 }

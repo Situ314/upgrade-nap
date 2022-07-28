@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Departament extends Model
 {
     public $timestamps = false;
+
     protected $table = 'departments';
+
     protected $primaryKey = 'dept_id';
+
     protected $fillable = [
         'hotel_id',
         'dept_name',
@@ -23,8 +26,9 @@ class Departament extends Model
         'color',
         'predetermined_target_2',
         'predetermined_target_3',
-        'is_api'
+        'is_api',
     ];
+
     protected $hidden = [
         'hotel_id',
         'dep_default',
@@ -37,10 +41,11 @@ class Departament extends Model
         'color',
         'predetermined_target_2',
         'predetermined_target_3',
-        'is_api'
+        'is_api',
     ];
 
-    public function tags() {
-        return $this->belongsToMany('App\Models\Tag', 'dept_tag','dept_id','tag_id');
+    public function tags()
+    {
+        return $this->belongsToMany('App\Models\Tag', 'dept_tag', 'dept_id', 'tag_id');
     }
 }

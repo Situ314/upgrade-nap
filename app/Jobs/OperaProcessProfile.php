@@ -2,18 +2,19 @@
 
 namespace App\Jobs;
 
+use App\Helpers\OperaHelper;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
-use App\Helpers\OperaHelper;
 
 class OperaProcessProfile implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $resort_id;
+
     private $unique_id;
 
     public function __construct($resort_id, $unique_id)
@@ -26,6 +27,8 @@ class OperaProcessProfile implements ShouldQueue
     {
         $xml = OperaHelper::getProfileData($this->resort_id, $this->unique_id);
         \Log::info($xml);
-        if ($xml) OperaHelper::sendXmlToAws($xml, $this->resort_id);
+        if ($xml) {
+            OperaHelper::sendXmlToAws($xml, $this->resort_id);
+        }
     }
 }

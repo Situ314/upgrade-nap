@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class HousekeepingPreferences extends Model
 {
     public $timestamps = false;
+
     protected $table = 'housekeeping_preferences';
+
     protected $primaryKey = 'hk_preferences_id';
-    
+
     protected $fillable = [
         'hotel_id',
         'am_shift_start',
@@ -32,7 +34,7 @@ class HousekeepingPreferences extends Model
         'created_on',
         'updated_by',
         'updated_on',
-        'sync_last_update'
+        'sync_last_update',
     ];
 
     protected $hidden = [

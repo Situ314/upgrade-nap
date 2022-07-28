@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Spatie\ArrayToXml\ArrayToXml;
 
-
 class InforAuth
 {
     /**
@@ -28,67 +27,67 @@ class InforAuth
             $xmlString = preg_replace('/([a-zA-Z0-9_-]+):([a-zA-Z0-9_-]+)/', '$1$2', $xmlString);
 
             try {
-                $xml       = simplexml_load_string($xmlString);
+                $xml = simplexml_load_string($xmlString);
             } catch (\Exception $e) {
                 /** Si el xml es enviado con errores estructurales, se retornara un error */
                 $xml_response = ArrayToXml::convert([
-                    "soap:Body" => [
+                    'soap:Body' => [
                         'm:Response' => [
                             'm:Status' => 400,
-                            'm:Message' => "Bad Request"
+                            'm:Message' => 'Bad Request',
                         ],
                         '_attributes' => [
-                            "xmlns:m" => ""
-                        ]
+                            'xmlns:m' => '',
+                        ],
                     ],
                     '_attributes' => [
-                        'xmlns:soap' => "http://www.w3.org/2003/05/soap-envelope/",
-                        'soap:encodingStyle' => "http://www.w3.org/2003/05/soap-encoding"
-                    ]
+                        'xmlns:soap' => 'http://www.w3.org/2003/05/soap-envelope/',
+                        'soap:encodingStyle' => 'http://www.w3.org/2003/05/soap-encoding',
+                    ],
                 ], 'soap:Envelope');
 
                 return response($xml_response, 400)->header('Content-Type', 'Application/xml');
             }
 
-            $str_json  = json_encode($xml);
-            $json      = json_decode($str_json);
+            $str_json = json_encode($xml);
+            $json = json_decode($str_json);
 
             $integrations_infor = \App\Models\IntegrationsActive::where('hotel_id', $hotel_id)
                 ->where('int_id', 7)->where('state', 1)->first();
             /** Se busca los datos de la integración en base al hotel_id que se envia como parametro en la url
              *  Ademas se valida si esta integración existe o no, y si no existe retoran un error de autenticación
              */
-            if (!$integrations_infor) {
+            if (! $integrations_infor) {
                 $xml_response = ArrayToXml::convert([
-                    "soap:Body" => [
+                    'soap:Body' => [
                         'm:Response' => [
                             'm:Status' => 401,
-                            'm:Message' => "Auth Failed"
+                            'm:Message' => 'Auth Failed',
                         ],
                         '_attributes' => [
-                            "xmlns:m" => ""
-                        ]
+                            'xmlns:m' => '',
+                        ],
                     ],
                     '_attributes' => [
-                        'xmlns:soap' => "http://www.w3.org/2003/05/soap-envelope/",
-                        'soap:encodingStyle' => "http://www.w3.org/2003/05/soap-encoding"
-                    ]
+                        'xmlns:soap' => 'http://www.w3.org/2003/05/soap-envelope/',
+                        'soap:encodingStyle' => 'http://www.w3.org/2003/05/soap-encoding',
+                    ],
                 ], 'soap:Envelope');
 
                 return response($xml_response, 401)->header('Content-Type', 'Aplication/xml');
             }
-            /** Se guardan los datos de configuración de la integración 
+            /** Se guardan los datos de configuración de la integración
              *  Ademas se guardan las credenciales que se encuentran en la configuración de la integración
              */
             $config = $integrations_infor->config;
-            $user      = $config['user'];
-            $password  = $config['password'];
+            $user = $config['user'];
+            $password = $config['password'];
 
             /** Se valida que se halla enviado los atributos Username y Password en el encabezado del xml y se guardan en sus respectivas variables
              *  Si estos atributos no son enviados se guardaran campos vacios.
              */
-            $inforUser_tenantId = !empty($json->Header->Security->UsernameToken->Username) ? $json->Header->Security->UsernameToken->Username : '';
-            $inforPass = !empty($json->Header->Security->UsernameToken->Password) ? $json->Header->Security->UsernameToken->Password : '';
+            $inforUser_tenantId = ! empty($json->Header->Security->UsernameToken->Username) ? $json->Header->Security->UsernameToken->Username : '';
+            $inforPass = ! empty($json->Header->Security->UsernameToken->Password) ? $json->Header->Security->UsernameToken->Password : '';
 
             /** El atributo Username envía dos datos concatenados por un @, se realiza la separación  y se toma  unicamente el username
              * ¡¡¡¡¡EXAMPLE!!!!!  username@tenantId
@@ -102,25 +101,26 @@ class InforAuth
              */
             if ($user == $inforUser && $password == $inforPass) {
                 $request->merge([
-                    "staff_id"  => $integrations_infor->created_by,
-                    "config"    => $integrations_infor->config
+                    'staff_id' => $integrations_infor->created_by,
+                    'config' => $integrations_infor->config,
                 ]);
+
                 return $next($request);
             } else {
                 $xml_response = ArrayToXml::convert([
-                    "soap:Body" => [
+                    'soap:Body' => [
                         'm:Response' => [
                             'm:Status' => 401,
-                            'm:Message' => "Auth Failed"
+                            'm:Message' => 'Auth Failed',
                         ],
                         '_attributes' => [
-                            "xmlns:m" => ""
-                        ]
+                            'xmlns:m' => '',
+                        ],
                     ],
                     '_attributes' => [
-                        'xmlns:soap' => "http://www.w3.org/2003/05/soap-envelope/",
-                        'soap:encodingStyle' => "http://www.w3.org/2003/05/soap-encoding"
-                    ]
+                        'xmlns:soap' => 'http://www.w3.org/2003/05/soap-envelope/',
+                        'soap:encodingStyle' => 'http://www.w3.org/2003/05/soap-encoding',
+                    ],
                 ], 'soap:Envelope');
 
                 return response($xml_response, 401)->header('Content-Type', 'Aplication/xml');

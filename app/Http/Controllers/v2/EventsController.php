@@ -2,53 +2,65 @@
 
 namespace App\Http\Controllers\v2;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use DB;
-use Validator;
-use \App\Models\Event;
-use \App\Models\GuestCheckinDetails;
-use Illuminate\Validation\Rule;
-use \App\Models\DeptTag;
-use \App\Models\Staff;
-// use App\Models\EventStay; ESTA SOLO EN DEVELOP PERO NO EN PRODUCTION
+use App\Models\DeptTag;
+use App\Models\Event;
+use App\Models\GuestCheckinDetails;
 use App\Models\IntegrationsActive;
 use App\Models\IntegrationsStay;
+use App\Models\Staff;
+use DB;
+use Illuminate\Http\Request;
+// use App\Models\EventStay; ESTA SOLO EN DEVELOP PERO NO EN PRODUCTION
+use Illuminate\Validation\Rule;
+use Validator;
 
 class EventsController extends Controller
 {
-
     public function index(Request $request)
     {
-        // captura de parametros iniciales         
+        // captura de parametros iniciales
         $paginate = $request->paginate ?: 50;
-        if (!is_numeric($paginate)) {
-            return response()->json(["sintaxis error" => "Paginate is numeric type"], 400);
+        if (! is_numeric($paginate)) {
+            return response()->json(['sintaxis error' => 'Paginate is numeric type'], 400);
         }
         $staff_id = $request->user()->staff_id;
         // Validar hotel
-        if (!$request->exists('hotel_id')) return response()->json(["error" => "Hotel id not provided"], 400);
+        if (! $request->exists('hotel_id')) {
+            return response()->json(['error' => 'Hotel id not provided'], 400);
+        }
         $hotel_id = $request->hotel_id;
-        if (!is_numeric($hotel_id)) return response()->json(["sintaxis error" => "Hotel ID is numeric type"], 400);
+        if (! is_numeric($hotel_id)) {
+            return response()->json(['sintaxis error' => 'Hotel ID is numeric type'], 400);
+        }
         // Validar acceso al hotel x usuario
-        if (!$this->validateHotelId($hotel_id, $staff_id)) return response()->json(["error" => "User does not have access to the hotel"], 400);
+        if (! $this->validateHotelId($hotel_id, $staff_id)) {
+            return response()->json(['error' => 'User does not have access to the hotel'], 400);
+        }
         // Validar que el usuario tenga permisos para realizar esta operacion
         $permission = $this->getPermission($hotel_id, $staff_id, $menu_id = 1, $action = 'view');
-        if (!$permission) return response()->json(["error" => "User does not have permission to perform this action"], 400);
+        if (! $permission) {
+            return response()->json(['error' => 'User does not have permission to perform this action'], 400);
+        }
         // Configurar timezone y capturar fecha
         $this->configTimeZone($hotel_id);
         $now = date('Y-m-d H:i:s');
 
         $guest_id = $request->exists('guest_id') ? $request->guest_id : 0;
-        if (!is_numeric($guest_id)) return response()->json(["error" => "Guest id is not a number "], 400);
+        if (! is_numeric($guest_id)) {
+            return response()->json(['error' => 'Guest id is not a number '], 400);
+        }
 
         $room_number = $request->exists('room_number') ? $request->room_number : null;
-        if($room_number) $room_number = explode(",", $room_number);
-        else $room_number = [];
+        if ($room_number) {
+            $room_number = explode(',', $room_number);
+        } else {
+            $room_number = [];
+        }
 
         $room_ids = [];
         if (count($room_number) > 0) {
-            $hotelRooms = \App\Models\HotelRoom::select("room_id")->where('hotel_id', $hotel_id)->whereIn("location", $room_number)->get();
+            $hotelRooms = \App\Models\HotelRoom::select('room_id')->where('hotel_id', $hotel_id)->whereIn('location', $room_number)->get();
             foreach ($hotelRooms as $r) {
                 $room_ids[] = $r->room_id;
             }
@@ -64,7 +76,7 @@ class EventsController extends Controller
             'time',
             'status',
             'completed_on',
-            'completed_by'
+            'completed_by',
         ];
 
         $query = Event::select($columns)
@@ -74,17 +86,23 @@ class EventsController extends Controller
                 },
                 'DepTag.departament',
                 'DepTag.tag',
-                'StaffCompleted'
+                'StaffCompleted',
             ])
             ->where(function ($q) use ($hotel_id, $guest_id, $room_ids) {
                 $q->where('hotel_id', $hotel_id)->where('active', 1);
-                if ($guest_id > 0) $q->where('guest_id', $guest_id);
-                if (count($room_ids) > 0) $q->whereIn("room_id", $room_ids);
+                if ($guest_id > 0) {
+                    $q->where('guest_id', $guest_id);
+                }
+                if (count($room_ids) > 0) {
+                    $q->whereIn('room_id', $room_ids);
+                }
+
                 return $q;
             })
             ->orderBy('event_id', 'DESC');
 
         $data = $query->paginate($paginate);
+
         return response()->json($data, 200);
     }
 
@@ -92,45 +110,45 @@ class EventsController extends Controller
     {
         DB::beginTransaction();
         try {
-            if (!$request->exists('hotel_id')) {
+            if (! $request->exists('hotel_id')) {
                 return response()->json([
-                    "create"        => false,
-                    "message"       => "Hotel id not provided",
-                    "description"   => []
+                    'create' => false,
+                    'message' => 'Hotel id not provided',
+                    'description' => [],
                 ], 400);
             }
             $hotel_id = $request->hotel_id;
             $staff_id = $request->user()->staff_id;
             $this->configTimeZone($hotel_id);
 
-            if (!$this->validateHotelId($hotel_id, $staff_id)) {
+            if (! $this->validateHotelId($hotel_id, $staff_id)) {
                 return response()->json([
-                    "create"        => false,
-                    "message"       => "User does not have access to the hotel",
-                    "description"   => null
+                    'create' => false,
+                    'message' => 'User does not have access to the hotel',
+                    'description' => null,
                 ], 400);
             }
 
             $permission = $this->getPermission($hotel_id, $staff_id, $menu_id = 1, $action = 'create');
-            if (!$permission) {
+            if (! $permission) {
                 return response()->json([
-                    "create"        => false,
-                    "message"       => "User does not have permission to perform this action",
-                    "description"   => null
+                    'create' => false,
+                    'message' => 'User does not have permission to perform this action',
+                    'description' => null,
                 ], 400);
             }
-            if (!$request->exists('events')) {
+            if (! $request->exists('events')) {
                 return response()->json([
-                    "create"        => false,
-                    "message"       => "event object, data not provided",
-                    "description"   => null
+                    'create' => false,
+                    'message' => 'event object, data not provided',
+                    'description' => null,
                 ], 400);
             }
 
             $event = $request->events;
             $__integration = IntegrationsActive::where('hotel_id', $hotel_id)->where('int_id', 13)->where('state', 1)->first();
 
-            $now = date("Y-m-d");
+            $now = date('Y-m-d');
 
             $data_validate = [
                 'issue' => 'string|required',
@@ -139,46 +157,46 @@ class EventsController extends Controller
                     'required_without:room_id',
                     Rule::exists('hotel_rooms')->where(function ($q) use ($hotel_id) {
                         $q->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ],
                 'room_id' => [
                     'numeric',
                     'required_without:location',
                     Rule::exists('hotel_rooms')->where(function ($q) use ($hotel_id) {
                         $q->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ],
                 'guest_id' => [
                     'numeric',
                     Rule::exists('guest_registration')->where(function ($q) use ($hotel_id) {
                         $q->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ],
                 'priority' => [
                     'numeric',
-                    Rule::in([1, 2, 3])
+                    Rule::in([1, 2, 3]),
                 ],
                 'status' => [
                     'numeric',
-                    Rule::in([1, 2, 3])
+                    Rule::in([1, 2, 3]),
                 ],
-                'date' => 'date_format:Y-m-d|after:' . date("Y-m-d", strtotime($now . " -1 day")),
-                'time' => 'required_with:date|date_format:H:i:s'
+                'date' => 'date_format:Y-m-d|after:'.date('Y-m-d', strtotime($now.' -1 day')),
+                'time' => 'required_with:date|date_format:H:i:s',
             ];
 
-            if (!$__integration) {
+            if (! $__integration) {
                 $data_validate['tag_id'] = [
                     'numeric',
                     Rule::exists('tags')->where(function ($q) use ($hotel_id) {
                         $q->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ];
 
-                $data_validate['dept_id'] =  [
+                $data_validate['dept_id'] = [
                     'numeric',
                     Rule::exists('departments')->where(function ($q) use ($hotel_id) {
                         $q->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ];
             }
 
@@ -186,9 +204,9 @@ class EventsController extends Controller
 
             if ($validation->fails()) {
                 return response()->json([
-                    'create'        => false,
-                    "message"       => "event object, failed validation",
-                    "description"   => $validation->errors()
+                    'create' => false,
+                    'message' => 'event object, failed validation',
+                    'description' => $validation->errors(),
                 ], 400);
             }
 
@@ -201,25 +219,23 @@ class EventsController extends Controller
                 'status',
                 'tag_id',
                 'date',
-                'time'
+                'time',
             ];
 
-            if (!$__integration) {
+            if (! $__integration) {
                 $__data_event[] = 'dept_id';
             }
             $event = collect($request->events);
             $event = $event->only($__data_event);
             $event = $event->all();
 
-
-
             if ($__integration) {
                 $integration_stay = IntegrationsStay::where('hotel_id', $hotel_id)->where('product_id', $event['tag_id'])->first();
-                if (!$integration_stay) {
+                if (! $integration_stay) {
                     return response()->json([
-                        'create'        => false,
-                        "message"       => "event object, failed validation",
-                        "description"   => "invalid tag_id"
+                        'create' => false,
+                        'message' => 'event object, failed validation',
+                        'description' => 'invalid tag_id',
                     ], 400);
                 }
                 $event['tag_id'] = $integration_stay->tag_id;
@@ -235,9 +251,9 @@ class EventsController extends Controller
                 $count_by_hotel_id = $last_event->count_by_hotel_id + 1;
             }
 
-            $room_id    = isset($event['room_id'])  ? $event['room_id']  : "";
-            $location   = isset($event['location']) ? $event['location'] : "";
-            $guest_id   = isset($event['guest_id']) ? $event['guest_id'] : "";
+            $room_id = isset($event['room_id']) ? $event['room_id'] : '';
+            $location = isset($event['location']) ? $event['location'] : '';
+            $guest_id = isset($event['guest_id']) ? $event['guest_id'] : '';
 
             if (empty($room_id)) {
                 $room = $this->getRoom($hotel_id, $staff_id, $location);
@@ -245,14 +261,14 @@ class EventsController extends Controller
             }
             $now = date('Y-m-d H:i:s');
 
-            $guest_checkin_details =  GuestCheckinDetails::select('room_no', 'guest_id')
+            $guest_checkin_details = GuestCheckinDetails::select('room_no', 'guest_id')
                 ->where(function ($q) use ($room_id, $guest_id, $now, $hotel_id) {
                     $q
                         ->where('status', 1)
                         ->where('hotel_id', $hotel_id)
                         ->whereRaw(DB::raw("'$now' >= check_in and '$now' <= check_out"));
 
-                    if (!empty($room_id)) {
+                    if (! empty($room_id)) {
                         $q->where('room_no', $room_id);
                     } else {
                         $q->where('guest_id', $guest_id);
@@ -261,7 +277,7 @@ class EventsController extends Controller
                 ->orderBy('sno', 'DESC')
                 ->first();
 
-            $event['guest_id'] = !empty($event['guest_id']) ? $event['guest_id'] : 0;
+            $event['guest_id'] = ! empty($event['guest_id']) ? $event['guest_id'] : 0;
             $event['room_id'] = $room_id;
 
             if ($guest_checkin_details) {
@@ -272,40 +288,39 @@ class EventsController extends Controller
                 }
             }
 
-
             $getDeptTag = DeptTag::select(['dept_tag_id'])
                 ->where('hotel_id', $hotel_id)
-                ->where('dept_id', $event["dept_id"])
-                ->where('tag_id', $event["tag_id"])
+                ->where('dept_id', $event['dept_id'])
+                ->where('tag_id', $event['tag_id'])
                 ->first();
 
-            if (!$getDeptTag) {
+            if (! $getDeptTag) {
                 return response()->json([
-                    'create'        => false,
-                    "message"       => "dept_id and tag_id are not linked",
-                    "description"   => null
+                    'create' => false,
+                    'message' => 'dept_id and tag_id are not linked',
+                    'description' => null,
                 ], 400);
             }
 
-            $event["dept_tag_id"]       = $getDeptTag->dept_tag_id;
-            $event["hotel_id"]          = $hotel_id;
-            $event["issue"]             = $this->proccessString($event["issue"]);
-            $event["closed_by"]         = 0;
-            $event["count_by_hotel_id"] = $count_by_hotel_id;
-            $event["created_by"]        = $staff_id;
-            $event["created_on"]        = $now;
-            $event["pending_by"]        = $staff_id;
-            $event["requested_by"]      = 1;
+            $event['dept_tag_id'] = $getDeptTag->dept_tag_id;
+            $event['hotel_id'] = $hotel_id;
+            $event['issue'] = $this->proccessString($event['issue']);
+            $event['closed_by'] = 0;
+            $event['count_by_hotel_id'] = $count_by_hotel_id;
+            $event['created_by'] = $staff_id;
+            $event['created_on'] = $now;
+            $event['pending_by'] = $staff_id;
+            $event['requested_by'] = 1;
 
-            if (!isset($event["date"])) {
+            if (! isset($event['date'])) {
                 $date = date('Y-m-d');
                 $time = date('H:i:s');
-                $event["date"]  = $date;
-                $event["time"]  = $time;
-                $event["pending_on"] = $now;
+                $event['date'] = $date;
+                $event['time'] = $time;
+                $event['pending_on'] = $now;
             } else {
-                $event["status"] = 5;
-                $event["pending_on"] = $event["date"] . " " . $event["time"];
+                $event['status'] = 5;
+                $event['pending_on'] = $event['date'].' '.$event['time'];
             }
 
             $event_id = Event::create($event)->event_id;
@@ -320,29 +335,30 @@ class EventsController extends Controller
 
             $this->saveLogTracker([
                 'module_id' => 1,
-                'action'    => 'add',
-                'prim_id'   => $event_id,
-                'staff_id'  => $request->user()->staff_id,
+                'action' => 'add',
+                'prim_id' => $event_id,
+                'staff_id' => $request->user()->staff_id,
                 'date_time' => $now,
-                'comments'  => $event["issue"],
-                'hotel_id'  => $event["hotel_id"],
-                'type'      => 'API-V2'
+                'comments' => $event['issue'],
+                'hotel_id' => $event['hotel_id'],
+                'type' => 'API-V2',
             ]);
 
             DB::commit();
 
             return response()->json([
-                'create'        => true,
-                'event_id'      => $event_id,
-                'message'       => '',
-                'description'   => null
+                'create' => true,
+                'event_id' => $event_id,
+                'message' => '',
+                'description' => null,
             ], 201);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
-                'create'        => false,
-                'message'       => 'Bad request',
-                'description'   =>  []
+                'create' => false,
+                'message' => 'Bad request',
+                'description' => [],
             ], 400);
         }
     }
@@ -351,101 +367,101 @@ class EventsController extends Controller
     {
         DB::beginTransaction();
         try {
-            if (!$request->exists('hotel_id')) {
+            if (! $request->exists('hotel_id')) {
                 return response()->json([
-                    "update"        => false,
-                    "message"       => "Hotel id not provided",
-                    "description"   => null
+                    'update' => false,
+                    'message' => 'Hotel id not provided',
+                    'description' => null,
                 ], 400);
             }
             $hotel_id = $request->hotel_id;
             $staff_id = $request->user()->staff_id;
             $this->configTimeZone($hotel_id);
-            if (!$this->validateHotelId($hotel_id, $staff_id)) {
+            if (! $this->validateHotelId($hotel_id, $staff_id)) {
                 return response()->json([
-                    "update"        => false,
-                    "message"       => "User does not have access to the hotel",
-                    "description"   => null
+                    'update' => false,
+                    'message' => 'User does not have access to the hotel',
+                    'description' => null,
                 ], 400);
             }
             $permission = $this->getPermission($hotel_id, $staff_id, $menu_id = 1, $action = 'update');
-            if (!$permission) {
+            if (! $permission) {
                 return response()->json([
-                    "update"        => false,
-                    "message"       => "User does not have permission to perform this action",
-                    "description"   => null
+                    'update' => false,
+                    'message' => 'User does not have permission to perform this action',
+                    'description' => null,
                 ], 400);
             }
-            if (!$request->exists('events')) {
+            if (! $request->exists('events')) {
                 return response()->json([
-                    "update"        => false,
-                    "message"       => "event object, data not provided",
-                    "description"   => null
+                    'update' => false,
+                    'message' => 'event object, data not provided',
+                    'description' => null,
                 ], 400);
             }
             $event_update = $request->events;
             $validation = Validator::make($event_update, [
-                'issue'       => 'string',
-                'location'  => [
+                'issue' => 'string',
+                'location' => [
                     'string',
                     Rule::exists('hotel_rooms')->where(function ($q) use ($hotel_id) {
                         $q->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ],
-                'room_id'   => [
+                'room_id' => [
                     'numeric',
                     Rule::exists('hotel_rooms')->where(function ($q) use ($hotel_id) {
                         $q->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ],
-                'guest_id'  => [
+                'guest_id' => [
                     'numeric',
                     Rule::exists('guest_registration')->where(function ($query) use ($hotel_id) {
                         $query->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ],
                 'dept_id' => [
                     'numeric',
                     Rule::exists('departments')->where(function ($query) use ($hotel_id) {
                         $query->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ],
                 'tag_id' => [
                     'numeric',
                     Rule::exists('tags')->where(function ($query) use ($hotel_id) {
                         $query->where('hotel_id', $hotel_id);
-                    })
+                    }),
                 ],
-                'priority'  => ['numeric', Rule::in([1, 2, 3])],
-                'status'    => ['numeric', Rule::in([1, 2, 3])]
+                'priority' => ['numeric', Rule::in([1, 2, 3])],
+                'status' => ['numeric', Rule::in([1, 2, 3])],
             ]);
             if ($validation->fails()) {
                 return response()->json([
-                    'update'        => false,
-                    "message"       => "event object, failed validation",
-                    "description"   => $validation->errors()
+                    'update' => false,
+                    'message' => 'event object, failed validation',
+                    'description' => $validation->errors(),
                 ], 400);
             }
-            $room_id    = isset($event_update['room_id'])  ? $event_update['room_id']  : "";
-            $location   = isset($event_update['location']) ? $event_update['location'] : "";
-            $guest_id   = isset($event_update['guest_id']) ? $event_update['guest_id'] : "";
+            $room_id = isset($event_update['room_id']) ? $event_update['room_id'] : '';
+            $location = isset($event_update['location']) ? $event_update['location'] : '';
+            $guest_id = isset($event_update['guest_id']) ? $event_update['guest_id'] : '';
 
             $event = Event::find($id);
-            if (!$event) {
+            if (! $event) {
                 return response()->json([
-                    'update'        => false,
-                    'message'       => 'Record not found',
-                    'description'   =>  null
+                    'update' => false,
+                    'message' => 'Record not found',
+                    'description' => null,
                 ], 400);
             }
 
             $__update = false;
-            if (!empty($room_id) && $event->room_id !== $room_id) {
+            if (! empty($room_id) && $event->room_id !== $room_id) {
                 $event->room_id = $room_id;
                 $__update = true;
             }
 
-            if (!empty($location)) {
+            if (! empty($location)) {
                 $room = $this->getRoom($hotel_id, $staff_id, $location);
                 $room_id = $room['room_id'];
                 if ($event->room_id !== $room_id) {
@@ -454,9 +470,9 @@ class EventsController extends Controller
                 }
             }
 
-            if ($__update || !empty($guest_id)) {
+            if ($__update || ! empty($guest_id)) {
                 $now = date('Y-m-d H:i:s');
-                $GuestCheckinDetails =  GuestCheckinDetails::select('room_no', 'guest_id')
+                $GuestCheckinDetails = GuestCheckinDetails::select('room_no', 'guest_id')
                     ->where(function ($q) use ($room_id, $guest_id, $now, $hotel_id, $__update) {
                         $q
                             ->where('hotel_id', $hotel_id)
@@ -479,16 +495,16 @@ class EventsController extends Controller
                 }
             }
 
-            if (isset($event_update["issue"]) && !empty($event_update["issue"]) && $event->issue !== $event_update["issue"]) {
-                $event->issue = $event_update["issue"];
+            if (isset($event_update['issue']) && ! empty($event_update['issue']) && $event->issue !== $event_update['issue']) {
+                $event->issue = $event_update['issue'];
                 $__update = true;
             }
 
-            if (isset($event_update["dept_id"]) && isset($event_update["tag_id"])) {
+            if (isset($event_update['dept_id']) && isset($event_update['tag_id'])) {
                 $getDeptTag = DeptTag::select(['dept_tag_id'])
                     ->where('hotel_id', $hotel_id)
-                    ->where('dept_id', $event_update["dept_id"])
-                    ->where('tag_id', $event_update["tag_id"])
+                    ->where('dept_id', $event_update['dept_id'])
+                    ->where('tag_id', $event_update['tag_id'])
                     ->first();
 
                 if ($getDeptTag) {
@@ -499,13 +515,13 @@ class EventsController extends Controller
                 }
             }
 
-            if (isset($event_update["status"]) && $event->status !== $event_update["status"]) {
-                $event->status = $event_update["status"];
+            if (isset($event_update['status']) && $event->status !== $event_update['status']) {
+                $event->status = $event_update['status'];
                 $__update = true;
             }
 
-            if (isset($event_update["priority"]) && $event->priority !== $event_update["priority"]) {
-                $event->priority = $event_update["priority"];
+            if (isset($event_update['priority']) && $event->priority !== $event_update['priority']) {
+                $event->priority = $event_update['priority'];
                 $__update = true;
             }
 
@@ -513,28 +529,30 @@ class EventsController extends Controller
                 $event->save();
                 $this->saveLogTracker([
                     'module_id' => 1,
-                    'action'    => 'update',
-                    'prim_id'   => $event->event_id,
-                    'staff_id'  => $staff_id,
+                    'action' => 'update',
+                    'prim_id' => $event->event_id,
+                    'staff_id' => $staff_id,
                     'date_time' => $now,
-                    'comments'  => $event->issue,
-                    'hotel_id'  => $hotel_id,
-                    'type'      => 'API-V2'
+                    'comments' => $event->issue,
+                    'hotel_id' => $hotel_id,
+                    'type' => 'API-V2',
                 ]);
             }
 
             DB::commit();
+
             return response()->json([
-                'update'        => true,
-                'message'       => "",
-                'description'   => null
+                'update' => true,
+                'message' => '',
+                'description' => null,
             ], 201);
         } catch (\Exception $th) {
             DB::rollback();
+
             return response()->json([
-                'update'        => false,
-                'message'       => 'Bad request',
-                'description'   =>  null
+                'update' => false,
+                'message' => 'Bad request',
+                'description' => null,
             ], 400);
         }
     }
@@ -543,11 +561,11 @@ class EventsController extends Controller
     {
         DB::beginTransaction();
         try {
-            if (!$request->exists('hotel_id')) {
+            if (! $request->exists('hotel_id')) {
                 return response()->json([
-                    "delete"        => false,
-                    "message"       => "Hotel id not provided",
-                    "description"   => []
+                    'delete' => false,
+                    'message' => 'Hotel id not provided',
+                    'description' => [],
                 ], 400);
             }
             $hotel_id = $request->hotel_id;
@@ -555,20 +573,20 @@ class EventsController extends Controller
             $this->configTimeZone($hotel_id);
             $now = date('Y-m-d H:i:s');
 
-            if (!$this->validateHotelId($hotel_id, $staff_id)) {
+            if (! $this->validateHotelId($hotel_id, $staff_id)) {
                 return response()->json([
-                    "delete"        => false,
-                    "message"       => "User does not have access to the hotel",
-                    "description"   => []
+                    'delete' => false,
+                    'message' => 'User does not have access to the hotel',
+                    'description' => [],
                 ], 400);
             }
 
             $permission = $this->getPermission($hotel_id, $staff_id, $menu_id = 1, $action = 'delete');
-            if (!$permission) {
+            if (! $permission) {
                 return response()->json([
-                    "delete"        => false,
-                    "message"       => "User does not have permission to perform this action",
-                    "description"   => []
+                    'delete' => false,
+                    'message' => 'User does not have permission to perform this action',
+                    'description' => [],
                 ], 400);
             }
             $event = Event::find($id);
@@ -577,27 +595,29 @@ class EventsController extends Controller
 
             $this->saveLogTracker([
                 'module_id' => 1,
-                'action'    => 'delete',
-                'prim_id'   => $id,
-                'staff_id'  => $staff_id,
+                'action' => 'delete',
+                'prim_id' => $id,
+                'staff_id' => $staff_id,
                 'date_time' => $now,
-                'comments'  => '',
-                'hotel_id'  => $hotel_id,
-                'type'      => 'API'
+                'comments' => '',
+                'hotel_id' => $hotel_id,
+                'type' => 'API',
             ]);
 
             DB::commit();
+
             return response()->json([
-                'delete'        => true,
-                'message'       => "",
-                'description'   => null
+                'delete' => true,
+                'message' => '',
+                'description' => null,
             ], 200);
         } catch (\Exception $e) {
             DB::rollback();
+
             return response()->json([
-                'delete'        => false,
-                'message'       => 'Record not found',
-                'description'   => null
+                'delete' => false,
+                'message' => 'Record not found',
+                'description' => null,
             ], 400);
         }
     }
@@ -608,21 +628,21 @@ class EventsController extends Controller
         $staff_id = $request->user()->staff_id;
         $hotel_id = $request->hotel_id;
 
-        if (!$request->exists('hotel_id')) {
-            return response()->json(["error" => "Hotel id not provided"], 400);
+        if (! $request->exists('hotel_id')) {
+            return response()->json(['error' => 'Hotel id not provided'], 400);
         }
 
-        if (!$this->validateHotelId($hotel_id, $staff_id)) {
+        if (! $this->validateHotelId($hotel_id, $staff_id)) {
             return response()->json([
-                "error" => "User does not have access to the hotel"
+                'error' => 'User does not have access to the hotel',
             ], 400);
         }
 
         $permission = $this->getPermission($hotel_id, $staff_id, $menu_id = 1, $action = 'view');
 
-        if (!$permission) {
+        if (! $permission) {
             return response()->json([
-                "error" => "User does not have permission to perform this action"
+                'error' => 'User does not have permission to perform this action',
             ], 400);
         }
 
@@ -632,7 +652,7 @@ class EventsController extends Controller
                     return $query->select(['room_id', 'location']);
                 },
                 'DepTag.departament',
-                'DepTag.tag'
+                'DepTag.tag',
             ])
             ->where(function ($query) use ($hotel_id, $guest_id) {
                 $query
@@ -647,7 +667,7 @@ class EventsController extends Controller
 
     // public function eventTest(Request $request)
     // {
-    //     // captura de parametros iniciales         
+    //     // captura de parametros iniciales
     //     $paginate = $request->paginate ?: 50;
     //     if (!is_numeric($paginate)) {
     //         return response()->json(["sintaxis error" => "Paginate is numeric type"], 400);
