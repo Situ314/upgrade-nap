@@ -52,7 +52,7 @@ class InsertAgilysys extends Command
     {
         //sleep(600);
         $IntegrationsActives = IntegrationsActive::where(function ($query) {
-        $query->where('int_id', 11)->where('state', 1);
+            $query->where('int_id', 11)->where('state', 1);
         })->get();
         foreach ($IntegrationsActives as $IntegrationsActiveKey => $_integrations_active) {
             $this->runProccess($_integrations_active, 'InHouseReservations', 1, 1);
