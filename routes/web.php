@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\v1;
+use App\Http\Controllers\v3;
+use Illuminate\Support\Facades\Route;
+
 // Route::get('/', function() { return view('welcome'); })->name('welcome');
 
 Route::get('/', function () {
@@ -14,8 +18,8 @@ Route::get('/', function () {
 | MAESTRO PMS INTEGRATION
 |--------------------------------------------------------------------------
 */
-Route::post('maestro-pms', 'v1\MaestroPmsController@index');
-Route::post('maestro-pms/v3', 'v3\MaestroPmsController@index');
+Route::post('maestro-pms', [v1\MaestroPmsController::class, 'index']);
+Route::post('maestro-pms/v3', [v3\MaestroPmsController::class, 'index']);
 /*
 |--------------------------------------------------------------------------
 | DOCUMENTATION
