@@ -176,7 +176,7 @@ return [
         /**
          * GraphQL
          */
-        Folklore\GraphQL\ServiceProvider::class,
+        //Folklore\GraphQL\ServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -189,7 +189,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         //Sentry\Laravel\ServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,
-       // Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
+        // Sentry\SentryLaravel\SentryLaravelServiceProvider::class,
         // Amazon SQS
         Aws\Laravel\AwsServiceProvider::class,
         // Amazon SQS FIFO
