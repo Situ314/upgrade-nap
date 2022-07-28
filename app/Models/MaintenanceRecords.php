@@ -65,6 +65,6 @@ class MaintenanceRecords extends Model
     public function assets()
     {
         //dd($this->belongsToMany('\App\Models\MaintenanceItems','maintenance_records_items','maintenance_record_id', 'item_id')->toSql());
-        return $this->belongsToMany('\App\Models\MaintenanceItems', 'maintenance_records_items', 'maintenance_record_id', 'item_id'/*,'item_id','item_id'*/);
+        return $this->belongsToMany(\App\Models\MaintenanceItems::class, 'maintenance_records_items', 'maintenance_record_id', 'item_id'/*,'item_id','item_id'*/);
     }
 }

@@ -80,11 +80,11 @@ class DeptTag extends Model
 
     public function departament()
     {
-        return $this->hasOne('App\Models\Departament', 'dept_id', 'dept_id');
+        return $this->hasOne(\App\Models\Departament::class, 'dept_id', 'dept_id');
     }
 
     public function tag()
     {
-        return $this->hasOne('App\Models\Tag', 'tag_id', 'tag_id');
+        return $this->hasOne(\App\Models\Tag::class, 'tag_id', 'tag_id');
     }
 }

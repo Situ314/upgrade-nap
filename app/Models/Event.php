@@ -103,21 +103,21 @@ class Event extends Model
 
     public function Guest()
     {
-        return $this->hasOne('App\Models\GuestRegistration', 'guest_id', 'guest_id');
+        return $this->hasOne(\App\Models\GuestRegistration::class, 'guest_id', 'guest_id');
     }
 
     public function Room()
     {
-        return $this->hasOne('App\Models\HotelRoom', 'room_id', 'room_id');
+        return $this->hasOne(\App\Models\HotelRoom::class, 'room_id', 'room_id');
     }
 
     public function DepTag()
     {
-        return $this->hasOne('App\Models\DeptTag', 'dept_tag_id', 'dept_tag_id');
+        return $this->hasOne(\App\Models\DeptTag::class, 'dept_tag_id', 'dept_tag_id');
     }
 
     public function StaffCompleted()
     {
-        return $this->hasOne('App\Models\Staff', 'staff_id', 'completed_by');
+        return $this->hasOne(\App\Models\Staff::class, 'staff_id', 'completed_by');
     }
 }

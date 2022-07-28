@@ -82,6 +82,6 @@ class StaffHotel extends Model
 
     public function role()
     {
-        return $this->hasOne('App\Models\Role', 'role_id', 'role_id');
+        return $this->hasOne(\App\Models\Role::class, 'role_id', 'role_id');
     }
 }

@@ -100,11 +100,11 @@ class User extends Authenticatable
 
     public function staffHotels()
     {
-        return $this->hasMany('App\Models\StaffHotel', 'staff_id');
+        return $this->hasMany(\App\Models\StaffHotel::class, 'staff_id');
     }
 
     public function Housekeeper()
     {
-        return $this->hasOne('App\Models\HousekeepingStaff', 'staff_id', 'staff_id');
+        return $this->hasOne(\App\Models\HousekeepingStaff::class, 'staff_id', 'staff_id');
     }
 }

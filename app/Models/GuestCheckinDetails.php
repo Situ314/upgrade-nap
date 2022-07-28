@@ -33,16 +33,16 @@ class GuestCheckinDetails extends Model
 
     public function Room()
     {
-        return $this->hasOne('App\Models\HotelRoom', 'room_id', 'room_no');
+        return $this->hasOne(\App\Models\HotelRoom::class, 'room_id', 'room_no');
     }
 
     public function Guest()
     {
-        return $this->hasOne('App\Models\GuestRegistration', 'guest_id', 'guest_id');
+        return $this->hasOne(\App\Models\GuestRegistration::class, 'guest_id', 'guest_id');
     }
 
     public function GuestPms()
     {
-        return $this->hasOne('App\Models\IntegrationsGuestInformation', 'guest_id', 'guest_id');
+        return $this->hasOne(\App\Models\IntegrationsGuestInformation::class, 'guest_id', 'guest_id');
     }
 }

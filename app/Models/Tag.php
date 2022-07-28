@@ -44,6 +44,6 @@ class Tag extends Model
 
     public function departments()
     {
-        return $this->belongsToMany('App\Models\Departament', 'dept_tag', 'tag_id', 'dept_id');
+        return $this->belongsToMany(\App\Models\Departament::class, 'dept_tag', 'tag_id', 'dept_id');
     }
 }

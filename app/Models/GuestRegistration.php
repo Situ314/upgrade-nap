@@ -95,12 +95,12 @@ class GuestRegistration extends Model
 
     public function GuestCheckingDetail()
     {
-        return $this->hasMany('App\Models\GuestCheckinDetails', 'guest_id', 'guest_id');
+        return $this->hasMany(\App\Models\GuestCheckinDetails::class, 'guest_id', 'guest_id');
     }
 
     public function Checking()
     {
-        return $this->hasMany('App\Models\GuestCheckinDetails', 'guest_id', 'guest_id');
+        return $this->hasMany(\App\Models\GuestCheckinDetails::class, 'guest_id', 'guest_id');
     }
 
     /**
@@ -108,7 +108,7 @@ class GuestRegistration extends Model
      */
     public function GuestCheckinDetails()
     {
-        return $this->hasMany('App\Models\GuestCheckinDetails', 'guest_id', 'guest_id');
+        return $this->hasMany(\App\Models\GuestCheckinDetails::class, 'guest_id', 'guest_id');
     }
 
     /**
@@ -117,6 +117,6 @@ class GuestRegistration extends Model
      */
     public function IntegrationsGuestInformation()
     {
-        return $this->hasOne('App\Models\IntegrationsGuestInformation', 'guest_id', 'guest_id');
+        return $this->hasOne(\App\Models\IntegrationsGuestInformation::class, 'guest_id', 'guest_id');
     }
 }

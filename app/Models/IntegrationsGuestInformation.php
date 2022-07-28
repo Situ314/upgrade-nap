@@ -20,6 +20,6 @@ class IntegrationsGuestInformation extends Model
 
     public function GuestRegistration()
     {
-        return $this->hasOne('App\Models\GuestRegistration', 'guest_id', 'guest_id');
+        return $this->hasOne(\App\Models\GuestRegistration::class, 'guest_id', 'guest_id');
     }
 }

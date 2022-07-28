@@ -38,6 +38,6 @@ class IntegrationsActive extends Model
 
     public function integration()
     {
-        return $this->hasOne('App\Models\Integrations', 'id', 'int_id');
+        return $this->hasOne(\App\Models\Integrations::class, 'id', 'int_id');
     }
 }

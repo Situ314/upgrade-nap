@@ -27,11 +27,11 @@ class GuestService extends Model
 
     public function Reservation()
     {
-        return $this->hasOne('App\Models\Opera\Reservation', 'ReservationID', 'ReservationID');
+        return $this->hasOne(\App\Models\Opera\Reservation::class, 'ReservationID', 'ReservationID');
     }
 
     public function Profile()
     {
-        return $this->hasOne('App\Models\Opera\Profile', 'UniqueID', 'ProfileUniqueID');
+        return $this->hasOne(\App\Models\Opera\Profile::class, 'UniqueID', 'ProfileUniqueID');
     }
 }

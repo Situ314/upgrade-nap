@@ -24,6 +24,6 @@ class AlexaDevice extends Model
 
     public function Room()
     {
-        return $this->hasOne('App\Models\HotelRoom', 'room_id', 'room_id');
+        return $this->hasOne(\App\Models\HotelRoom::class, 'room_id', 'room_id');
     }
 }

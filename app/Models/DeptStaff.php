@@ -34,11 +34,11 @@ class DeptStaff extends Model
 
     public function staff()
     {
-        return $this->hasOne('App\User', 'staff_id', 'staff_id');
+        return $this->hasOne(\App\User::class, 'staff_id', 'staff_id');
     }
 
     public function departament()
     {
-        return $this->hasOne('App\Models\Departament', 'dept_id', 'dept_id');
+        return $this->hasOne(\App\Models\Departament::class, 'dept_id', 'dept_id');
     }
 }

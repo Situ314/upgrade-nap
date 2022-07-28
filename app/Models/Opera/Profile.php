@@ -29,11 +29,11 @@ class Profile extends Model
 
     public function ProfileAddress()
     {
-        return $this->hasOne('App\Models\Opera\ProfileAddress', 'ProfileID', 'ID');
+        return $this->hasOne(\App\Models\Opera\ProfileAddress::class, 'ProfileID', 'ID');
     }
 
     public function ProfilePhone()
     {
-        return $this->hasMany('App\Models\Opera\ProfilePhone', 'ProfileID', 'ID');
+        return $this->hasMany(\App\Models\Opera\ProfilePhone::class, 'ProfileID', 'ID');
     }
 }

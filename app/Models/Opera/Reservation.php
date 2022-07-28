@@ -39,6 +39,6 @@ class Reservation extends Model
 
     public function Profile()
     {
-        return $this->hasOne('App\Models\Opera\Profile', 'UniqueID', 'ProfileID');
+        return $this->hasOne(\App\Models\Opera\Profile::class, 'UniqueID', 'ProfileID');
     }
 }
