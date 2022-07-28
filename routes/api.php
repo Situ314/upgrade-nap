@@ -11,8 +11,8 @@ use App\Http\Controllers\IntegrationMonitoringController;
 use App\Http\Controllers\v1;
 use App\Http\Controllers\v2;
 use App\Http\Controllers\v3;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
